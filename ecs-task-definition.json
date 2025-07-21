@@ -24,6 +24,26 @@
         {
           "name": "PORT",
           "value": "8080"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "ch-production-db.cifgmm0mqg5q.us-east-1.rds.amazonaws.com"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "5432"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "ch_production"
+        },
+        {
+          "name": "DB_USER",
+          "value": "ch_admin"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "LLJW8cLuLv1yyJlRt6aUioSzq"
         }
       ],
       "logConfiguration": {

@@ -8,7 +8,7 @@ import asyncpg
 from datetime import datetime
 import json
 
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 
@@ -204,6 +204,67 @@ async def get_bom():
             }
     except Exception as e:
         return {"bom_items": [], "error": str(e), "source": "database_error"}
+
+# Database initialization endpoint (for setup only)
+@app.post("/api/admin/init-database")
+async def init_database():
+    if not db_pool:
+        return {"status": "error", "message": "No database connection"}
+    
+    try:
+        schema_sql = """
+        -- Categories table
+        CREATE TABLE IF NOT EXISTS product_categories (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(100) NOT NULL UNIQUE,
+            code VARCHAR(50) NOT NULL UNIQUE,
+            display_order INTEGER DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Products table
+        CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            article_number VARCHAR(20) UNIQUE NOT NULL,
+            article_name VARCHAR(200) NOT NULL,
+            category_id INTEGER REFERENCES product_categories(id),
+            pack_size VARCHAR(50),
+            unit_type VARCHAR(50) DEFAULT 'pcs',
+            production_cost DECIMAL(12,4) DEFAULT 0,
+            production_overhead DECIMAL(12,4) DEFAULT 0,
+            logistics_overhead DECIMAL(12,4) DEFAULT 0,
+            marketing_overhead DECIMAL(12,4) DEFAULT 0,
+            general_overhead DECIMAL(12,4) DEFAULT 0,
+            profit_overhead DECIMAL(12,4) DEFAULT 0,
+            sales_price DECIMAL(12,4) DEFAULT 0,
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Sample data
+        INSERT INTO product_categories (name, code, display_order) VALUES
+        ('Meat Products', 'meat', 1),
+        ('Baked Meat', 'baked', 2),
+        ('Dairy Products', 'dairy', 3)
+        ON CONFLICT (code) DO NOTHING;
+
+        INSERT INTO products (article_number, article_name, category_id, pack_size, unit_type,
+            production_cost, production_overhead, logistics_overhead, 
+            marketing_overhead, general_overhead, profit_overhead, sales_price) VALUES
+        ('001', 'Premium Salami', 1, '500g', 'pcs', 4.8000, 1.8000, 2.4000, 1.2000, 1.2000, 0.6000, 13.2000),
+        ('002', 'Classic Mortadella', 1, '300g', 'pcs', 3.5000, 1.0000, 1.5000, 0.8000, 1.0000, 0.2000, 8.5000),
+        ('003', 'Smoked Ham', 2, '1kg', 'pcs', 8.0000, 3.0000, 3.5000, 2.0000, 2.5000, 1.0000, 22.0000)
+        ON CONFLICT (article_number) DO NOTHING;
+        """
+        
+        async with db_pool.acquire() as conn:
+            await conn.execute(schema_sql)
+            
+        return {"status": "success", "message": "Database initialized with sample data"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 # Module-specific API routes would be added here
 # Each module can register its own routes following the constitutional principle of module independence
