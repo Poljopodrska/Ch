@@ -91,3 +91,33 @@ aws codebuild start-build --project-name ch-production-docker-build --region us-
 - Build time: ~54 seconds
 - Deployment time: ~2 minutes
 - Total: <5 minutes from push to live
+
+## 2025-07-21 13:05 UTC | 13:05 CET - Full CI/CD Pipeline ACTIVE [🚀 DEPLOYMENT]
+**Deployed to Production**: YES ✅
+**Automation**: GitHub → CodeBuild → ECS (FULLY AUTOMATED)
+
+### What Was Completed:
+- ✅ GitHub repository created: https://github.com/Poljopodrska/Ch
+- ✅ GitHub webhook configured and tested
+- ✅ Automatic deployments working on git push
+- ✅ Deployed version 0.1.1 automatically
+- ✅ Full CI/CD pipeline operational
+
+### Deployment Metrics (Actual):
+- Git push to main: Instant trigger
+- Build time: ~50 seconds
+- ECS deployment: ~2-3 minutes
+- **Total time: ~3-4 minutes from push to live**
+
+### Verified Workflow:
+1. `git push` to main branch
+2. GitHub webhook triggers CodeBuild instantly
+3. CodeBuild builds Docker image (50s)
+4. Image pushed to ECR
+5. ECS service updated automatically
+6. New version live at http://ch-alb-2140286266.us-east-1.elb.amazonaws.com
+
+### Test Results:
+- Initial push: ✅ Build triggered automatically
+- Version update (0.1.0 → 0.1.1): ✅ Deployed successfully
+- Current live version: v0.1.1
