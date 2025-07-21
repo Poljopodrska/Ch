@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 import json
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 
