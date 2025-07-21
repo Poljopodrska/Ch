@@ -1,0 +1,202 @@
+<!-- Production Planning Module with Multi-Level BOM -->
+<div class="production-planning-container">
+    <!-- Module Header -->
+    <div class="module-header">
+        <h2>Production Planning & BOM</h2>
+        <p class="subtitle">Multi-level BOM with yield tracking and backwards calculation</p>
+        
+        <div class="tabs">
+            <button class="tab view-tab active" data-view="bom-tree">BOM Structure</button>
+            <button class="tab view-tab" data-view="requirements">Requirements</button>
+            <button class="tab view-tab" data-view="timeline">Timeline</button>
+            <button class="tab view-tab" data-view="editor">BOM Editor</button>
+        </div>
+    </div>
+    
+    <!-- Dynamic Content Area -->
+    <div id="production-content" class="production-content">
+        <!-- Content will be dynamically loaded based on selected tab -->
+        <div class="loading">
+            <h3>Loading production planning...</h3>
+        </div>
+    </div>
+</div>
+
+<!-- BOM Relationship Modal -->
+<div id="bom-relationship-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="ProductionPlanning.closeRelationshipModal()"></div>
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Add/Edit BOM Relationship</h3>
+            <button class="modal-close" onclick="ProductionPlanning.closeRelationshipModal()">&times;</button>
+        </div>
+        
+        <form id="relationship-form" onsubmit="return ProductionPlanning.saveRelationship(event)">
+            <input type="hidden" id="relationship-id" name="id">
+            
+            <!-- Parent-Child Selection -->
+            <div class="form-section">
+                <h4>Material Relationship</h4>
+                <div class="relationship-visual">
+                    <div class="parent-selection">
+                        <label>Parent Material *</label>
+                        <select name="parent_id" required onchange="ProductionPlanning.updateRelationshipPreview()">
+                            <option value="">Select parent material...</option>
+                        </select>
+                        <div class="parent-info" id="parent-info"></div>
+                    </div>
+                    
+                    <div class="relationship-arrow">
+                        <span class="arrow">→</span>
+                        <div class="yield-display" id="yield-display">
+                            <span class="yield-text">Yield: 100%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="child-selection">
+                        <label>Child Material *</label>
+                        <select name="child_id" required onchange="ProductionPlanning.updateRelationshipPreview()">
+                            <option value="">Select child material...</option>
+                        </select>
+                        <div class="child-info" id="child-info"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quantities and Yields -->
+            <div class="form-section">
+                <h4>Quantities and Yields</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Quantity Required (from parent) *</label>
+                        <input type="number" name="quantity_required" step="0.0001" min="0" required 
+                               onchange="ProductionPlanning.updateRelationshipPreview()">
+                        <small class="form-help">How much parent material is needed</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Yield Percentage *</label>
+                        <input type="number" name="yield_percentage" step="0.01" min="0" max="100" value="100" required
+                               onchange="ProductionPlanning.updateRelationshipPreview()">
+                        <small class="form-help">What % of parent becomes child</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Proportion Percentage</label>
+                        <input type="number" name="proportion_percentage" step="0.01" min="0" max="100" value="100"
+                               onchange="ProductionPlanning.updateRelationshipPreview()">
+                        <small class="form-help">What % of parent this child represents</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Production Time (hours)</label>
+                        <input type="number" name="production_time_hours" step="0.1" min="0" value="0"
+                               onchange="ProductionPlanning.updateRelationshipPreview()">
+                        <small class="form-help">Time to convert parent to child</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Live Preview -->
+            <div class="form-section">
+                <h4>Relationship Preview</h4>
+                <div id="relationship-preview" class="relationship-preview">
+                    <p>Select parent and child materials to see preview</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="ProductionPlanning.closeRelationshipModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Relationship</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Add Item Modal -->
+<div id="add-item-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="ProductionPlanning.closeAddItemModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add BOM Item</h3>
+            <button class="modal-close" onclick="ProductionPlanning.closeAddItemModal()">&times;</button>
+        </div>
+        
+        <form id="add-item-form" onsubmit="return ProductionPlanning.saveItem(event)">
+            <input type="hidden" id="item-id" name="id">
+            
+            <!-- Item Details -->
+            <div class="form-section">
+                <h4>Item Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Item Code *</label>
+                        <input type="text" name="item_code" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>Item Name *</label>
+                        <input type="text" name="item_name" required maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Item Type *</label>
+                        <select name="item_type" required>
+                            <option value="">Select type...</option>
+                            <option value="raw">Raw Material</option>
+                            <option value="intermediate">Intermediate</option>
+                            <option value="finished">Finished Product</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Unit Type *</label>
+                        <select name="unit_type" required>
+                            <option value="">Select unit...</option>
+                            <option value="kg">Kilograms</option>
+                            <option value="liters">Liters</option>
+                            <option value="pieces">Pieces</option>
+                            <option value="meters">Meters</option>
+                            <option value="grams">Grams</option>
+                            <option value="tons">Tons</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Inventory Information -->
+            <div class="form-section">
+                <h4>Inventory Information</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Current Inventory</label>
+                        <input type="number" name="current_inventory" step="0.0001" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Safety Stock</label>
+                        <input type="number" name="safety_stock" step="0.0001" min="0" value="0">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="ProductionPlanning.closeAddItemModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Item</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Production Order Details Modal -->
+<div id="production-order-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="ProductionPlanning.closeOrderModal()"></div>
+    <div class="modal-content modal-large">
+        <div class="modal-header">
+            <h3>Production Order Details</h3>
+            <button class="modal-close" onclick="ProductionPlanning.closeOrderModal()">&times;</button>
+        </div>
+        
+        <div id="order-details-content">
+            <!-- Order details will be loaded here -->
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="ProductionPlanning.closeOrderModal()">Close</button>
+            <button type="button" class="btn btn-primary" onclick="ProductionPlanning.createProductionOrder()">Create Order</button>
+        </div>
+    </div>
+</div>

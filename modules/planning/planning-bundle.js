@@ -1,0 +1,231 @@
+// Auto-generated bundle for planning module
+// This file is for development mode only (file:// protocol)
+
+(function() {
+    // Ensure ModuleContent exists
+    window.ModuleContent = window.ModuleContent || {};
+    
+    // Embed the planning module HTML content
+    window.ModuleContent.planning = {
+        html: `<!-- Production Planning Module -->
+<div class="planning-container">
+    <!-- Module Header -->
+    <div class="module-header">
+        <h2>Production Planning Tool</h2>
+        <p class="subtitle">Plan production with historical context and future projections</p>
+        
+        <div class="tabs">
+            <button class="tab active">Planning</button>
+            <button class="tab" onclick="ChApp.loadView('pricing')">Pricing</button>
+        </div>
+    </div>
+    
+    <!-- Planning Controls -->
+    <div class="planning-controls">
+        <!-- Time Period Controls -->
+        <div class="time-controls">
+            <button onclick="Planning.changeView('daily')" class="time-btn" data-view="daily">Daily</button>
+            <button onclick="Planning.changeView('weekly')" class="time-btn active" data-view="weekly">Weekly</button>
+            <button onclick="Planning.changeView('monthly')" class="time-btn" data-view="monthly">Monthly</button>
+            <button onclick="Planning.changeView('yearly')" class="time-btn" data-view="yearly">Yearly</button>
+        </div>
+        
+        <!-- History/Future Controls -->
+        <div class="history-controls">
+            <div class="control-group">
+                <label>History Years: 
+                    <select id="history-years" onchange="Planning.updateView()">
+                        <option value="0">None</option>
+                        <option value="1">1 Year</option>
+                        <option value="2" selected>2 Years</option>
+                        <option value="3">3 Years</option>
+                    </select>
+                </label>
+            </div>
+            <div class="control-group">
+                <label>Future Years: 
+                    <select id="future-years" onchange="Planning.updateView()">
+                        <option value="0">Current Year Only</option>
+                        <option value="1">1 Year</option>
+                        <option value="2" selected>2 Years</option>
+                        <option value="3">3 Years</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="planning-actions">
+            <button class="btn btn-secondary" onclick="Planning.autoDistribute()">
+                <span class="icon">⚡</span> Auto-Distribute
+            </button>
+            <button class="btn btn-secondary" onclick="Planning.exportPlan()">
+                <span class="icon">↓</span> Export Plan
+            </button>
+            <button class="btn btn-secondary" onclick="Planning.importPlan()">
+                <span class="icon">↑</span> Import Plan
+            </button>
+            <button class="btn btn-primary" onclick="Planning.savePlan()">
+                <span class="icon">💾</span> Save Plan
+            </button>
+        </div>
+    </div>
+    
+    <!-- Legend -->
+    <div class="planning-legend">
+        <div class="legend-item">
+            <span class="legend-color history"></span>
+            <span>Historical Sales</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color actual"></span>
+            <span>Current Year Actual</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color plan-current"></span>
+            <span>Current Year Plan</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-color future"></span>
+            <span>Future Plan</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-icon">🔒</span>
+            <span>Locked (Historical)</span>
+        </div>
+        <div class="legend-item">
+            <span class="legend-icon">📝</span>
+            <span>Editable</span>
+        </div>
+    </div>
+    
+    <!-- Planning Grid Container -->
+    <div class="planning-grid-container">
+        <div id="planning-grid" class="planning-grid">
+            <!-- Dynamic content will be inserted here -->
+            <div class="loading">
+                <h3>Loading planning data...</h3>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Statistics -->
+    <div class="planning-summary">
+        <div class="summary-card">
+            <h4>Total Units Planned</h4>
+            <div class="summary-value" id="total-units">0</div>
+        </div>
+        <div class="summary-card">
+            <h4>Working Days</h4>
+            <div class="summary-value" id="working-days">0</div>
+        </div>
+        <div class="summary-card">
+            <h4>Daily Average</h4>
+            <div class="summary-value" id="daily-average">0</div>
+        </div>
+        <div class="summary-card">
+            <h4>Capacity Utilization</h4>
+            <div class="summary-value" id="capacity-util">0%</div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto-Distribute Modal -->
+<div id="distribute-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="Planning.closeDistributeModal()"></div>
+    <div class="modal-content modal-medium">
+        <div class="modal-header">
+            <h3>Auto-Distribute Production</h3>
+            <button class="modal-close" onclick="Planning.closeDistributeModal()">&times;</button>
+        </div>
+        
+        <form id="distribute-form" onsubmit="return Planning.applyDistribution(event)">
+            <div class="form-section">
+                <h4>Distribution Settings</h4>
+                <div class="form-group">
+                    <label>Product</label>
+                    <select name="product_id" required onchange="Planning.updateDistributePreview()">
+                        <option value="">Select product...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Period Type</label>
+                    <select name="period_type" required onchange="Planning.updateDistributePreview()">
+                        <option value="yearly">Yearly Total</option>
+                        <option value="monthly">Monthly Total</option>
+                        <option value="weekly">Weekly Total</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Total Units</label>
+                    <input type="number" name="total_units" step="0.0001" min="0" required 
+                           onchange="Planning.updateDistributePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Year</label>
+                    <select name="year" required onchange="Planning.updateDistributePreview()">
+                        <!-- Dynamic options -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" name="working_days_only" checked>
+                        Distribute only on working days (Mon-Fri)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Preview</h4>
+                <div id="distribute-preview">
+                    <p>Select options above to see distribution preview</p>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="Planning.closeDistributeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Apply Distribution</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Import Plan Modal -->
+<div id="import-plan-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="Planning.closeImportModal()"></div>
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Import Production Plan</h3>
+            <button class="modal-close" onclick="Planning.closeImportModal()">&times;</button>
+        </div>
+        
+        <div class="import-instructions">
+            <p>Upload a CSV file with production planning data. The file should contain:</p>
+            <ul>
+                <li>Product ID or Article Number</li>
+                <li>Date (YYYY-MM-DD format)</li>
+                <li>Planned Units (4 decimal places)</li>
+                <li>Period Type (daily/weekly/monthly/yearly)</li>
+            </ul>
+            <p><a href="#" onclick="Planning.downloadPlanTemplate()">Download Plan Template</a></p>
+        </div>
+        
+        <div class="file-upload-area">
+            <input type="file" id="plan-file" accept=".csv" onchange="Planning.handlePlanFileSelect(event)" style="display: none;">
+            <label for="plan-file" class="file-upload-label">
+                <span class="icon">📁</span>
+                <span>Click to select CSV file</span>
+            </label>
+            <div id="plan-file-info" class="file-info" style="display: none;"></div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="Planning.closeImportModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="Planning.importPlanFile()" disabled id="import-plan-btn">Import</button>
+        </div>
+    </div>
+</div>`
+    };
+    
+    console.log('Planning module bundle loaded');
+})();

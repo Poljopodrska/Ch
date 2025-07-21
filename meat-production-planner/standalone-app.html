@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AGP Planner - Standalone Version</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/recharts@2.5.0/dist/Recharts.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, createContext, useContext } = React;
+
+        // Local Storage Database
+        class LocalDB {
+            constructor() {
+                this.initDB();
+            }
+
+            initDB() {
+                if (!localStorage.getItem('agp_initialized')) {
+                    // Initialize with default data
+                    const defaultData = {
+                        users: [
+                            { id: 1, username: 'admin', password: 'admin123', email: 'admin@agp.local', role: 'admin' },
+                            { id: 2, username: 'user', password: 'user123', email: 'user@agp.local', role: 'user' }
+                        ],
+                        products: [
+                            { id: 1, article_number: 'K12', name: 'Klasična klobasa', color: '#FF6B6B', unit: 'kg', actual_price: 12.50, production_cost: 6.25, production_oh: 1.25, marketing_oh: 1.00, general_oh: 0.88, logistics_oh: 0.63 },
+                            { id: 2, article_number: 'K34', name: 'Kranjska klobasa', color: '#4ECDC4', unit: 'kg', actual_price: 15.00, production_cost: 7.50, production_oh: 1.50, marketing_oh: 1.20, general_oh: 1.05, logistics_oh: 0.75 },
+                            { id: 3, article_number: 'P56', name: 'Pečenica', color: '#45B7D1', unit: 'kg', actual_price: 18.00, production_cost: 9.00, production_oh: 1.80, marketing_oh: 1.44, general_oh: 1.26, logistics_oh: 0.90 },
+                            { id: 4, article_number: 'S78', name: 'Šunka', color: '#F7DC6F', unit: 'kg', actual_price: 22.00, production_cost: 11.00, production_oh: 2.20, marketing_oh: 1.76, general_oh: 1.54, logistics_oh: 1.10 },
+                            { id: 5, article_number: 'M90', name: 'Mortadela', color: '#BB8FCE', unit: 'kg', actual_price: 11.00, production_cost: 5.50, production_oh: 1.10, marketing_oh: 0.88, general_oh: 0.77, logistics_oh: 0.55 },
+                            { id: 6, article_number: 'H12', name: 'Hrenovka', color: '#85C1E2', unit: 'kg', actual_price: 8.50, production_cost: 4.25, production_oh: 0.85, marketing_oh: 0.68, general_oh: 0.60, logistics_oh: 0.43 }
+                        ],
+                        customers: [
+                            { id: 1, name: 'Mercator', color: '#3B82F6' },
+                            { id: 2, name: 'Spar', color: '#10B981' },
+                            { id: 3, name: 'Lidl', color: '#F59E0B' },
+                            { id: 4, name: 'Hofer', color: '#EF4444' }
+                        ],
+                        workers: [
+                            { id: 1, name: 'Ana Novak', active: true },
+                            { id: 2, name: 'Marko Kovač', active: true },
+                            { id: 3, name: 'Petra Zajc', active: true },
+                            { id: 4, name: 'Luka Vidmar', active: true },
+                            { id: 5, name: 'Nina Potočnik', active: true },
+                            { id: 6, name: 'Matej Mlakar', active: true }
+                        ],
+                        planning_data: {},
+                        worker_availability: {},
+                        production_calendar: {}
+                    };
+
+                    Object.entries(defaultData).forEach(([key, value]) => {
+                        localStorage.setItem(`agp_${key}`, JSON.stringify(value));
+                    });
+                    localStorage.setItem('agp_initialized', 'true');
+                }
+            }
+
+            getAll(table) {
+                const data = localStorage.getItem(`agp_${table}`);
+                return data ? JSON.parse(data) : [];
+            }
+
+            get(table, id) {
+                const data = this.getAll(table);
+                return data.find(item => item.id === id);
+            }
+
+            create(table, item) {
+                const data = this.getAll(table);
+                const newItem = {
+                    ...item,
+                    id: Math.max(0, ...data.map(d => d.id || 0)) + 1,
+                    created_at: new Date().toISOString()
+                };
+                data.push(newItem);
+                localStorage.setItem(`agp_${table}`, JSON.stringify(data));
+                return newItem;
+            }
+
+            update(table, id, updates) {
+                const data = this.getAll(table);
+                const index = data.findIndex(item => item.id === id);
+                if (index !== -1) {
+                    data[index] = { ...data[index], ...updates, updated_at: new Date().toISOString() };
+                    localStorage.setItem(`agp_${table}`, JSON.stringify(data));
+                    return data[index];
+                }
+                return null;
+            }
+
+            delete(table, id) {
+                const data = this.getAll(table);
+                const filtered = data.filter(item => item.id !== id);
+                localStorage.setItem(`agp_${table}`, JSON.stringify(filtered));
+                return true;
+            }
+
+            // Special methods for planning data
+            getPlanningData(date, type) {
+                const allData = this.getAll('planning_data');
+                return allData[`${date}_${type}`] || {};
+            }
+
+            setPlanningData(date, type, data) {
+                const allData = this.getAll('planning_data');
+                allData[`${date}_${type}`] = data;
+                localStorage.setItem('agp_planning_data', JSON.stringify(allData));
+            }
+        }
+
+        const db = new LocalDB();
+
+        // Auth Context
+        const AuthContext = createContext(null);
+
+        const AuthProvider = ({ children }) => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+
+            useEffect(() => {
+                const savedUser = localStorage.getItem('agp_current_user');
+                if (savedUser) {
+                    setUser(JSON.parse(savedUser));
+                }
+                setLoading(false);
+            }, []);
+
+            const login = (username, password) => {
+                const users = db.getAll('users');
+                const foundUser = users.find(u => u.username === username && u.password === password);
+                if (foundUser) {
+                    const { password: _, ...userWithoutPassword } = foundUser;
+                    setUser(userWithoutPassword);
+                    localStorage.setItem('agp_current_user', JSON.stringify(userWithoutPassword));
+                    return true;
+                }
+                return false;
+            };
+
+            const logout = () => {
+                setUser(null);
+                localStorage.removeItem('agp_current_user');
+            };
+
+            return (
+                <AuthContext.Provider value={{ user, login, logout, loading }}>
+                    {children}
+                </AuthContext.Provider>
+            );
+        };
+
+        const useAuth = () => useContext(AuthContext);
+
+        // Login Component
+        const Login = () => {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const { login } = useAuth();
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (login(username, password)) {
+                    setError('');
+                } else {
+                    setError('Invalid username or password');
+                }
+            };
+
+            return (
+                <div className="min-h-screen flex items-center justify-center bg-gray-100">
+                    <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+                        <h1 className="text-2xl font-bold text-center mb-6">AGP Planner</h1>
+                        <form onSubmit={handleSubmit}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    required
+                                />
+                            </div>
+                            {error && (
+                                <div className="mb-4 text-red-600 text-sm">{error}</div>
+                            )}
+                            <button
+                                type="submit"
+                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Login
+                            </button>
+                        </form>
+                        <div className="mt-4 text-sm text-gray-600">
+                            <p>Demo accounts:</p>
+                            <p>Admin: admin / admin123</p>
+                            <p>User: user / user123</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // Main Dashboard Component
+        const Dashboard = () => {
+            const { user, logout } = useAuth();
+            const [activeTab, setActiveTab] = useState('dashboard');
+            const [products, setProducts] = useState([]);
+            const [customers, setCustomers] = useState([]);
+            const [workers, setWorkers] = useState([]);
+
+            useEffect(() => {
+                setProducts(db.getAll('products'));
+                setCustomers(db.getAll('customers'));
+                setWorkers(db.getAll('workers'));
+            }, []);
+
+            const calculateKPIs = () => {
+                const totalRevenue = products.reduce((sum, p) => sum + (p.actual_price || 0), 0);
+                const totalCost = products.reduce((sum, p) => {
+                    return sum + (p.production_cost || 0) + (p.production_oh || 0) + 
+                           (p.marketing_oh || 0) + (p.general_oh || 0) + (p.logistics_oh || 0);
+                }, 0);
+                const margin = totalRevenue - totalCost;
+                const marginPercent = totalRevenue > 0 ? (margin / totalRevenue) * 100 : 0;
+
+                return {
+                    revenue: totalRevenue.toFixed(2),
+                    cost: totalCost.toFixed(2),
+                    margin: margin.toFixed(2),
+                    marginPercent: marginPercent.toFixed(1)
+                };
+            };
+
+            const kpis = calculateKPIs();
+
+            const renderDashboard = () => (
+                <div className="space-y-6">
+                    <h2 className="text-2xl font-bold">Dashboard</h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-sm text-gray-600">Total Products</h3>
+                            <p className="text-2xl font-bold text-blue-600">{products.length}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-sm text-gray-600">Total Revenue</h3>
+                            <p className="text-2xl font-bold text-green-600">€{kpis.revenue}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-sm text-gray-600">Total Cost</h3>
+                            <p className="text-2xl font-bold text-red-600">€{kpis.cost}</p>
+                        </div>
+                        <div className="bg-white p-6 rounded-lg shadow">
+                            <h3 className="text-sm text-gray-600">Margin</h3>
+                            <p className="text-2xl font-bold text-purple-600">{kpis.marginPercent}%</p>
+                        </div>
+                    </div>
+
+                    <div className="bg-white p-6 rounded-lg shadow">
+                        <h3 className="text-lg font-semibold mb-4">Product Overview</h3>
+                        <div className="space-y-2">
+                            {products.map(product => {
+                                const totalCost = (product.production_cost || 0) + (product.production_oh || 0) + 
+                                                (product.marketing_oh || 0) + (product.general_oh || 0) + (product.logistics_oh || 0);
+                                const margin = ((product.actual_price - totalCost) / product.actual_price) * 100;
+                                
+                                return (
+                                    <div key={product.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded">
+                                        <div className="flex items-center gap-3">
+                                            <div 
+                                                className="w-4 h-4 rounded"
+                                                style={{ backgroundColor: product.color }}
+                                            ></div>
+                                            <span className="font-medium">{product.name}</span>
+                                            <span className="text-sm text-gray-500">({product.article_number})</span>
+                                        </div>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-sm">€{product.actual_price}</span>
+                                            <span className={`text-sm font-semibold ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {margin.toFixed(1)}%
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            );
+
+            const renderProducts = () => {
+                const [editingProduct, setEditingProduct] = useState(null);
+                const [formData, setFormData] = useState({});
+
+                const handleEdit = (product) => {
+                    setEditingProduct(product.id);
+                    setFormData(product);
+                };
+
+                const handleSave = () => {
+                    db.update('products', editingProduct, formData);
+                    setProducts(db.getAll('products'));
+                    setEditingProduct(null);
+                };
+
+                const handleCancel = () => {
+                    setEditingProduct(null);
+                    setFormData({});
+                };
+
+                return (
+                    <div className="space-y-6">
+                        <h2 className="text-2xl font-bold">Products</h2>
+                        
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            <table className="min-w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production Cost</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production OH</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marketing OH</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">General OH</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logistics OH</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Price</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margin</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {products.map(product => {
+                                        const totalCost = (product.production_cost || 0) + (product.production_oh || 0) + 
+                                                        (product.marketing_oh || 0) + (product.general_oh || 0) + (product.logistics_oh || 0);
+                                        const margin = ((product.actual_price - totalCost) / product.actual_price) * 100;
+                                        const isEditing = editingProduct === product.id;
+                                        
+                                        return (
+                                            <tr key={product.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div 
+                                                            className="w-4 h-4 rounded mr-3"
+                                                            style={{ backgroundColor: product.color }}
+                                                        ></div>
+                                                        <div>
+                                                            <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                            <div className="text-sm text-gray-500">{product.article_number}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.production_cost || ''}
+                                                            onChange={(e) => setFormData({...formData, production_cost: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.production_cost?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.production_oh || ''}
+                                                            onChange={(e) => setFormData({...formData, production_oh: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.production_oh?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.marketing_oh || ''}
+                                                            onChange={(e) => setFormData({...formData, marketing_oh: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.marketing_oh?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.general_oh || ''}
+                                                            onChange={(e) => setFormData({...formData, general_oh: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.general_oh?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.logistics_oh || ''}
+                                                            onChange={(e) => setFormData({...formData, logistics_oh: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.logistics_oh?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {isEditing ? (
+                                                        <input
+                                                            type="number"
+                                                            value={formData.actual_price || ''}
+                                                            onChange={(e) => setFormData({...formData, actual_price: parseFloat(e.target.value)})}
+                                                            className="w-20 px-2 py-1 border rounded"
+                                                            step="0.01"
+                                                        />
+                                                    ) : (
+                                                        `€${product.actual_price?.toFixed(2) || '0.00'}`
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`text-sm font-semibold ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {margin.toFixed(1)}%
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                    {isEditing ? (
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                onClick={handleSave}
+                                                                className="text-green-600 hover:text-green-900"
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button
+                                                                onClick={handleCancel}
+                                                                className="text-gray-600 hover:text-gray-900"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => handleEdit(product)}
+                                                            className="text-blue-600 hover:text-blue-900"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderPlanning = () => {
+                const [selectedWeek, setSelectedWeek] = useState(0);
+                const [planningData, setPlanningData] = useState({});
+                
+                const weeks = Array.from({ length: 12 }, (_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() + (i * 7) - date.getDay() + 1);
+                    return {
+                        index: i,
+                        start: new Date(date),
+                        label: `Week ${i + 1}`
+                    };
+                });
+
+                const saveData = (productId, customerId, value) => {
+                    const key = `${productId}_${customerId}`;
+                    setPlanningData({
+                        ...planningData,
+                        [key]: value
+                    });
+                };
+
+                return (
+                    <div className="space-y-6">
+                        <h2 className="text-2xl font-bold">Sales Planning</h2>
+                        
+                        <div className="flex gap-2 overflow-x-auto pb-2">
+                            {weeks.map((week) => (
+                                <button
+                                    key={week.index}
+                                    onClick={() => setSelectedWeek(week.index)}
+                                    className={`px-4 py-2 rounded whitespace-nowrap ${
+                                        selectedWeek === week.index
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-white text-gray-700 hover:bg-gray-100'
+                                    }`}
+                                >
+                                    {week.label}
+                                    <div className="text-xs mt-1">
+                                        {week.start.toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric' })}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                            <table className="min-w-full">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                                        {customers.map(customer => (
+                                            <th key={customer.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                <div className="flex items-center gap-2">
+                                                    <div 
+                                                        className="w-3 h-3 rounded"
+                                                        style={{ backgroundColor: customer.color }}
+                                                    ></div>
+                                                    {customer.name}
+                                                </div>
+                                            </th>
+                                        ))}
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {products.map(product => {
+                                        const rowTotal = customers.reduce((sum, customer) => {
+                                            const key = `${product.id}_${customer.id}`;
+                                            return sum + (parseFloat(planningData[key]) || 0);
+                                        }, 0);
+                                        
+                                        return (
+                                            <tr key={product.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div 
+                                                            className="w-4 h-4 rounded mr-3"
+                                                            style={{ backgroundColor: product.color }}
+                                                        ></div>
+                                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                    </div>
+                                                </td>
+                                                {customers.map(customer => {
+                                                    const key = `${product.id}_${customer.id}`;
+                                                    return (
+                                                        <td key={customer.id} className="px-6 py-4 whitespace-nowrap">
+                                                            <input
+                                                                type="number"
+                                                                value={planningData[key] || ''}
+                                                                onChange={(e) => saveData(product.id, customer.id, e.target.value)}
+                                                                className="w-20 px-2 py-1 border rounded text-sm"
+                                                                placeholder="0"
+                                                                min="0"
+                                                            />
+                                                        </td>
+                                                    );
+                                                })}
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                                                    {rowTotal}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            };
+
+            const tabs = [
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'products', label: 'Products', icon: '📦' },
+                { id: 'planning', label: 'Planning', icon: '📅' },
+                { id: 'customers', label: 'Customers', icon: '👥' },
+                { id: 'workers', label: 'Workers', icon: '👷' }
+            ];
+
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <nav className="bg-white shadow">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between h-16">
+                                <div className="flex">
+                                    <div className="flex-shrink-0 flex items-center">
+                                        <h1 className="text-xl font-bold">AGP Planner</h1>
+                                    </div>
+                                    <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                                        {tabs.map(tab => (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setActiveTab(tab.id)}
+                                                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                                                    activeTab === tab.id
+                                                        ? 'border-blue-500 text-gray-900'
+                                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                                }`}
+                                            >
+                                                <span className="mr-2">{tab.icon}</span>
+                                                {tab.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="text-sm text-gray-700 mr-4">
+                                        {user.username} ({user.role})
+                                    </span>
+                                    <button
+                                        onClick={logout}
+                                        className="text-sm text-gray-500 hover:text-gray-700"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        {activeTab === 'dashboard' && renderDashboard()}
+                        {activeTab === 'products' && renderProducts()}
+                        {activeTab === 'planning' && renderPlanning()}
+                        {activeTab === 'customers' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold">Customers</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {customers.map(customer => (
+                                        <div key={customer.id} className="bg-white p-6 rounded-lg shadow">
+                                            <div className="flex items-center gap-3">
+                                                <div 
+                                                    className="w-8 h-8 rounded"
+                                                    style={{ backgroundColor: customer.color }}
+                                                ></div>
+                                                <h3 className="text-lg font-semibold">{customer.name}</h3>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'workers' && (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-bold">Workers</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {workers.map(worker => (
+                                        <div key={worker.id} className="bg-white p-6 rounded-lg shadow">
+                                            <h3 className="text-lg font-semibold">{worker.name}</h3>
+                                            <p className="text-sm text-gray-600">
+                                                Status: <span className={worker.active ? 'text-green-600' : 'text-red-600'}>
+                                                    {worker.active ? 'Active' : 'Inactive'}
+                                                </span>
+                                            </p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        // Main App Component
+        const App = () => {
+            const { user, loading } = useAuth();
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center">
+                        <div className="spinner"></div>
+                    </div>
+                );
+            }
+
+            return user ? <Dashboard /> : <Login />;
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+            <AuthProvider>
+                <App />
+            </AuthProvider>
+        );
+    </script>
+</body>
+</html>

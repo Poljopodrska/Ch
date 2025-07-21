@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+.env
+.venv
+env/
+venv/
+development/
+protection_system/tests/
+reports/
+*.md

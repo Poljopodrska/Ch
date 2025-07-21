@@ -1,0 +1,6 @@
+{
+  "projectName": "ch-production-docker-build",
+  "sourceTypeOverride": "S3",
+  "sourceLocationOverride": "ch-production-source-1753092181/ch-source-v3.tar.gz",
+  "buildspecOverride": "version: 0.2\n\nphases:\n  pre_build:\n    commands:\n      - echo Current directory is $PWD\n      - echo CODEBUILD_SRC_DIR is $CODEBUILD_SRC_DIR\n      - echo Listing root directory\n      - ls -la\n      - echo Listing parent directory\n      - ls -la ..\n      - echo Finding Dockerfile\n      - find . -name Dockerfile -type f\n      - echo Finding buildspec.yml\n      - find . -name buildspec.yml -type f\n  build:\n    commands:\n      - echo Skipping build for debug"
+}

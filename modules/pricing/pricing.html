@@ -1,0 +1,241 @@
+<!-- Pricing Module Dashboard -->
+<div class="pricing-container">
+    <!-- Module Header -->
+    <div class="module-header">
+        <h2>Planning & Pricing Tool</h2>
+        <p class="subtitle">Smart Excel System for Production Planning and Cost Analysis</p>
+        
+        <div class="tabs">
+            <button class="tab" onclick="alert('Planning module coming soon!')">Planning</button>
+            <button class="tab active">Pricing</button>
+        </div>
+    </div>
+    
+    <!-- Category Filters -->
+    <div class="category-filters">
+        <button class="category-btn active" data-category="all" onclick="Pricing.filterByCategory('all')">
+            All Products
+        </button>
+        <button class="category-btn" data-category="meat" onclick="Pricing.filterByCategory('meat')">
+            Meat Products
+        </button>
+        <button class="category-btn" data-category="baked" onclick="Pricing.filterByCategory('baked')">
+            Baked Meat
+        </button>
+        <button class="category-btn" data-category="dairy" onclick="Pricing.filterByCategory('dairy')">
+            Dairy Products
+        </button>
+    </div>
+    
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <button class="btn btn-primary" onclick="Pricing.showAddProduct()">
+            <span class="icon">+</span> Add Product
+        </button>
+        <button class="btn btn-secondary" onclick="Pricing.exportToExcel()">
+            <span class="icon">↓</span> Export to Excel
+        </button>
+        <button class="btn btn-secondary" onclick="Pricing.showImportDialog()">
+            <span class="icon">↑</span> Import Excel
+        </button>
+        <button class="btn btn-secondary" onclick="Pricing.refreshData()">
+            <span class="icon">↻</span> Refresh
+        </button>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="summary-stats">
+        <div class="stat-card">
+            <div class="stat-value" id="total-products">0</div>
+            <div class="stat-label">Total Products</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value positive" id="profitable-products">0</div>
+            <div class="stat-label">Profitable</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value negative" id="loss-products">0</div>
+            <div class="stat-label">Loss Making</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="avg-margin">0%</div>
+            <div class="stat-label">Avg Margin</div>
+        </div>
+    </div>
+    
+    <!-- Products Table -->
+    <div class="products-table-container">
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th class="col-article">Article #</th>
+                    <th class="col-name">Article Name</th>
+                    <th class="col-pack">Pack Size</th>
+                    <th class="col-group">Group 1</th>
+                    <th class="col-group">Group 2</th>
+                    <th class="col-cost-bar">Cost Breakdown & Coverage</th>
+                    <th class="col-cost">Production</th>
+                    <th class="col-cost">Prod OH</th>
+                    <th class="col-cost">Logistics</th>
+                    <th class="col-cost">Marketing</th>
+                    <th class="col-cost">General</th>
+                    <th class="col-cost">Profit OH</th>
+                    <th class="col-total">Total Cost</th>
+                    <th class="col-price">Sales Price</th>
+                    <th class="col-margin">Margin</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="products-list">
+                <!-- Dynamic content will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Product Modal -->
+<div id="product-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="Pricing.closeModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Add Product</h3>
+            <button class="modal-close" onclick="Pricing.closeModal()">&times;</button>
+        </div>
+        
+        <form id="product-form" onsubmit="return Pricing.saveProduct(event)">
+            <input type="hidden" id="product-id" name="id">
+            
+            <!-- Product Details Section -->
+            <div class="form-section">
+                <h4>Product Details</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Article Number *</label>
+                        <input type="text" name="article_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Article Name *</label>
+                        <input type="text" name="article_name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select name="category_id" required>
+                            <option value="">Select category...</option>
+                            <option value="1">Meat Products</option>
+                            <option value="2">Baked Meat</option>
+                            <option value="3">Dairy Products</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pack Size</label>
+                        <input type="text" name="pack_size" placeholder="e.g., 500g">
+                    </div>
+                    <div class="form-group">
+                        <label>Group 1</label>
+                        <input type="text" name="group_1">
+                    </div>
+                    <div class="form-group">
+                        <label>Group 2</label>
+                        <input type="text" name="group_2">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cost Components Section -->
+            <div class="form-section">
+                <h4>Cost Components (EUR)</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Production Cost</label>
+                        <input type="number" name="production_cost" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Production Overhead</label>
+                        <input type="number" name="production_overhead" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Logistics Overhead</label>
+                        <input type="number" name="logistics_overhead" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Marketing Overhead</label>
+                        <input type="number" name="marketing_overhead" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>General Overhead</label>
+                        <input type="number" name="general_overhead" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Profit Overhead</label>
+                        <input type="number" name="profit_overhead" step="0.01" min="0" value="0.00" onchange="Pricing.calculateTotal()">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pricing Section -->
+            <div class="form-section">
+                <h4>Pricing</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Total Cost (Calculated)</label>
+                        <input type="text" id="total-cost-display" readonly class="readonly-field">
+                    </div>
+                    <div class="form-group">
+                        <label>Sales Price (EUR) *</label>
+                        <input type="number" name="sales_price" step="0.01" min="0" value="0.00" required onchange="Pricing.calculateTotal()">
+                    </div>
+                    <div class="form-group">
+                        <label>Margin (EUR)</label>
+                        <input type="text" id="margin-eur-display" readonly class="readonly-field">
+                    </div>
+                    <div class="form-group">
+                        <label>Margin (%)</label>
+                        <input type="text" id="margin-percent-display" readonly class="readonly-field">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="Pricing.closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Import Excel Modal -->
+<div id="import-modal" class="modal" style="display: none;">
+    <div class="modal-overlay" onclick="Pricing.closeImportModal()"></div>
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h3>Import Excel File</h3>
+            <button class="modal-close" onclick="Pricing.closeImportModal()">&times;</button>
+        </div>
+        
+        <div class="import-instructions">
+            <p>Upload an Excel file with product data. The file should contain columns for:</p>
+            <ul>
+                <li>Article Number</li>
+                <li>Article Name</li>
+                <li>Pack Size</li>
+                <li>Cost components (Production, Overheads)</li>
+                <li>Sales Price</li>
+            </ul>
+            <p><a href="#" onclick="Pricing.downloadTemplate()">Download Excel Template</a></p>
+        </div>
+        
+        <div class="file-upload-area">
+            <input type="file" id="excel-file" accept=".xlsx,.xls" onchange="Pricing.handleFileSelect(event)" style="display: none;">
+            <label for="excel-file" class="file-upload-label">
+                <span class="icon">📁</span>
+                <span>Click to select Excel file</span>
+            </label>
+            <div id="file-info" class="file-info" style="display: none;"></div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="Pricing.closeImportModal()">Cancel</button>
+            <button type="button" class="btn btn-primary" onclick="Pricing.importExcel()" disabled id="import-btn">Import</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,480 @@
+/* Ch Project Pricing Module Styles */
+
+/* Module Container */
+.pricing-container {
+    padding: 1rem;
+}
+
+/* Module Header */
+.module-header {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.module-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+}
+
+.subtitle {
+    color: #7f8c8d;
+    margin: 0 0 1rem 0;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.tab {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: none;
+    color: #7f8c8d;
+    cursor: pointer;
+    font-size: 1rem;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab:hover {
+    color: #3498db;
+}
+
+.tab.active {
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+/* Category Filters */
+.category-filters {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.category-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.category-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.category-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* Action Bar */
+.action-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.icon {
+    margin-right: 0.5rem;
+}
+
+/* Summary Stats */
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-value.positive {
+    color: #27ae60;
+}
+
+.stat-value.negative {
+    color: #e74c3c;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+/* Products Table */
+.products-table-container {
+    background: white;
+    border-radius: 8px;
+    overflow-x: auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.products-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.products-table th {
+    background: #f8f9fa;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #ecf0f1;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.products-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #ecf0f1;
+    font-size: 0.9rem;
+}
+
+.products-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Column specific widths */
+.col-article { width: 80px; }
+.col-name { min-width: 200px; }
+.col-pack { width: 80px; }
+.col-group { width: 120px; }
+.col-cost { width: 80px; text-align: right; }
+.col-total { width: 90px; text-align: right; font-weight: 600; }
+.col-price { width: 90px; text-align: right; font-weight: 600; }
+.col-margin { width: 120px; }
+.col-actions { width: 80px; text-align: center; }
+
+/* Cost Bar Visualization */
+.cost-bar-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cost-bar-container {
+    width: 250px;
+    height: 24px;
+    display: flex;
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f5f5f5;
+}
+
+.cost-segment {
+    height: 100%;
+    position: relative;
+    transition: opacity 0.3s;
+    cursor: help;
+}
+
+.cost-segment.covered {
+    opacity: 1;
+}
+
+.cost-segment.uncovered {
+    opacity: 0.3;
+}
+
+.coverage-indicator {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 3px;
+    background: #2c3e50;
+    z-index: 10;
+    box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.coverage-indicator::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -4px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid #2c3e50;
+}
+
+.coverage-indicator.full-coverage {
+    right: -3px;
+    left: auto;
+}
+
+.cost-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #7f8c8d;
+}
+
+/* Margin Info */
+.margin-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-weight: 600;
+}
+
+.margin-info.positive {
+    color: #27ae60;
+}
+
+.margin-info.negative {
+    color: #e74c3c;
+}
+
+.margin-eur {
+    font-size: 0.95rem;
+}
+
+.margin-percent {
+    font-size: 0.85rem;
+}
+
+/* Action Buttons */
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.25rem;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+.btn-icon:hover {
+    opacity: 1;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: none;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    max-width: 800px;
+    margin: 50px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-small {
+    max-width: 500px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #7f8c8d;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.modal-close:hover {
+    background: #ecf0f1;
+}
+
+/* Form Styles */
+.form-section {
+    padding: 1.5rem;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.readonly-field {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.readonly-field.positive {
+    color: #27ae60;
+    font-weight: 600;
+}
+
+.readonly-field.negative {
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+.form-actions {
+    padding: 1.5rem;
+    border-top: 1px solid #ecf0f1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+}
+
+/* Import Modal */
+.import-instructions {
+    padding: 1.5rem;
+}
+
+.import-instructions ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.file-upload-area {
+    padding: 1.5rem;
+}
+
+.file-upload-label {
+    display: block;
+    padding: 2rem;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.file-upload-label:hover {
+    border-color: #3498db;
+    background: #f8f9fa;
+}
+
+.file-info {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background: #e8f4f8;
+    border-radius: 4px;
+    color: #2980b9;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .cost-bar-container {
+        width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .products-table {
+        font-size: 0.8rem;
+    }
+    
+    .products-table th,
+    .products-table td {
+        padding: 0.5rem;
+    }
+    
+    .cost-bar-container {
+        width: 150px;
+        height: 20px;
+    }
+}

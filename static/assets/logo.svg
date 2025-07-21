@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Ch Project Logo -->
+  <rect width="200" height="200" fill="#2c3e50" rx="20"/>
+  
+  <!-- Letter C -->
+  <path d="M 60 60 Q 30 60 30 100 Q 30 140 60 140" 
+        fill="none" stroke="#3498db" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Letter h -->
+  <line x1="90" y1="60" x2="90" y2="140" 
+        stroke="#3498db" stroke-width="12" stroke-linecap="round"/>
+  <path d="M 90 100 Q 90 80 110 80 Q 130 80 130 100 L 130 140" 
+        fill="none" stroke="#3498db" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Version indicator -->
+  <circle cx="170" cy="30" r="20" fill="#27ae60"/>
+  <text x="170" y="37" text-anchor="middle" fill="white" font-family="Arial" font-size="16" font-weight="bold">v1</text>
+</svg>

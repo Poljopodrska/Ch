@@ -1,0 +1,10 @@
+{
+  "name": "ch-production-docker-build",
+  "source": {
+    "type": "GITHUB",
+    "location": "https://github.com/HP2706/Ch.git",
+    "gitCloneDepth": 1,
+    "buildspec": "buildspec.yml",
+    "reportBuildStatus": true
+  }
+}

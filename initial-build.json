@@ -1,0 +1,6 @@
+{
+  "projectName": "ch-production-docker-build",
+  "sourceTypeOverride": "S3",
+  "sourceLocationOverride": "ch-production-source-1753092181/ch-source-v3.tar.gz",
+  "buildspecOverride": "version: 0.2\n\nphases:\n  pre_build:\n    commands:\n      - echo Logging in to Amazon ECR...\n      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 127679825789.dkr.ecr.us-east-1.amazonaws.com\n  build:\n    commands:\n      - echo Build started on `date`\n      - echo Building the Docker image...\n      - docker build -t ch-production .\n      - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest\n      - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v0.1.0-initial\n  post_build:\n    commands:\n      - echo Pushing the Docker images...\n      - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest\n      - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v0.1.0-initial\n      - echo Build completed on `date`\n      - echo Updating ECS service...\n      - aws ecs update-service --cluster ch-production --service ch-production-service --force-new-deployment --region us-east-1 || echo Service update may have failed"
+}

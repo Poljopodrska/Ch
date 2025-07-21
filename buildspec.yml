@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 127679825789.dkr.ecr.us-east-1.amazonaws.com
+      
+  build:
+    commands:
+      - echo Build started on `date`
+      - docker build -t ch-production .
+      - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
+      
+  post_build:
+    commands:
+      - echo Pushing the Docker image...
+      - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
+      - echo Build completed on `date`
+      - aws ecs update-service --cluster ch-production --service ch-production-service --force-new-deployment --region us-east-1

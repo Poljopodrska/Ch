@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Backend Connection</title>
+</head>
+<body>
+    <h1>Testing Backend Connection</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                console.log('Testing connection to backend...');
+                
+                // Test 1: Simple health check
+                const healthResponse = await fetch('http://localhost:3001/api/health');
+                const healthData = await healthResponse.text();
+                console.log('Health check response:', healthData);
+                
+                // Test 2: Login test
+                const loginResponse = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username: 'admin', password: 'admin123' })
+                });
+                const loginData = await loginResponse.text();
+                console.log('Login response:', loginData);
+                
+                resultDiv.innerHTML = `
+                    <h3>Success!</h3>
+                    <p>Health: ${healthData}</p>
+                    <p>Login: ${loginData}</p>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h3>Error</h3>
+                    <p>${error.message}</p>
+                    <p>This is likely due to browser security restrictions when loading from file://</p>
+                    <h3>Solution:</h3>
+                    <p>1. Use the standalone version (production-planner.html) which saves data locally</p>
+                    <p>2. Or run a local web server - see instructions below</p>
+                `;
+            }
+        }
+    </script>
+    
+    <hr>
+    <h2>Instructions for Windows</h2>
+    <p>Due to browser security, you cannot make HTTP requests from a file:// URL. Here are your options:</p>
+    
+    <h3>Option 1: Use the standalone version</h3>
+    <p>Open <strong>production-planner.html</strong> - it works without a backend server</p>
+    
+    <h3>Option 2: Run a simple web server</h3>
+    <ol>
+        <li>Open Command Prompt</li>
+        <li>Navigate to: cd C:\Users\HP\MeatProductionPlanner</li>
+        <li>Run: python -m http.server 8000</li>
+        <li>Open browser to: http://localhost:8000/production-planner-api.html</li>
+    </ol>
+</body>
+</html>

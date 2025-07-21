@@ -1,0 +1,212 @@
+/* Legacy Module Styles */
+
+/* Navigation styling for legacy items */
+.legacy-item {
+    opacity: 0.85;
+    font-style: italic;
+    position: relative;
+}
+
+.temp-badge {
+    background: #ff9800;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* Legacy module container */
+.legacy-module-container {
+    position: relative;
+    min-height: calc(100vh - 150px);
+}
+
+/* Warning notice */
+.legacy-notice {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    color: #856404;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+    position: relative;
+}
+
+.legacy-notice::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ff9800;
+    border-radius: 4px 0 0 4px;
+}
+
+.legacy-notice .icon-warning {
+    font-size: 1.2rem;
+    color: #ff9800;
+}
+
+.legacy-notice span {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* Iframe container */
+.iframe-container {
+    border: 3px dashed #ffc107;
+    padding: 8px;
+    background: linear-gradient(135deg, #fffbf0 0%, #fff8e1 100%);
+    border-radius: 8px;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.iframe-container::before {
+    content: 'LEGACY MODULE';
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #ff9800;
+    color: white;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Make iframe responsive */
+#meat-planner-frame {
+    min-height: 700px;
+    height: calc(100vh - 200px);
+    width: 100%;
+    border: none;
+    border-radius: 4px;
+    background: white;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading overlay for iframe */
+.iframe-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.iframe-loading .spinner {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #ff9800;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Migration info section */
+.migration-info {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 6px;
+    padding: 15px;
+    margin-top: 15px;
+    color: #1565c0;
+}
+
+.migration-info h4 {
+    margin: 0 0 10px 0;
+    color: #0d47a1;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.migration-info ul {
+    margin: 8px 0 0 20px;
+    font-size: 0.9rem;
+}
+
+.migration-info li {
+    margin-bottom: 4px;
+}
+
+/* Legacy item hover effects */
+.legacy-item:hover {
+    background-color: rgba(255, 152, 0, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.legacy-item:hover .temp-badge {
+    animation-duration: 0.5s;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .legacy-notice {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .temp-badge {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+    
+    #meat-planner-frame {
+        min-height: 600px;
+        height: calc(100vh - 180px);
+    }
+    
+    .iframe-container {
+        padding: 4px;
+    }
+}
+
+/* Dark mode support (if implemented in future) */
+@media (prefers-color-scheme: dark) {
+    .legacy-notice {
+        background: linear-gradient(135deg, #3e2723 0%, #5d4037 100%);
+        border-color: #ff9800;
+        color: #ffb74d;
+    }
+    
+    .iframe-container {
+        background: linear-gradient(135deg, #2e2e2e 0%, #3e3e3e 100%);
+        border-color: #ff9800;
+    }
+    
+    .migration-info {
+        background: #1e3a5f;
+        border-color: #64b5f6;
+        color: #90caf9;
+    }
+}

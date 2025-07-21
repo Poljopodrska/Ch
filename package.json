@@ -1,0 +1,29 @@
+{
+  "name": "ch-project",
+  "version": "0.1.0",
+  "description": "Ch Project - Built with AVA OLO best practices",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified yet\" && exit 1",
+    "lint": "echo \"Error: no linter configured yet\" && exit 1",
+    "build": "echo \"Error: no build process configured yet\" && exit 1",
+    "build-dev": "node scripts/build-dev-modules.js",
+    "dev": "npm run build-dev && echo \"Open ch_app.html in your browser\"",
+    "pre-deploy": "./protection_system/pre_deployment_gate.sh",
+    "capture-state": "./protection_system/capture_working_state.sh",
+    "test-protection": "./protection_system/test_protection_system.sh"
+  },
+  "keywords": [
+    "ch-project",
+    "llm-first",
+    "constitutional"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

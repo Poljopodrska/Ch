@@ -1,0 +1,217 @@
+{
+    "bom_items": [
+        {
+            "id": 1,
+            "item_code": "HAMBURGER",
+            "item_name": "Hamburger",
+            "item_type": "finished",
+            "unit_type": "pieces",
+            "current_inventory": 0,
+            "safety_stock": 50,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 2,
+            "item_code": "MINCED_MEAT",
+            "item_name": "Minced Meat",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 25.5,
+            "safety_stock": 10,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 3,
+            "item_code": "CHICKEN_PARTS",
+            "item_name": "Chicken Parts",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 45.2,
+            "safety_stock": 20,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 4,
+            "item_code": "CLEANED_CHICKEN",
+            "item_name": "Cleaned Chicken",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 120.8,
+            "safety_stock": 50,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 5,
+            "item_code": "RAW_CHICKEN",
+            "item_name": "Raw Chicken",
+            "item_type": "raw",
+            "unit_type": "kg",
+            "current_inventory": 200.0,
+            "safety_stock": 100,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 6,
+            "item_code": "SPICES",
+            "item_name": "Spice Mix",
+            "item_type": "raw",
+            "unit_type": "kg",
+            "current_inventory": 5.5,
+            "safety_stock": 2,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 7,
+            "item_code": "BUN",
+            "item_name": "Hamburger Bun",
+            "item_type": "raw",
+            "unit_type": "pieces",
+            "current_inventory": 500,
+            "safety_stock": 100,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 8,
+            "item_code": "CHICKEN_BREAST",
+            "item_name": "Chicken Breast",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 35.4,
+            "safety_stock": 15,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 9,
+            "item_code": "CHICKEN_THIGH",
+            "item_name": "Chicken Thigh",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 28.6,
+            "safety_stock": 12,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 10,
+            "item_code": "CHICKEN_WING",
+            "item_name": "Chicken Wing",
+            "item_type": "intermediate",
+            "unit_type": "kg",
+            "current_inventory": 18.2,
+            "safety_stock": 8,
+            "created_at": "2025-01-21T14:10:00Z"
+        }
+    ],
+    "bom_relationships": [
+        {
+            "id": 1,
+            "parent_id": 1,
+            "child_id": 2,
+            "quantity_required": 0.15,
+            "yield_percentage": 100,
+            "proportion_percentage": 100,
+            "production_time_hours": 0.5,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 2,
+            "parent_id": 1,
+            "child_id": 6,
+            "quantity_required": 0.01,
+            "yield_percentage": 100,
+            "proportion_percentage": 100,
+            "production_time_hours": 0.1,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 3,
+            "parent_id": 1,
+            "child_id": 7,
+            "quantity_required": 1,
+            "yield_percentage": 100,
+            "proportion_percentage": 100,
+            "production_time_hours": 0.1,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 4,
+            "parent_id": 2,
+            "child_id": 3,
+            "quantity_required": 0.214,
+            "yield_percentage": 70,
+            "proportion_percentage": 100,
+            "production_time_hours": 2,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 5,
+            "parent_id": 3,
+            "child_id": 4,
+            "quantity_required": 0.306,
+            "yield_percentage": 70,
+            "proportion_percentage": 100,
+            "production_time_hours": 4,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 6,
+            "parent_id": 4,
+            "child_id": 5,
+            "quantity_required": 0.431,
+            "yield_percentage": 71,
+            "proportion_percentage": 100,
+            "production_time_hours": 8,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 7,
+            "parent_id": 4,
+            "child_id": 8,
+            "quantity_required": 1,
+            "yield_percentage": 30,
+            "proportion_percentage": 30,
+            "production_time_hours": 4,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 8,
+            "parent_id": 4,
+            "child_id": 9,
+            "quantity_required": 1,
+            "yield_percentage": 25,
+            "proportion_percentage": 25,
+            "production_time_hours": 4,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 9,
+            "parent_id": 4,
+            "child_id": 10,
+            "quantity_required": 1,
+            "yield_percentage": 15,
+            "proportion_percentage": 15,
+            "production_time_hours": 4,
+            "created_at": "2025-01-21T14:10:00Z"
+        }
+    ],
+    "production_requirements": [
+        {
+            "id": 1,
+            "item_id": 1,
+            "required_date": "2025-01-28",
+            "required_quantity": 1000,
+            "source_type": "sales_plan",
+            "source_id": 1,
+            "created_at": "2025-01-21T14:10:00Z"
+        },
+        {
+            "id": 2,
+            "item_id": 8,
+            "required_date": "2025-01-25",
+            "required_quantity": 50,
+            "source_type": "sales_plan",
+            "source_id": 2,
+            "created_at": "2025-01-21T14:10:00Z"
+        }
+    ],
+    "production_orders": []
+}

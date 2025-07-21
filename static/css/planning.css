@@ -1,0 +1,409 @@
+/* Ch Project Planning Module Styles */
+
+/* Planning Container */
+.planning-container {
+    padding: 1rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Planning Controls */
+.planning-controls {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Time Controls */
+.time-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.time-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+}
+
+.time-btn:hover {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.time-btn.active {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+/* History Controls */
+.history-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.control-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.control-group select {
+    padding: 0.4rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Planning Actions */
+.planning-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+/* Planning Legend */
+.planning-legend {
+    display: flex;
+    gap: 2rem;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.legend-color.history {
+    background: #ecf0f1;
+}
+
+.legend-color.actual {
+    background: #3498db;
+}
+
+.legend-color.plan-current {
+    background: #2ecc71;
+}
+
+.legend-color.future {
+    background: #f39c12;
+}
+
+.legend-icon {
+    font-size: 1.2rem;
+}
+
+/* Planning Grid */
+.planning-grid-container {
+    flex: 1;
+    overflow: auto;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+.planning-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.planning-table th {
+    background: #f8f9fa;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: #2c3e50;
+    border: 1px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.planning-table td {
+    padding: 0.5rem;
+    border: 1px solid #dee2e6;
+    text-align: center;
+}
+
+/* Fixed Columns */
+.fixed-column {
+    position: sticky;
+    background: white;
+    z-index: 5;
+}
+
+.product-column {
+    left: 0;
+    min-width: 150px;
+    text-align: left !important;
+}
+
+.unit-column {
+    left: 150px;
+    min-width: 50px;
+}
+
+.total-column {
+    right: 0;
+    min-width: 80px;
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+/* Column Types */
+.history-column {
+    background: #fafafa;
+    color: #7f8c8d;
+}
+
+.current-column {
+    background: #e3f2fd;
+}
+
+.future-column {
+    background: #fff3e0;
+}
+
+.current-period {
+    border-left: 2px solid #3498db;
+    border-right: 2px solid #3498db;
+}
+
+/* Cell Types */
+.historical-cell {
+    background: #ecf0f1;
+}
+
+.historical-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.historical-value .value {
+    font-weight: 500;
+}
+
+.historical-value .lock-icon {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.actual-cell {
+    background: #e3f2fd;
+}
+
+.actual-value {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.current-cell {
+    background: #e8f5e9;
+}
+
+.split-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.split-value .actual {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+.split-value .divider {
+    color: #ccc;
+}
+
+.plan-cell {
+    background: #f3e5f5;
+}
+
+.future-cell {
+    background: #fff8e1;
+}
+
+/* Plan Inputs */
+.plan-input {
+    width: 70px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-family: 'Consolas', 'Monaco', monospace;
+}
+
+.plan-input.mini {
+    width: 50px;
+    padding: 2px;
+    font-size: 0.8rem;
+}
+
+.plan-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Totals Row */
+.totals-row {
+    font-weight: 600;
+    background: #f8f9fa;
+}
+
+.totals-row td {
+    border-top: 2px solid #dee2e6;
+}
+
+.column-total,
+.row-total {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.grand-total {
+    font-size: 1.1rem;
+    color: #e74c3c;
+}
+
+/* Planning Summary */
+.planning-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.summary-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.summary-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Modal Styles */
+.modal-medium {
+    max-width: 600px;
+}
+
+#distribute-preview {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+}
+
+#distribute-preview p {
+    margin: 0.5rem 0;
+}
+
+#distribute-preview strong {
+    color: #3498db;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .planning-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .planning-actions {
+        margin-left: 0;
+        justify-content: center;
+    }
+    
+    .planning-legend {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .plan-input {
+        width: 60px;
+    }
+}
+
+@media (max-width: 768px) {
+    .planning-table {
+        font-size: 0.8rem;
+    }
+    
+    .planning-table th,
+    .planning-table td {
+        padding: 0.3rem;
+    }
+    
+    .plan-input {
+        width: 50px;
+        font-size: 0.75rem;
+    }
+    
+    .time-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .planning-controls,
+    .planning-actions,
+    .planning-legend {
+        display: none;
+    }
+    
+    .planning-grid-container {
+        box-shadow: none;
+        overflow: visible;
+    }
+    
+    .plan-input {
+        border: none;
+        background: none;
+    }
+}
