@@ -1,0 +1,5 @@
+DB_HOST=ch-production-db.cifgmm0mqg5q.us-east-1.rds.amazonaws.com
+DB_PORT=5432
+DB_NAME=ch_production
+DB_USER=ch_admin
+DB_PASSWORD=LLJW8cLuLv1yyJlRt6aUioSzq

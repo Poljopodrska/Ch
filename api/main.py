@@ -2,18 +2,54 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 import os
+import asyncpg
 from datetime import datetime
 import json
 
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
+
+# Database configuration
+DATABASE_URL = os.environ.get('DATABASE_URL')
+if not DATABASE_URL and all(k in os.environ for k in ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_NAME']):
+    DATABASE_URL = f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:5432/{os.environ['DB_NAME']}"
+
+# Connection pool
+db_pool = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    global db_pool
+    if DATABASE_URL:
+        try:
+            db_pool = await asyncpg.create_pool(
+                DATABASE_URL,
+                min_size=2,
+                max_size=10,
+                command_timeout=60
+            )
+            print(f"Database connected: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'configured'}")
+        except Exception as e:
+            print(f"Database connection failed: {e}")
+            db_pool = None
+    else:
+        print("No database configuration found, running without database")
+    
+    yield
+    
+    # Shutdown
+    if db_pool:
+        await db_pool.close()
 
 app = FastAPI(
     title="Ch Production API", 
     version=VERSION,
-    description="Ch Project Production System"
+    description="Ch Project Production System",
+    lifespan=lifespan
 )
 
 # CORS middleware
@@ -47,8 +83,22 @@ async def deployment_verify():
         "deployment_valid": True,
         "version": f"v{VERSION}-{BUILD_ID}",
         "service": "ch-production",
-        "deployment_id": DEPLOYMENT_ID
+        "deployment_id": DEPLOYMENT_ID,
+        "database": "connected" if db_pool else "not_configured"
     }
+
+# Database health check
+@app.get("/health/database")
+async def database_health():
+    if not db_pool:
+        return {"status": "not_configured", "database": "no_connection_pool"}
+    
+    try:
+        async with db_pool.acquire() as conn:
+            result = await conn.fetchval("SELECT 1")
+            return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "error": str(e)}
 
 
 # Serve the main application
@@ -78,14 +128,82 @@ app.mount("/meat-production-planner",
           StaticFiles(directory="meat-production-planner", html=True), 
           name="meat-production-planner")
 
-# API routes for modules (placeholder)
+# API routes for modules
 @app.get("/api/v1/products")
 async def get_products():
-    return {"products": []}
+    if not db_pool:
+        # Fallback to empty data if no database
+        return {"products": [], "source": "no_database"}
+    
+    try:
+        async with db_pool.acquire() as conn:
+            products = await conn.fetch("""
+                SELECT 
+                    p.id, p.article_number, p.article_name, p.pack_size, p.unit_type,
+                    p.production_cost, p.production_overhead, p.logistics_overhead,
+                    p.marketing_overhead, p.general_overhead, p.profit_overhead,
+                    p.sales_price, p.is_active, p.created_at,
+                    c.name as category_name, c.code as category_code
+                FROM products p
+                LEFT JOIN product_categories c ON p.category_id = c.id
+                WHERE p.is_active = true
+                ORDER BY p.article_number
+            """)
+            return {
+                "products": [dict(p) for p in products],
+                "count": len(products),
+                "source": "database"
+            }
+    except Exception as e:
+        return {"products": [], "error": str(e), "source": "database_error"}
 
 @app.get("/api/v1/planning")
 async def get_planning():
-    return {"plans": []}
+    if not db_pool:
+        return {"plans": [], "source": "no_database"}
+    
+    try:
+        async with db_pool.acquire() as conn:
+            plans = await conn.fetch("""
+                SELECT 
+                    sp.id, sp.plan_date, sp.plan_type, sp.planned_units, sp.actual_units,
+                    p.article_number, p.article_name
+                FROM sales_plans sp
+                JOIN products p ON sp.product_id = p.id
+                WHERE sp.plan_date >= CURRENT_DATE - INTERVAL '7 days'
+                ORDER BY sp.plan_date DESC
+            """)
+            return {
+                "plans": [dict(p) for p in plans],
+                "count": len(plans),
+                "source": "database"
+            }
+    except Exception as e:
+        return {"plans": [], "error": str(e), "source": "database_error"}
+
+# BOM API endpoint
+@app.get("/api/v1/bom")
+async def get_bom():
+    if not db_pool:
+        return {"bom_items": [], "source": "no_database"}
+    
+    try:
+        async with db_pool.acquire() as conn:
+            bom_items = await conn.fetch("""
+                SELECT 
+                    id, item_code, item_name, item_type, unit_type,
+                    current_inventory, safety_stock, is_active
+                FROM bom_items
+                WHERE is_active = true
+                ORDER BY item_type, item_name
+            """)
+            return {
+                "bom_items": [dict(item) for item in bom_items],
+                "count": len(bom_items),
+                "source": "database"
+            }
+    except Exception as e:
+        return {"bom_items": [], "error": str(e), "source": "database_error"}
 
 # Module-specific API routes would be added here
 # Each module can register its own routes following the constitutional principle of module independence
