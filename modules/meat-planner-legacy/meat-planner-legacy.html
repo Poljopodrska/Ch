@@ -1,19 +1,19 @@
-<!-- Legacy Meat Production Planner Module -->
+<!-- Načrtovalec Mesne Proizvodnje - Začasni Modul -->
 <div class="legacy-module-container">
-    <!-- Legacy Warning Notice -->
+    <!-- Opozorilo o začasnem modulu -->
     <div class="legacy-notice">
         <span class="icon-warning">⚠️</span>
         <div>
-            <strong>Temporary Legacy Module</strong> - This will be replaced with the integrated Ch Production Planning system.
-            Data is stored locally and may not sync with other Ch modules.
+            <strong>Začasni modul</strong> - Ta modul bo nadomestil integriran sistem Ch za načrtovanje proizvodnje.
+            Podatki se shranjujejo lokalno in se morda ne sinhronizirajo z drugimi moduli Ch.
         </div>
     </div>
     
-    <!-- Iframe Container -->
+    <!-- Iframe vsebnik -->
     <div class="iframe-container">
         <div class="iframe-loading" id="iframe-loading">
             <div class="spinner"></div>
-            <span>Loading Meat Production Planner...</span>
+            <span>Nalaganje načrtovalca mesne proizvodnje...</span>
         </div>
         
         <iframe 
@@ -25,19 +25,19 @@
             sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
             onload="LegacyMeatPlanner.onIframeLoaded()"
             onerror="LegacyMeatPlanner.onIframeError()">
-            <p>Your browser does not support iframes. Please update to a modern browser to use the Legacy Meat Planner.</p>
+            <p>Vaš brskalnik ne podpira iframe elementov. Prosimo, posodobite na sodoben brskalnik za uporabo načrtovalca.</p>
         </iframe>
     </div>
     
-    <!-- Migration Information -->
+    <!-- Informacije o migraciji -->
     <div class="migration-info">
-        <h4>🚀 Migration to Ch Production Planning</h4>
-        <p><strong>Current Status:</strong> This legacy module provides immediate access to meat production planning while we develop the integrated Ch solution.</p>
+        <h4>🚀 Migracija na Ch sistem načrtovanja proizvodnje</h4>
+        <p><strong>Trenutni status:</strong> Ta začasni modul omogoča takojšen dostop do načrtovanja mesne proizvodnje, medtem ko razvijamo integrirano rešitev Ch.</p>
         <ul>
-            <li><strong>Data Storage:</strong> Uses local browser storage (data stays on your computer)</li>
-            <li><strong>Features:</strong> Full meat production planning, cost analysis, and worker scheduling</li>
-            <li><strong>Migration Path:</strong> Data will be migrated to PostgreSQL when the new system is ready</li>
-            <li><strong>Timeline:</strong> Planned replacement with native Ch module by Q2 2025</li>
+            <li><strong>Shranjevanje podatkov:</strong> Uporablja lokalno shranjevanje v brskalniku (podatki ostanejo na vašem računalniku)</li>
+            <li><strong>Funkcionalnosti:</strong> Celotno načrtovanje mesne proizvodnje, analiza stroškov in razporejanje delavcev</li>
+            <li><strong>Pot migracije:</strong> Podatki bodo migrirani v PostgreSQL, ko bo nov sistem pripravljen</li>
+            <li><strong>Časovnica:</strong> Načrtovana zamenjava z nativnim modulom Ch do Q2 2025</li>
         </ul>
     </div>
 </div>
@@ -46,7 +46,7 @@
 // Legacy Meat Planner Integration
 window.LegacyMeatPlanner = {
     onIframeLoaded() {
-        console.log('Legacy Meat Planner loaded successfully');
+        console.log('Načrtovalec mesne proizvodnje uspešno naložen');
         
         // Hide loading overlay
         const loadingOverlay = document.getElementById('iframe-loading');
@@ -61,13 +61,13 @@ window.LegacyMeatPlanner = {
     },
     
     onIframeError() {
-        console.error('Failed to load Legacy Meat Planner');
+        console.error('Napaka pri nalaganju načrtovalca mesne proizvodnje');
         
         const loadingOverlay = document.getElementById('iframe-loading');
         if (loadingOverlay) {
             loadingOverlay.innerHTML = `
                 <span style="color: #d32f2f;">❌</span>
-                <span>Failed to load Legacy Meat Planner. Please check the file path.</span>
+                <span>Napaka pri nalaganju načrtovalca. Prosimo, preverite pot do datoteke.</span>
             `;
         }
     },

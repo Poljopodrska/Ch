@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AGP Planner - Standalone Version</title>
+    <title>Načrtovalec Mesne Proizvodnje</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -23,13 +23,142 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div id="root"></div>
+    <div id="root">
+        <div class="loading-overlay">
+            <div class="loading-spinner"></div>
+            <p class="mt-4 text-lg text-gray-600">Nalaganje načrtovalca mesne proizvodnje...</p>
+        </div>
+    </div>
 
     <script type="text/babel">
         const { useState, useEffect, useCallback, createContext, useContext } = React;
+
+        // Slovenian translations
+        const translations = {
+            // General
+            loading: "Nalaganje...",
+            save: "Shrani",
+            cancel: "Prekliči",
+            delete: "Izbriši",
+            edit: "Uredi",
+            add: "Dodaj",
+            close: "Zapri",
+            search: "Iskanje",
+            filter: "Filter",
+            export: "Izvozi",
+            import: "Uvozi",
+            print: "Natisni",
+            
+            // Authentication
+            login: "Prijava",
+            logout: "Odjava",
+            username: "Uporabniško ime",
+            password: "Geslo",
+            loginButton: "Prijavi se",
+            welcomeBack: "Dobrodošli nazaj",
+            loginError: "Napačno uporabniško ime ali geslo",
+            
+            // Navigation
+            dashboard: "Nadzorna plošča",
+            products: "Izdelki",
+            customers: "Stranke",
+            workers: "Delavci",
+            planning: "Načrtovanje",
+            production: "Proizvodnja",
+            reports: "Poročila",
+            settings: "Nastavitve",
+            
+            // Products
+            productManagement: "Upravljanje izdelkov",
+            articleNumber: "Številka artikla",
+            productName: "Ime izdelka",
+            unit: "Enota",
+            actualPrice: "Dejanska cena",
+            productionCost: "Stroški proizvodnje",
+            productionOverhead: "Režijski stroški proizvodnje",
+            marketingOverhead: "Režijski stroški trženja",
+            generalOverhead: "Splošni režijski stroški",
+            logisticsOverhead: "Režijski stroški logistike",
+            totalCost: "Skupni stroški",
+            margin: "Marža",
+            
+            // Customers
+            customerManagement: "Upravljanje strank",
+            customerName: "Ime stranke",
+            customerColor: "Barva stranke",
+            
+            // Workers
+            workerManagement: "Upravljanje delavcev",
+            workerName: "Ime delavca",
+            active: "Aktiven",
+            inactive: "Neaktiven",
+            availability: "Razpoložljivost",
+            
+            // Planning
+            productionPlanning: "Načrtovanje proizvodnje",
+            selectWeek: "Izberi teden",
+            selectProducts: "Izberi izdelke",
+            planProduction: "Načrtuj proizvodnjo",
+            weeklyPlan: "Tedenski načrt",
+            dailyPlan: "Dnevni načrt",
+            totalQuantity: "Skupna količina",
+            workerAssignment: "Dodelitev delavcev",
+            
+            // Days of week
+            monday: "Ponedeljek",
+            tuesday: "Torek",
+            wednesday: "Sreda",
+            thursday: "Četrtek",
+            friday: "Petek",
+            saturday: "Sobota",
+            sunday: "Nedelja",
+            
+            // Messages
+            saveSuccess: "Uspešno shranjeno",
+            deleteConfirm: "Ali ste prepričani, da želite izbrisati?",
+            errorOccurred: "Prišlo je do napake",
+            noDataAvailable: "Ni razpoložljivih podatkov",
+            
+            // Statistics
+            statistics: "Statistika",
+            totalProducts: "Skupaj izdelkov",
+            totalCustomers: "Skupaj strank",
+            activeWorkers: "Aktivni delavci",
+            weeklyProduction: "Tedenska proizvodnja",
+            
+            // Forms
+            addNewProduct: "Dodaj nov izdelek",
+            editProduct: "Uredi izdelek",
+            addNewCustomer: "Dodaj novo stranko",
+            editCustomer: "Uredi stranko",
+            addNewWorker: "Dodaj novega delavca",
+            editWorker: "Uredi delavca"
+        };
 
         // Local Storage Database
         class LocalDB {
@@ -39,11 +168,10 @@
 
             initDB() {
                 if (!localStorage.getItem('agp_initialized')) {
-                    // Initialize with default data
                     const defaultData = {
                         users: [
                             { id: 1, username: 'admin', password: 'admin123', email: 'admin@agp.local', role: 'admin' },
-                            { id: 2, username: 'user', password: 'user123', email: 'user@agp.local', role: 'user' }
+                            { id: 2, username: 'uporabnik', password: 'uporabnik123', email: 'uporabnik@agp.local', role: 'user' }
                         ],
                         products: [
                             { id: 1, article_number: 'K12', name: 'Klasična klobasa', color: '#FF6B6B', unit: 'kg', actual_price: 12.50, production_cost: 6.25, production_oh: 1.25, marketing_oh: 1.00, general_oh: 0.88, logistics_oh: 0.63 },
@@ -57,7 +185,8 @@
                             { id: 1, name: 'Mercator', color: '#3B82F6' },
                             { id: 2, name: 'Spar', color: '#10B981' },
                             { id: 3, name: 'Lidl', color: '#F59E0B' },
-                            { id: 4, name: 'Hofer', color: '#EF4444' }
+                            { id: 4, name: 'Hofer', color: '#EF4444' },
+                            { id: 5, name: 'Tuš', color: '#8B5CF6' }
                         ],
                         workers: [
                             { id: 1, name: 'Ana Novak', active: true },
@@ -118,26 +247,14 @@
                 localStorage.setItem(`agp_${table}`, JSON.stringify(filtered));
                 return true;
             }
-
-            // Special methods for planning data
-            getPlanningData(date, type) {
-                const allData = this.getAll('planning_data');
-                return allData[`${date}_${type}`] || {};
-            }
-
-            setPlanningData(date, type, data) {
-                const allData = this.getAll('planning_data');
-                allData[`${date}_${type}`] = data;
-                localStorage.setItem('agp_planning_data', JSON.stringify(allData));
-            }
         }
 
         const db = new LocalDB();
 
         // Auth Context
-        const AuthContext = createContext(null);
+        const AuthContext = createContext();
 
-        const AuthProvider = ({ children }) => {
+        function AuthProvider({ children }) {
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
 
@@ -153,7 +270,7 @@
                 const users = db.getAll('users');
                 const foundUser = users.find(u => u.username === username && u.password === password);
                 if (foundUser) {
-                    const { password: _, ...userWithoutPassword } = foundUser;
+                    const { password, ...userWithoutPassword } = foundUser;
                     setUser(userWithoutPassword);
                     localStorage.setItem('agp_current_user', JSON.stringify(userWithoutPassword));
                     return true;
@@ -171,12 +288,12 @@
                     {children}
                 </AuthContext.Provider>
             );
-        };
+        }
 
         const useAuth = () => useContext(AuthContext);
 
         // Login Component
-        const Login = () => {
+        function LoginForm() {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
             const [error, setError] = useState('');
@@ -184,548 +301,1118 @@
 
             const handleSubmit = (e) => {
                 e.preventDefault();
-                if (login(username, password)) {
-                    setError('');
+                if (!login(username, password)) {
+                    setError(translations.loginError);
                 } else {
-                    setError('Invalid username or password');
+                    setError('');
                 }
             };
 
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                    <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-                        <h1 className="text-2xl font-bold text-center mb-6">AGP Planner</h1>
-                        <form onSubmit={handleSubmit}>
-                            <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                                <input
-                                    type="text"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
-                                />
-                            </div>
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    required
-                                />
-                            </div>
-                            {error && (
-                                <div className="mb-4 text-red-600 text-sm">{error}</div>
-                            )}
-                            <button
-                                type="submit"
-                                className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
-                            >
-                                Login
-                            </button>
-                        </form>
-                        <div className="mt-4 text-sm text-gray-600">
-                            <p>Demo accounts:</p>
-                            <p>Admin: admin / admin123</p>
-                            <p>User: user / user123</p>
+                <div className="min-h-screen flex items-center justify-center bg-gray-50">
+                    <div className="max-w-md w-full space-y-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-center text-gray-900">
+                                Načrtovalec Mesne Proizvodnje
+                            </h1>
+                            <h2 className="mt-6 text-center text-xl text-gray-600">
+                                {translations.welcomeBack}
+                            </h2>
                         </div>
+                        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+                            <div className="rounded-md shadow-sm -space-y-px">
+                                <div>
+                                    <label htmlFor="username" className="sr-only">
+                                        {translations.username}
+                                    </label>
+                                    <input
+                                        id="username"
+                                        name="username"
+                                        type="text"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                        placeholder={translations.username}
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="password" className="sr-only">
+                                        {translations.password}
+                                    </label>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        required
+                                        className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                        placeholder={translations.password}
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            {error && (
+                                <div className="text-red-500 text-sm text-center">{error}</div>
+                            )}
+
+                            <div>
+                                <button
+                                    type="submit"
+                                    className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                >
+                                    {translations.loginButton}
+                                </button>
+                            </div>
+                            
+                            <div className="text-center text-sm text-gray-600">
+                                <p>Testni računi:</p>
+                                <p>admin / admin123</p>
+                                <p>uporabnik / uporabnik123</p>
+                            </div>
+                        </form>
                     </div>
                 </div>
             );
-        };
+        }
 
         // Main Dashboard Component
-        const Dashboard = () => {
+        function Dashboard() {
             const { user, logout } = useAuth();
             const [activeTab, setActiveTab] = useState('dashboard');
-            const [products, setProducts] = useState([]);
-            const [customers, setCustomers] = useState([]);
-            const [workers, setWorkers] = useState([]);
+            const [products, setProducts] = useState(db.getAll('products'));
+            const [customers, setCustomers] = useState(db.getAll('customers'));
+            const [workers, setWorkers] = useState(db.getAll('workers'));
 
-            useEffect(() => {
+            const refreshData = () => {
                 setProducts(db.getAll('products'));
                 setCustomers(db.getAll('customers'));
                 setWorkers(db.getAll('workers'));
-            }, []);
-
-            const calculateKPIs = () => {
-                const totalRevenue = products.reduce((sum, p) => sum + (p.actual_price || 0), 0);
-                const totalCost = products.reduce((sum, p) => {
-                    return sum + (p.production_cost || 0) + (p.production_oh || 0) + 
-                           (p.marketing_oh || 0) + (p.general_oh || 0) + (p.logistics_oh || 0);
-                }, 0);
-                const margin = totalRevenue - totalCost;
-                const marginPercent = totalRevenue > 0 ? (margin / totalRevenue) * 100 : 0;
-
-                return {
-                    revenue: totalRevenue.toFixed(2),
-                    cost: totalCost.toFixed(2),
-                    margin: margin.toFixed(2),
-                    marginPercent: marginPercent.toFixed(1)
-                };
             };
 
-            const kpis = calculateKPIs();
-
-            const renderDashboard = () => (
-                <div className="space-y-6">
-                    <h2 className="text-2xl font-bold">Dashboard</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-white p-6 rounded-lg shadow">
-                            <h3 className="text-sm text-gray-600">Total Products</h3>
-                            <p className="text-2xl font-bold text-blue-600">{products.length}</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow">
-                            <h3 className="text-sm text-gray-600">Total Revenue</h3>
-                            <p className="text-2xl font-bold text-green-600">€{kpis.revenue}</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow">
-                            <h3 className="text-sm text-gray-600">Total Cost</h3>
-                            <p className="text-2xl font-bold text-red-600">€{kpis.cost}</p>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow">
-                            <h3 className="text-sm text-gray-600">Margin</h3>
-                            <p className="text-2xl font-bold text-purple-600">{kpis.marginPercent}%</p>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h3 className="text-lg font-semibold mb-4">Product Overview</h3>
-                        <div className="space-y-2">
-                            {products.map(product => {
-                                const totalCost = (product.production_cost || 0) + (product.production_oh || 0) + 
-                                                (product.marketing_oh || 0) + (product.general_oh || 0) + (product.logistics_oh || 0);
-                                const margin = ((product.actual_price - totalCost) / product.actual_price) * 100;
-                                
-                                return (
-                                    <div key={product.id} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded">
-                                        <div className="flex items-center gap-3">
-                                            <div 
-                                                className="w-4 h-4 rounded"
-                                                style={{ backgroundColor: product.color }}
-                                            ></div>
-                                            <span className="font-medium">{product.name}</span>
-                                            <span className="text-sm text-gray-500">({product.article_number})</span>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="text-sm">€{product.actual_price}</span>
-                                            <span className={`text-sm font-semibold ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                {margin.toFixed(1)}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            );
-
-            const renderProducts = () => {
-                const [editingProduct, setEditingProduct] = useState(null);
-                const [formData, setFormData] = useState({});
-
-                const handleEdit = (product) => {
-                    setEditingProduct(product.id);
-                    setFormData(product);
-                };
-
-                const handleSave = () => {
-                    db.update('products', editingProduct, formData);
-                    setProducts(db.getAll('products'));
-                    setEditingProduct(null);
-                };
-
-                const handleCancel = () => {
-                    setEditingProduct(null);
-                    setFormData({});
-                };
-
-                return (
-                    <div className="space-y-6">
-                        <h2 className="text-2xl font-bold">Products</h2>
-                        
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
-                            <table className="min-w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production Cost</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Production OH</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marketing OH</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">General OH</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Logistics OH</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actual Price</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Margin</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {products.map(product => {
-                                        const totalCost = (product.production_cost || 0) + (product.production_oh || 0) + 
-                                                        (product.marketing_oh || 0) + (product.general_oh || 0) + (product.logistics_oh || 0);
-                                        const margin = ((product.actual_price - totalCost) / product.actual_price) * 100;
-                                        const isEditing = editingProduct === product.id;
-                                        
-                                        return (
-                                            <tr key={product.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <div 
-                                                            className="w-4 h-4 rounded mr-3"
-                                                            style={{ backgroundColor: product.color }}
-                                                        ></div>
-                                                        <div>
-                                                            <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                                            <div className="text-sm text-gray-500">{product.article_number}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.production_cost || ''}
-                                                            onChange={(e) => setFormData({...formData, production_cost: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.production_cost?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.production_oh || ''}
-                                                            onChange={(e) => setFormData({...formData, production_oh: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.production_oh?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.marketing_oh || ''}
-                                                            onChange={(e) => setFormData({...formData, marketing_oh: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.marketing_oh?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.general_oh || ''}
-                                                            onChange={(e) => setFormData({...formData, general_oh: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.general_oh?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.logistics_oh || ''}
-                                                            onChange={(e) => setFormData({...formData, logistics_oh: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.logistics_oh?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {isEditing ? (
-                                                        <input
-                                                            type="number"
-                                                            value={formData.actual_price || ''}
-                                                            onChange={(e) => setFormData({...formData, actual_price: parseFloat(e.target.value)})}
-                                                            className="w-20 px-2 py-1 border rounded"
-                                                            step="0.01"
-                                                        />
-                                                    ) : (
-                                                        `€${product.actual_price?.toFixed(2) || '0.00'}`
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`text-sm font-semibold ${margin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {margin.toFixed(1)}%
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                    {isEditing ? (
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={handleSave}
-                                                                className="text-green-600 hover:text-green-900"
-                                                            >
-                                                                Save
-                                                            </button>
-                                                            <button
-                                                                onClick={handleCancel}
-                                                                className="text-gray-600 hover:text-gray-900"
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </div>
-                                                    ) : (
-                                                        <button
-                                                            onClick={() => handleEdit(product)}
-                                                            className="text-blue-600 hover:text-blue-900"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                );
-            };
-
-            const renderPlanning = () => {
-                const [selectedWeek, setSelectedWeek] = useState(0);
-                const [planningData, setPlanningData] = useState({});
-                
-                const weeks = Array.from({ length: 12 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() + (i * 7) - date.getDay() + 1);
-                    return {
-                        index: i,
-                        start: new Date(date),
-                        label: `Week ${i + 1}`
-                    };
-                });
-
-                const saveData = (productId, customerId, value) => {
-                    const key = `${productId}_${customerId}`;
-                    setPlanningData({
-                        ...planningData,
-                        [key]: value
-                    });
-                };
-
-                return (
-                    <div className="space-y-6">
-                        <h2 className="text-2xl font-bold">Sales Planning</h2>
-                        
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                            {weeks.map((week) => (
-                                <button
-                                    key={week.index}
-                                    onClick={() => setSelectedWeek(week.index)}
-                                    className={`px-4 py-2 rounded whitespace-nowrap ${
-                                        selectedWeek === week.index
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-white text-gray-700 hover:bg-gray-100'
-                                    }`}
-                                >
-                                    {week.label}
-                                    <div className="text-xs mt-1">
-                                        {week.start.toLocaleDateString('sl-SI', { day: 'numeric', month: 'numeric' })}
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
-                            <table className="min-w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                                        {customers.map(customer => (
-                                            <th key={customer.id} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                <div className="flex items-center gap-2">
-                                                    <div 
-                                                        className="w-3 h-3 rounded"
-                                                        style={{ backgroundColor: customer.color }}
-                                                    ></div>
-                                                    {customer.name}
-                                                </div>
-                                            </th>
-                                        ))}
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {products.map(product => {
-                                        const rowTotal = customers.reduce((sum, customer) => {
-                                            const key = `${product.id}_${customer.id}`;
-                                            return sum + (parseFloat(planningData[key]) || 0);
-                                        }, 0);
-                                        
-                                        return (
-                                            <tr key={product.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <div 
-                                                            className="w-4 h-4 rounded mr-3"
-                                                            style={{ backgroundColor: product.color }}
-                                                        ></div>
-                                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                                                    </div>
-                                                </td>
-                                                {customers.map(customer => {
-                                                    const key = `${product.id}_${customer.id}`;
-                                                    return (
-                                                        <td key={customer.id} className="px-6 py-4 whitespace-nowrap">
-                                                            <input
-                                                                type="number"
-                                                                value={planningData[key] || ''}
-                                                                onChange={(e) => saveData(product.id, customer.id, e.target.value)}
-                                                                className="w-20 px-2 py-1 border rounded text-sm"
-                                                                placeholder="0"
-                                                                min="0"
-                                                            />
-                                                        </td>
-                                                    );
-                                                })}
-                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                                                    {rowTotal}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                );
-            };
-
-            const tabs = [
-                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-                { id: 'products', label: 'Products', icon: '📦' },
-                { id: 'planning', label: 'Planning', icon: '📅' },
-                { id: 'customers', label: 'Customers', icon: '👥' },
-                { id: 'workers', label: 'Workers', icon: '👷' }
+            const navItems = [
+                { id: 'dashboard', label: translations.dashboard, icon: '📊' },
+                { id: 'products', label: translations.products, icon: '🥩' },
+                { id: 'customers', label: translations.customers, icon: '🏪' },
+                { id: 'workers', label: translations.workers, icon: '👷' },
+                { id: 'planning', label: translations.planning, icon: '📅' },
+                { id: 'production', label: translations.production, icon: '🏭' },
+                { id: 'reports', label: translations.reports, icon: '📈' }
             ];
 
             return (
                 <div className="min-h-screen bg-gray-50">
-                    <nav className="bg-white shadow">
+                    {/* Header */}
+                    <header className="bg-white shadow">
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex justify-between h-16">
-                                <div className="flex">
-                                    <div className="flex-shrink-0 flex items-center">
-                                        <h1 className="text-xl font-bold">AGP Planner</h1>
-                                    </div>
-                                    <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                                        {tabs.map(tab => (
-                                            <button
-                                                key={tab.id}
-                                                onClick={() => setActiveTab(tab.id)}
-                                                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                                                    activeTab === tab.id
-                                                        ? 'border-blue-500 text-gray-900'
-                                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                                }`}
-                                            >
-                                                <span className="mr-2">{tab.icon}</span>
-                                                {tab.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="flex items-center">
-                                    <span className="text-sm text-gray-700 mr-4">
-                                        {user.username} ({user.role})
+                            <div className="flex justify-between items-center py-4">
+                                <h1 className="text-2xl font-bold text-gray-900">
+                                    Načrtovalec Mesne Proizvodnje
+                                </h1>
+                                <div className="flex items-center space-x-4">
+                                    <span className="text-gray-700">
+                                        Pozdravljen, {user.username}!
                                     </span>
                                     <button
                                         onClick={logout}
-                                        className="text-sm text-gray-500 hover:text-gray-700"
+                                        className="text-gray-500 hover:text-gray-700"
                                     >
-                                        Logout
+                                        {translations.logout}
                                     </button>
                                 </div>
                             </div>
                         </div>
+                    </header>
+
+                    {/* Navigation */}
+                    <nav className="bg-blue-600">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex space-x-8">
+                                {navItems.map(item => (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActiveTab(item.id)}
+                                        className={`py-3 px-3 text-sm font-medium ${
+                                            activeTab === item.id
+                                                ? 'text-white border-b-2 border-white'
+                                                : 'text-blue-200 hover:text-white'
+                                        }`}
+                                    >
+                                        <span className="mr-2">{item.icon}</span>
+                                        {item.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </nav>
 
+                    {/* Main Content */}
                     <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-                        {activeTab === 'dashboard' && renderDashboard()}
-                        {activeTab === 'products' && renderProducts()}
-                        {activeTab === 'planning' && renderPlanning()}
+                        {activeTab === 'dashboard' && (
+                            <DashboardView 
+                                products={products}
+                                customers={customers}
+                                workers={workers}
+                            />
+                        )}
+                        {activeTab === 'products' && (
+                            <ProductsView 
+                                products={products}
+                                refreshData={refreshData}
+                            />
+                        )}
                         {activeTab === 'customers' && (
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-bold">Customers</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {customers.map(customer => (
-                                        <div key={customer.id} className="bg-white p-6 rounded-lg shadow">
-                                            <div className="flex items-center gap-3">
-                                                <div 
-                                                    className="w-8 h-8 rounded"
-                                                    style={{ backgroundColor: customer.color }}
-                                                ></div>
-                                                <h3 className="text-lg font-semibold">{customer.name}</h3>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <CustomersView 
+                                customers={customers}
+                                refreshData={refreshData}
+                            />
                         )}
                         {activeTab === 'workers' && (
-                            <div className="space-y-6">
-                                <h2 className="text-2xl font-bold">Workers</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    {workers.map(worker => (
-                                        <div key={worker.id} className="bg-white p-6 rounded-lg shadow">
-                                            <h3 className="text-lg font-semibold">{worker.name}</h3>
-                                            <p className="text-sm text-gray-600">
-                                                Status: <span className={worker.active ? 'text-green-600' : 'text-red-600'}>
-                                                    {worker.active ? 'Active' : 'Inactive'}
-                                                </span>
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <WorkersView 
+                                workers={workers}
+                                refreshData={refreshData}
+                            />
+                        )}
+                        {activeTab === 'planning' && (
+                            <PlanningView 
+                                products={products}
+                                customers={customers}
+                                workers={workers}
+                            />
+                        )}
+                        {activeTab === 'production' && (
+                            <ProductionView />
+                        )}
+                        {activeTab === 'reports' && (
+                            <ReportsView />
                         )}
                     </main>
                 </div>
             );
-        };
+        }
+
+        // Dashboard View Component
+        function DashboardView({ products, customers, workers }) {
+            const activeWorkers = workers.filter(w => w.active).length;
+
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                        {translations.dashboard}
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-3xl">🥩</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">
+                                                {translations.totalProducts}
+                                            </dt>
+                                            <dd className="text-2xl font-semibold text-gray-900">
+                                                {products.length}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-3xl">🏪</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">
+                                                {translations.totalCustomers}
+                                            </dt>
+                                            <dd className="text-2xl font-semibold text-gray-900">
+                                                {customers.length}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-3xl">👷</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">
+                                                {translations.activeWorkers}
+                                            </dt>
+                                            <dd className="text-2xl font-semibold text-gray-900">
+                                                {activeWorkers}
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white overflow-hidden shadow rounded-lg">
+                            <div className="p-5">
+                                <div className="flex items-center">
+                                    <div className="flex-shrink-0">
+                                        <span className="text-3xl">📊</span>
+                                    </div>
+                                    <div className="ml-5 w-0 flex-1">
+                                        <dl>
+                                            <dt className="text-sm font-medium text-gray-500 truncate">
+                                                {translations.weeklyProduction}
+                                            </dt>
+                                            <dd className="text-2xl font-semibold text-gray-900">
+                                                0 kg
+                                            </dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Recent Products */}
+                    <div className="bg-white shadow overflow-hidden sm:rounded-md">
+                        <div className="px-4 py-5 sm:px-6">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                Nedavni izdelki
+                            </h3>
+                        </div>
+                        <ul className="divide-y divide-gray-200">
+                            {products.slice(0, 5).map(product => (
+                                <li key={product.id} className="px-4 py-4 sm:px-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center">
+                                            <div
+                                                className="w-10 h-10 rounded-full mr-4"
+                                                style={{ backgroundColor: product.color }}
+                                            ></div>
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {product.name}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {product.article_number}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="text-sm text-gray-900">
+                                            €{product.actual_price.toFixed(2)} / {product.unit}
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
+
+        // Products View Component
+        function ProductsView({ products, refreshData }) {
+            const [showForm, setShowForm] = useState(false);
+            const [editingProduct, setEditingProduct] = useState(null);
+
+            const handleSave = (productData) => {
+                if (editingProduct) {
+                    db.update('products', editingProduct.id, productData);
+                } else {
+                    db.create('products', productData);
+                }
+                refreshData();
+                setShowForm(false);
+                setEditingProduct(null);
+            };
+
+            const handleDelete = (id) => {
+                if (confirm(translations.deleteConfirm)) {
+                    db.delete('products', id);
+                    refreshData();
+                }
+            };
+
+            const handleEdit = (product) => {
+                setEditingProduct(product);
+                setShowForm(true);
+            };
+
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <div className="sm:flex sm:items-center">
+                        <div className="sm:flex-auto">
+                            <h2 className="text-2xl font-semibold text-gray-900">
+                                {translations.productManagement}
+                            </h2>
+                        </div>
+                        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                            <button
+                                onClick={() => {
+                                    setEditingProduct(null);
+                                    setShowForm(true);
+                                }}
+                                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            >
+                                {translations.addNewProduct}
+                            </button>
+                        </div>
+                    </div>
+
+                    {showForm && (
+                        <ProductForm
+                            product={editingProduct}
+                            onSave={handleSave}
+                            onCancel={() => {
+                                setShowForm(false);
+                                setEditingProduct(null);
+                            }}
+                        />
+                    )}
+
+                    <div className="mt-8 flex flex-col">
+                        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                                    <table className="min-w-full divide-y divide-gray-300">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.articleNumber}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.productName}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.unit}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.actualPrice}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.totalCost}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.margin}
+                                                </th>
+                                                <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                                    <span className="sr-only">Akcije</span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                            {products.map((product) => {
+                                                const totalCost = product.production_cost + 
+                                                    product.production_oh + 
+                                                    product.marketing_oh + 
+                                                    product.general_oh + 
+                                                    product.logistics_oh;
+                                                const margin = ((product.actual_price - totalCost) / product.actual_price * 100);
+                                                
+                                                return (
+                                                    <tr key={product.id}>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                            <div className="flex items-center">
+                                                                <div
+                                                                    className="w-8 h-8 rounded-full mr-2"
+                                                                    style={{ backgroundColor: product.color }}
+                                                                ></div>
+                                                                {product.article_number}
+                                                            </div>
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                            {product.name}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                            {product.unit}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                            €{product.actual_price.toFixed(2)}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                            €{totalCost.toFixed(2)}
+                                                        </td>
+                                                        <td className="whitespace-nowrap px-3 py-4 text-sm">
+                                                            <span className={`font-medium ${margin > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {margin.toFixed(1)}%
+                                                            </span>
+                                                        </td>
+                                                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                            <button
+                                                                onClick={() => handleEdit(product)}
+                                                                className="text-blue-600 hover:text-blue-900 mr-4"
+                                                            >
+                                                                {translations.edit}
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(product.id)}
+                                                                className="text-red-600 hover:text-red-900"
+                                                            >
+                                                                {translations.delete}
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Product Form Component
+        function ProductForm({ product, onSave, onCancel }) {
+            const [formData, setFormData] = useState(product || {
+                article_number: '',
+                name: '',
+                color: '#3B82F6',
+                unit: 'kg',
+                actual_price: 0,
+                production_cost: 0,
+                production_oh: 0,
+                marketing_oh: 0,
+                general_oh: 0,
+                logistics_oh: 0
+            });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave({
+                    ...formData,
+                    actual_price: parseFloat(formData.actual_price),
+                    production_cost: parseFloat(formData.production_cost),
+                    production_oh: parseFloat(formData.production_oh),
+                    marketing_oh: parseFloat(formData.marketing_oh),
+                    general_oh: parseFloat(formData.general_oh),
+                    logistics_oh: parseFloat(formData.logistics_oh)
+                });
+            };
+
+            return (
+                <div className="mt-6 bg-white shadow sm:rounded-lg">
+                    <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">
+                            {product ? translations.editProduct : translations.addNewProduct}
+                        </h3>
+                        <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.articleNumber}
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.article_number}
+                                    onChange={(e) => setFormData({ ...formData, article_number: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-3">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.productName}
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-1">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Barva
+                                </label>
+                                <input
+                                    type="color"
+                                    value={formData.color}
+                                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                                    className="mt-1 block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.unit}
+                                </label>
+                                <select
+                                    value={formData.unit}
+                                    onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                >
+                                    <option value="kg">kg</option>
+                                    <option value="kom">kom</option>
+                                    <option value="pak">pak</option>
+                                </select>
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.actualPrice} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.actual_price}
+                                    onChange={(e) => setFormData({ ...formData, actual_price: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.productionCost} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.production_cost}
+                                    onChange={(e) => setFormData({ ...formData, production_cost: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.productionOverhead} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.production_oh}
+                                    onChange={(e) => setFormData({ ...formData, production_oh: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.marketingOverhead} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.marketing_oh}
+                                    onChange={(e) => setFormData({ ...formData, marketing_oh: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.generalOverhead} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.general_oh}
+                                    onChange={(e) => setFormData({ ...formData, general_oh: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    {translations.logisticsOverhead} (€)
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    required
+                                    value={formData.logistics_oh}
+                                    onChange={(e) => setFormData({ ...formData, logistics_oh: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                            </div>
+
+                            <div className="sm:col-span-6">
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={onCancel}
+                                        className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    >
+                                        {translations.cancel}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                    >
+                                        {translations.save}
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            );
+        }
+
+        // Customers View Component
+        function CustomersView({ customers, refreshData }) {
+            const [showForm, setShowForm] = useState(false);
+            const [editingCustomer, setEditingCustomer] = useState(null);
+
+            const handleSave = (customerData) => {
+                if (editingCustomer) {
+                    db.update('customers', editingCustomer.id, customerData);
+                } else {
+                    db.create('customers', customerData);
+                }
+                refreshData();
+                setShowForm(false);
+                setEditingCustomer(null);
+            };
+
+            const handleDelete = (id) => {
+                if (confirm(translations.deleteConfirm)) {
+                    db.delete('customers', id);
+                    refreshData();
+                }
+            };
+
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <div className="sm:flex sm:items-center">
+                        <div className="sm:flex-auto">
+                            <h2 className="text-2xl font-semibold text-gray-900">
+                                {translations.customerManagement}
+                            </h2>
+                        </div>
+                        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                            <button
+                                onClick={() => {
+                                    setEditingCustomer(null);
+                                    setShowForm(true);
+                                }}
+                                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                            >
+                                {translations.addNewCustomer}
+                            </button>
+                        </div>
+                    </div>
+
+                    {showForm && (
+                        <div className="mt-6 bg-white shadow sm:rounded-lg">
+                            <div className="px-4 py-5 sm:p-6">
+                                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                    {editingCustomer ? translations.editCustomer : translations.addNewCustomer}
+                                </h3>
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const formData = new FormData(e.target);
+                                        handleSave({
+                                            name: formData.get('name'),
+                                            color: formData.get('color')
+                                        });
+                                    }}
+                                    className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6"
+                                >
+                                    <div className="sm:col-span-4">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            {translations.customerName}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            required
+                                            defaultValue={editingCustomer?.name}
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            {translations.customerColor}
+                                        </label>
+                                        <input
+                                            type="color"
+                                            name="color"
+                                            defaultValue={editingCustomer?.color || '#3B82F6'}
+                                            className="mt-1 block w-full h-10 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                        />
+                                    </div>
+
+                                    <div className="sm:col-span-6">
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowForm(false);
+                                                    setEditingCustomer(null);
+                                                }}
+                                                className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                                            >
+                                                {translations.cancel}
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                                            >
+                                                {translations.save}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {customers.map((customer) => (
+                            <div
+                                key={customer.id}
+                                className="col-span-1 bg-white rounded-lg shadow divide-y divide-gray-200"
+                            >
+                                <div className="w-full flex items-center justify-between p-6 space-x-6">
+                                    <div className="flex-1 truncate">
+                                        <div className="flex items-center space-x-3">
+                                            <h3 className="text-gray-900 text-sm font-medium truncate">
+                                                {customer.name}
+                                            </h3>
+                                            <span
+                                                className="inline-block w-8 h-8 rounded-full"
+                                                style={{ backgroundColor: customer.color }}
+                                            ></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="-mt-px flex divide-x divide-gray-200">
+                                        <div className="w-0 flex-1 flex">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingCustomer(customer);
+                                                    setShowForm(true);
+                                                }}
+                                                className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
+                                            >
+                                                {translations.edit}
+                                            </button>
+                                        </div>
+                                        <div className="-ml-px w-0 flex-1 flex">
+                                            <button
+                                                onClick={() => handleDelete(customer.id)}
+                                                className="relative w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-br-lg hover:text-gray-500"
+                                            >
+                                                {translations.delete}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Workers View Component
+        function WorkersView({ workers, refreshData }) {
+            const [showForm, setShowForm] = useState(false);
+            const [editingWorker, setEditingWorker] = useState(null);
+
+            const handleSave = (workerData) => {
+                if (editingWorker) {
+                    db.update('workers', editingWorker.id, workerData);
+                } else {
+                    db.create('workers', workerData);
+                }
+                refreshData();
+                setShowForm(false);
+                setEditingWorker(null);
+            };
+
+            const handleToggleActive = (worker) => {
+                db.update('workers', worker.id, { active: !worker.active });
+                refreshData();
+            };
+
+            const handleDelete = (id) => {
+                if (confirm(translations.deleteConfirm)) {
+                    db.delete('workers', id);
+                    refreshData();
+                }
+            };
+
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <div className="sm:flex sm:items-center">
+                        <div className="sm:flex-auto">
+                            <h2 className="text-2xl font-semibold text-gray-900">
+                                {translations.workerManagement}
+                            </h2>
+                        </div>
+                        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+                            <button
+                                onClick={() => {
+                                    setEditingWorker(null);
+                                    setShowForm(true);
+                                }}
+                                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                            >
+                                {translations.addNewWorker}
+                            </button>
+                        </div>
+                    </div>
+
+                    {showForm && (
+                        <div className="mt-6 bg-white shadow sm:rounded-lg">
+                            <div className="px-4 py-5 sm:p-6">
+                                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                    {editingWorker ? translations.editWorker : translations.addNewWorker}
+                                </h3>
+                                <form
+                                    onSubmit={(e) => {
+                                        e.preventDefault();
+                                        const formData = new FormData(e.target);
+                                        handleSave({
+                                            name: formData.get('name'),
+                                            active: formData.get('active') === 'true'
+                                        });
+                                    }}
+                                    className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6"
+                                >
+                                    <div className="sm:col-span-4">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            {translations.workerName}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            required
+                                            defaultValue={editingWorker?.name}
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        />
+                                    </div>
+
+                                    <div className="sm:col-span-2">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                            Status
+                                        </label>
+                                        <select
+                                            name="active"
+                                            defaultValue={editingWorker?.active ?? true}
+                                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        >
+                                            <option value="true">{translations.active}</option>
+                                            <option value="false">{translations.inactive}</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="sm:col-span-6">
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setShowForm(false);
+                                                    setEditingWorker(null);
+                                                }}
+                                                className="inline-flex justify-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                                            >
+                                                {translations.cancel}
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                                            >
+                                                {translations.save}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="mt-8 flex flex-col">
+                        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                            <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                                    <table className="min-w-full divide-y divide-gray-300">
+                                        <thead className="bg-gray-50">
+                                            <tr>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    {translations.workerName}
+                                                </th>
+                                                <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                                                    Status
+                                                </th>
+                                                <th className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                                    <span className="sr-only">Akcije</span>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200 bg-white">
+                                            {workers.map((worker) => (
+                                                <tr key={worker.id}>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                                                        {worker.name}
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-3 py-4 text-sm">
+                                                        <button
+                                                            onClick={() => handleToggleActive(worker)}
+                                                            className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
+                                                                worker.active
+                                                                    ? 'bg-green-100 text-green-800'
+                                                                    : 'bg-gray-100 text-gray-800'
+                                                            }`}
+                                                        >
+                                                            {worker.active ? translations.active : translations.inactive}
+                                                        </button>
+                                                    </td>
+                                                    <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                                        <button
+                                                            onClick={() => {
+                                                                setEditingWorker(worker);
+                                                                setShowForm(true);
+                                                            }}
+                                                            className="text-blue-600 hover:text-blue-900 mr-4"
+                                                        >
+                                                            {translations.edit}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(worker.id)}
+                                                            className="text-red-600 hover:text-red-900"
+                                                        >
+                                                            {translations.delete}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Planning View Component
+        function PlanningView({ products, customers, workers }) {
+            const [selectedWeek, setSelectedWeek] = useState('');
+            const [planningData, setPlanningData] = useState({});
+
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                        {translations.productionPlanning}
+                    </h2>
+                    
+                    <div className="bg-white shadow sm:rounded-lg p-6">
+                        <div className="mb-6">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {translations.selectWeek}
+                            </label>
+                            <input
+                                type="week"
+                                value={selectedWeek}
+                                onChange={(e) => setSelectedWeek(e.target.value)}
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            />
+                        </div>
+
+                        {selectedWeek && (
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                                    Načrt za teden {selectedWeek}
+                                </h3>
+                                <p className="text-gray-500">
+                                    Funkcionalnost načrtovanja bo kmalu na voljo...
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Production View Component
+        function ProductionView() {
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                        {translations.production}
+                    </h2>
+                    <div className="bg-white shadow sm:rounded-lg p-6">
+                        <p className="text-gray-500">
+                            Proizvodna funkcionalnost bo kmalu na voljo...
+                        </p>
+                    </div>
+                </div>
+            );
+        }
+
+        // Reports View Component
+        function ReportsView() {
+            return (
+                <div className="px-4 py-6 sm:px-0">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                        {translations.reports}
+                    </h2>
+                    <div className="bg-white shadow sm:rounded-lg p-6">
+                        <p className="text-gray-500">
+                            Poročila bodo kmalu na voljo...
+                        </p>
+                    </div>
+                </div>
+            );
+        }
 
         // Main App Component
-        const App = () => {
+        function App() {
             const { user, loading } = useAuth();
 
+            useEffect(() => {
+                // Remove loading overlay once React is loaded
+                const loadingOverlay = document.querySelector('.loading-overlay');
+                if (loadingOverlay && !loading) {
+                    setTimeout(() => {
+                        loadingOverlay.style.display = 'none';
+                    }, 500);
+                }
+            }, [loading]);
+
             if (loading) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center">
-                        <div className="spinner"></div>
-                    </div>
-                );
+                return null;
             }
 
-            return user ? <Dashboard /> : <Login />;
-        };
+            return user ? <Dashboard /> : <LoginForm />;
+        }
 
         // Render the app
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(
-            <AuthProvider>
-                <App />
-            </AuthProvider>
+            <React.StrictMode>
+                <AuthProvider>
+                    <App />
+                </AuthProvider>
+            </React.StrictMode>
         );
     </script>
 </body>
