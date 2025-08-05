@@ -2,7 +2,7 @@
 const ProductionPlanning = {
     bomData: null,
     requirementsCalculated: false,
-    currentView: 'bom-tree',
+    currentView: 'products',
     
     // Initialize the module
     async init() {
@@ -20,8 +20,34 @@ const ProductionPlanning = {
     // Load BOM data
     async loadBOMData() {
         try {
-            const response = await fetch('data/bom.json');
-            this.bomData = await response.json();
+            // Try to load products from our new API
+            const productsResponse = await fetch('/api/production/products');
+            if (productsResponse.ok) {
+                const products = await productsResponse.json();
+                console.log('Loaded products from API:', products);
+                
+                // Convert to BOM format for compatibility
+                this.bomData = {
+                    bom_items: products.map(p => ({
+                        id: p.id,
+                        item_code: `P${p.id}`,
+                        item_name: p.name,
+                        item_type: p.product_type === 'END_PRODUCT' ? 'finished' : 
+                                  p.product_type === 'RAW_MATERIAL' ? 'raw' : 'component',
+                        unit_type: p.unit,
+                        current_inventory: 0,
+                        safety_stock: 0,
+                        is_active: true
+                    })),
+                    bom_relationships: [],
+                    production_requirements: [],
+                    production_orders: []
+                };
+            } else {
+                // Fallback to JSON file
+                const response = await fetch('data/bom.json');
+                this.bomData = await response.json();
+            }
             console.log('BOM data loaded:', this.bomData);
         } catch (error) {
             console.error('Error loading BOM data:', error);
@@ -63,6 +89,9 @@ const ProductionPlanning = {
         if (!container) return;
         
         switch (this.currentView) {
+            case 'products':
+                container.innerHTML = this.renderProductsView();
+                break;
             case 'bom-tree':
                 container.innerHTML = this.renderBOMTreeView();
                 break;
@@ -76,7 +105,7 @@ const ProductionPlanning = {
                 container.innerHTML = this.renderEditorView();
                 break;
             default:
-                container.innerHTML = this.renderBOMTreeView();
+                container.innerHTML = this.renderProductsView();
         }
         
         // Initialize view-specific functionality
@@ -86,6 +115,9 @@ const ProductionPlanning = {
     // Initialize view-specific features
     initializeCurrentView() {
         switch (this.currentView) {
+            case 'products':
+                this.loadProducts();
+                break;
             case 'bom-tree':
                 this.renderBOMTrees();
                 break;
@@ -96,6 +128,81 @@ const ProductionPlanning = {
                 this.renderProductionTimeline();
                 break;
         }
+    },
+    
+    // Render Products View
+    renderProductsView() {
+        return `
+            <div class="products-container">
+                <div class="view-header">
+                    <h3>Upravljanje Izdelkov</h3>
+                    <div class="view-actions">
+                        <button class="btn btn-primary" onclick="ProductionPlanning.showAddProductForm()">
+                            <span class="icon">➕</span> Dodaj Izdelek
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="add-product-form" class="product-form" style="display: none;">
+                    <h4>Dodaj Nov Izdelek</h4>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ime izdelka</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tip izdelka</label>
+                            <select id="product-type" required>
+                                <option value="RAW_MATERIAL">Surovina</option>
+                                <option value="INTERMEDIATE">Vmesni izdelek</option>
+                                <option value="END_PRODUCT">Končni izdelek</option>
+                                <option value="MULTI_PURPOSE">Večnamenski</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Enota</label>
+                            <select id="product-unit" required>
+                                <option value="kg">kg</option>
+                                <option value="l">l</option>
+                                <option value="kom">kom</option>
+                                <option value="m">m</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="can-be-sold">
+                                Lahko se prodaja
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Opis</label>
+                        <textarea id="product-description" rows="2"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-primary" onclick="ProductionPlanning.addProduct()">Shrani</button>
+                        <button class="btn btn-secondary" onclick="ProductionPlanning.hideAddProductForm()">Prekliči</button>
+                    </div>
+                </div>
+                
+                <div class="products-table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>Ime</th>
+                                <th>Tip</th>
+                                <th>Enota</th>
+                                <th>Prodaja</th>
+                                <th>Dejanja</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-list">
+                            <tr><td colspan="5" class="loading">Nalaganje izdelkov...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
     },
     
     // Render BOM Tree View
@@ -622,6 +729,114 @@ const ProductionPlanning = {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+    },
+    
+    // Product Management Methods
+    async loadProducts() {
+        const tbody = document.getElementById('products-list');
+        if (!tbody) return;
+        
+        try {
+            const response = await fetch('/api/production/products');
+            if (!response.ok) throw new Error('Failed to load products');
+            
+            const products = await response.json();
+            
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Ni najdenih izdelkov</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = products.map(product => `
+                <tr>
+                    <td>
+                        <strong>${product.name}</strong>
+                        ${product.description ? `<br><small>${product.description}</small>` : ''}
+                    </td>
+                    <td>${this.getProductTypeName(product.product_type)}</td>
+                    <td>${product.unit}</td>
+                    <td>${product.can_be_sold ? '✓' : '✗'}</td>
+                    <td>
+                        <button class="btn btn-small" onclick="ProductionPlanning.editProduct(${product.id})">Uredi</button>
+                        <button class="btn btn-small btn-danger" onclick="ProductionPlanning.deleteProduct(${product.id})">Izbriši</button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            tbody.innerHTML = '<tr><td colspan="5" class="error">Napaka pri nalaganju izdelkov</td></tr>';
+            console.error('Error loading products:', error);
+        }
+    },
+    
+    getProductTypeName(type) {
+        const types = {
+            'RAW_MATERIAL': 'Surovina',
+            'INTERMEDIATE': 'Vmesni izdelek',
+            'END_PRODUCT': 'Končni izdelek',
+            'MULTI_PURPOSE': 'Večnamenski'
+        };
+        return types[type] || type;
+    },
+    
+    showAddProductForm() {
+        document.getElementById('add-product-form').style.display = 'block';
+    },
+    
+    hideAddProductForm() {
+        document.getElementById('add-product-form').style.display = 'none';
+        // Clear form
+        document.getElementById('product-name').value = '';
+        document.getElementById('product-description').value = '';
+        document.getElementById('product-type').value = 'RAW_MATERIAL';
+        document.getElementById('product-unit').value = 'kg';
+        document.getElementById('can-be-sold').checked = false;
+    },
+    
+    async addProduct() {
+        const productData = {
+            name: document.getElementById('product-name').value,
+            description: document.getElementById('product-description').value,
+            product_type: document.getElementById('product-type').value,
+            unit: document.getElementById('product-unit').value,
+            can_be_sold: document.getElementById('can-be-sold').checked
+        };
+        
+        try {
+            const response = await fetch('/api/production/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+            
+            if (!response.ok) throw new Error('Failed to add product');
+            
+            this.hideAddProductForm();
+            this.loadProducts();
+            alert('Izdelek uspešno dodan!');
+        } catch (error) {
+            alert('Napaka pri dodajanju izdelka');
+            console.error('Error adding product:', error);
+        }
+    },
+    
+    async deleteProduct(productId) {
+        if (!confirm('Ali ste prepričani, da želite izbrisati ta izdelek?')) return;
+        
+        try {
+            const response = await fetch(`/api/production/products/${productId}`, {
+                method: 'DELETE'
+            });
+            
+            if (!response.ok) throw new Error('Failed to delete product');
+            
+            this.loadProducts();
+            alert('Izdelek uspešno izbrisan!');
+        } catch (error) {
+            alert('Napaka pri brisanju izdelka');
+            console.error('Error deleting product:', error);
+        }
     }
 };
 
