@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ch - Načrtovanje Proizvodnje</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .module-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1976D2;
+        }
+        .product-list {
+            display: grid;
+            gap: 10px;
+        }
+        .product-item {
+            display: grid;
+            grid-template-columns: 1fr 150px 100px 100px 150px;
+            gap: 10px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            align-items: center;
+        }
+        .product-item:hover {
+            background: #f0f0f0;
+        }
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+        .status-message.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .status-message.error {
+            background: #f44336;
+            color: white;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏭 Načrtovanje Proizvodnje</h1>
+        
+        <div class="module-card">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('products')">Izdelki</button>
+                <button class="tab" onclick="switchTab('recipes')">Recepti</button>
+                <button class="tab" onclick="switchTab('costs')">Stroški</button>
+                <button class="tab" onclick="switchTab('planning')">Načrtovanje</button>
+            </div>
+            
+            <div id="status-message" class="status-message"></div>
+            
+            <!-- Products Tab -->
+            <div id="products-tab" class="tab-content active">
+                <h2>Upravljanje Izdelkov</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3>Dodaj Nov Izdelek</h3>
+                    <form id="add-product-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>Ime izdelka</label>
+                                <input type="text" id="product-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tip izdelka</label>
+                                <select id="product-type" required>
+                                    <option value="RAW_MATERIAL">Surovina</option>
+                                    <option value="INTERMEDIATE">Vmesni izdelek</option>
+                                    <option value="END_PRODUCT">Končni izdelek</option>
+                                    <option value="MULTI_PURPOSE">Večnamenski</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Enota</label>
+                                <select id="product-unit" required>
+                                    <option value="kg">kg</option>
+                                    <option value="l">l</option>
+                                    <option value="kom">kom</option>
+                                    <option value="m">m</option>
+                                    <option value="m2">m²</option>
+                                    <option value="m3">m³</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="can-be-sold">
+                                    Lahko se prodaja
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Opis</label>
+                            <textarea id="product-description" rows="2"></textarea>
+                        </div>
+                        <button type="submit">Dodaj Izdelek</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <h3>Seznam Izdelkov</h3>
+                    <div id="products-list" class="product-list">
+                        <div class="loading">Nalaganje izdelkov...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recipes Tab -->
+            <div id="recipes-tab" class="tab-content">
+                <h2>Recepti</h2>
+                <div class="empty-state">
+                    <p>Modul receptov bo kmalu na voljo</p>
+                </div>
+            </div>
+            
+            <!-- Costs Tab -->
+            <div id="costs-tab" class="tab-content">
+                <h2>Upravljanje Stroškov</h2>
+                <div class="empty-state">
+                    <p>Modul stroškov bo kmalu na voljo</p>
+                </div>
+            </div>
+            
+            <!-- Planning Tab -->
+            <div id="planning-tab" class="tab-content">
+                <h2>Proizvodno Načrtovanje</h2>
+                <div class="empty-state">
+                    <p>Modul načrtovanja bo kmalu na voljo</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/production';
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            // Load data for the tab
+            if (tabName === 'products') {
+                loadProducts();
+            }
+        }
+        
+        // Status message
+        function showStatus(message, type = 'success') {
+            const statusEl = document.getElementById('status-message');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Load products
+        async function loadProducts() {
+            const listEl = document.getElementById('products-list');
+            listEl.innerHTML = '<div class="loading">Nalaganje izdelkov...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/products`);
+                if (!response.ok) throw new Error('Napaka pri nalaganju');
+                
+                const products = await response.json();
+                
+                if (products.length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">Ni najdenih izdelkov</div>';
+                    return;
+                }
+                
+                listEl.innerHTML = products.map(product => `
+                    <div class="product-item">
+                        <div>
+                            <strong>${product.name}</strong>
+                            ${product.description ? `<br><small>${product.description}</small>` : ''}
+                        </div>
+                        <div>${getProductTypeName(product.product_type)}</div>
+                        <div>${product.unit}</div>
+                        <div>${product.can_be_sold ? 'Da' : 'Ne'}</div>
+                        <div>
+                            <button onclick="editProduct(${product.id})">Uredi</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                listEl.innerHTML = '<div class="empty-state">Napaka pri nalaganju izdelkov</div>';
+                showStatus('Napaka pri nalaganju izdelkov', 'error');
+            }
+        }
+        
+        // Get product type name in Slovenian
+        function getProductTypeName(type) {
+            const types = {
+                'RAW_MATERIAL': 'Surovina',
+                'INTERMEDIATE': 'Vmesni izdelek',
+                'END_PRODUCT': 'Končni izdelek',
+                'MULTI_PURPOSE': 'Večnamenski'
+            };
+            return types[type] || type;
+        }
+        
+        // Add product form handler
+        document.getElementById('add-product-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const productData = {
+                name: document.getElementById('product-name').value,
+                description: document.getElementById('product-description').value,
+                product_type: document.getElementById('product-type').value,
+                unit: document.getElementById('product-unit').value,
+                can_be_sold: document.getElementById('can-be-sold').checked
+            };
+            
+            try {
+                const response = await fetch(`${API_BASE}/products`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+                
+                if (!response.ok) throw new Error('Napaka pri dodajanju');
+                
+                showStatus('Izdelek uspešno dodan');
+                e.target.reset();
+                loadProducts();
+            } catch (error) {
+                showStatus('Napaka pri dodajanju izdelka', 'error');
+            }
+        });
+        
+        // Initialize
+        loadProducts();
+    </script>
+</body>
+</html>
