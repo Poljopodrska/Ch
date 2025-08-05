@@ -58,7 +58,14 @@ class TranslationRequest(BaseModel):
 
 # Database dependency
 async def get_db():
-    from .main import db_pool
+    try:
+        from main import db_pool
+    except ImportError:
+        try:
+            from .main import db_pool
+        except ImportError:
+            from api.main import db_pool
+    
     if not db_pool:
         raise HTTPException(status_code=503, detail="Database unavailable")
     return db_pool
