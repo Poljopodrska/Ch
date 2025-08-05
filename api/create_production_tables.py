@@ -57,7 +57,7 @@ def create_tables():
         created_tables = cur.fetchall()
         print(f"\nSuccessfully created/verified {len(created_tables)} tables:")
         for table in created_tables:
-            print(f"  ✓ {table[0]}")
+            print(f"  - {table[0]}")
         
         # Insert some sample data for testing
         print("\nInserting sample data...")
@@ -76,16 +76,16 @@ def create_tables():
         
         products = cur.fetchall()
         if products:
-            print(f"  ✓ Created {len(products)} sample products")
+            print(f"  - Created {len(products)} sample products")
         
         # Commit changes
         conn.commit()
-        print("\n✅ Production planning schema created successfully!")
+        print("\nProduction planning schema created successfully!")
         
         return True
         
     except Exception as e:
-        print(f"\n❌ Error creating tables: {str(e)}")
+        print(f"\nError creating tables: {str(e)}")
         if conn:
             conn.rollback()
         return False
@@ -103,12 +103,14 @@ def verify_connection():
         cur = conn.cursor()
         cur.execute("SELECT version();")
         version = cur.fetchone()[0]
-        print(f"✓ Connected to PostgreSQL: {version.split(',')[0]}")
+        print(f"Connected to PostgreSQL: {version.split(',')[0]}")
         cur.close()
         conn.close()
         return True
     except Exception as e:
-        print(f"❌ Cannot connect to database: {str(e)}")
+        print(f"Cannot connect to database: {str(e)}")
+        print("\nNote: This database is only accessible from AWS environment.")
+        print("To create tables locally, use create_production_tables_simple.py")
         return False
 
 if __name__ == "__main__":

@@ -370,6 +370,46 @@ async def calculate_recipe_cost(
             ]
         }
 
+# Database initialization endpoint
+@router.post("/initialize-database")
+async def initialize_database(db_pool = Depends(get_db)):
+    """Initialize the production planning database schema"""
+    try:
+        # Read schema file
+        import os
+        schema_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'production_planning_schema.sql')
+        
+        with open(schema_path, 'r') as f:
+            schema_sql = f.read()
+        
+        # Execute schema
+        async with db_pool.acquire() as conn:
+            await conn.execute(schema_sql)
+        
+        # Verify tables
+        async with db_pool.acquire() as conn:
+            tables = await conn.fetch("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' 
+                AND table_name IN (
+                    'products', 'cost_categories', 'product_cost_periods',
+                    'recipes', 'recipe_ingredients', 'recipe_outputs',
+                    'recipe_overheads', 'production_plans', 'production_plan_items',
+                    'surplus_inventory', 'translations'
+                )
+                ORDER BY table_name;
+            """)
+        
+        return {
+            "status": "success",
+            "message": "Production planning database initialized",
+            "tables_created": [t['table_name'] for t in tables]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database initialization failed: {str(e)}")
+
 # System info endpoint
 @router.get("/system-info")
 async def get_system_info(db_pool = Depends(get_db)):
