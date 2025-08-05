@@ -7,6 +7,10 @@ import os
 import asyncpg
 from datetime import datetime
 import json
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 VERSION = "0.1.5"
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
@@ -268,6 +272,14 @@ async def init_database():
 
 # Module-specific API routes would be added here
 # Each module can register its own routes following the constitutional principle of module independence
+
+# Import and include production planning API
+try:
+    from .production_api import router as production_router
+    app.include_router(production_router)
+    print("Production Planning API loaded successfully")
+except Exception as e:
+    print(f"Failed to load Production Planning API: {e}")
 
 if __name__ == "__main__":
     import uvicorn
