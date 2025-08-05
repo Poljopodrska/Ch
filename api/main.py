@@ -290,6 +290,14 @@ try:
 except Exception as e:
     print(f"Failed to load Production Planning API: {e}")
 
+# Import and include production planning API v2 (simpler version)
+try:
+    from .production_api_v2 import router as production_v2_router
+    app.include_router(production_v2_router)
+    print("Production Planning API v2 loaded successfully")
+except Exception as e:
+    print(f"Failed to load Production Planning API v2: {e}")
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8080)

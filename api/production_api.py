@@ -114,7 +114,7 @@ async def get_products(
     
     query += " ORDER BY name"
     
-    async with db_pool.acquire() as conn:
+    async with pool.acquire() as conn:
         rows = await conn.fetch(query, *params)
         return [dict(row) for row in rows]
 
