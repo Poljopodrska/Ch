@@ -418,6 +418,22 @@ async def initialize_database(db_pool = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database initialization failed: {str(e)}")
 
+# Test endpoint without dependency injection
+@router.get("/test-db")
+async def test_database():
+    """Test database connection directly"""
+    global db_pool
+    if not db_pool:
+        return {"status": "error", "message": "db_pool is None"}
+    
+    try:
+        async with db_pool.acquire() as conn:
+            # Test basic query
+            result = await conn.fetchval("SELECT COUNT(*) FROM products")
+            return {"status": "success", "products_count": result, "db_pool": "available"}
+    except Exception as e:
+        return {"status": "error", "message": str(e), "db_pool": "available"}
+
 # System info endpoint
 @router.get("/system-info")
 async def get_system_info(db_pool = Depends(get_db)):
