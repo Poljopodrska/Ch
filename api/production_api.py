@@ -13,6 +13,14 @@ from .translation_service import get_translation, get_translations_batch
 
 router = APIRouter(prefix="/api/production", tags=["production"])
 
+# Global variable for db_pool - will be set by main.py
+db_pool = None
+
+def set_db_pool(pool):
+    """Set the database pool from main.py"""
+    global db_pool
+    db_pool = pool
+
 # Pydantic models for API
 class Product(BaseModel):
     id: Optional[int] = None
@@ -58,14 +66,7 @@ class TranslationRequest(BaseModel):
 
 # Database dependency
 async def get_db():
-    try:
-        from main import db_pool
-    except ImportError:
-        try:
-            from .main import db_pool
-        except ImportError:
-            from api.main import db_pool
-    
+    global db_pool
     if not db_pool:
         raise HTTPException(status_code=503, detail="Database unavailable")
     return db_pool

@@ -37,6 +37,15 @@ async def lifespan(app: FastAPI):
                 command_timeout=60
             )
             print(f"Database connected: {DATABASE_URL.split('@')[1] if '@' in DATABASE_URL else 'configured'}")
+            
+            # Share db_pool with production_api module
+            try:
+                from .production_api import set_db_pool
+                set_db_pool(db_pool)
+                print("Database pool shared with production_api")
+            except Exception as e:
+                print(f"Failed to share db_pool with production_api: {e}")
+                
         except Exception as e:
             print(f"Database connection failed: {e}")
             db_pool = None
