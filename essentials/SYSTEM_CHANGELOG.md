@@ -4,6 +4,65 @@ All changes are logged in reverse chronological order with dual timestamps (UTC 
 
 ---
 
+## 2025-08-14 14:30:00 UTC | 16:30:00 CET - Planning Module V2 Implementation [✨ FEATURE]
+**Deployed to Production**: NO 🔄
+**Version**: API v0.2.0
+**Impact**: Major enhancement to planning capabilities
+
+### What Was Added:
+- **Planning Module V2 JavaScript** (`/modules/planning/planning_v2.js`)
+  - Multi-level time granularity (Daily/Weekly/Monthly/Yearly)
+  - Expandable/collapsible time navigation
+  - Auto-save with 2-second debounce
+  - Keyboard shortcuts (Ctrl+S to save, Esc to collapse all)
+  
+- **Planning Module V2 UI** (`/modules/planning/planning_v2.html`)
+  - Complete standalone HTML with embedded styles
+  - Responsive design for mobile/desktop
+  - Print-friendly styles
+  - Visual indicators for locked/editable cells
+  
+- **Planning API Module** (`/api/modules/planning_api.py`)
+  - FastAPI router with full CRUD operations
+  - Bulk save/load capabilities
+  - Data aggregation endpoints
+  - MANGO RULE validation endpoint
+
+### Features Implemented:
+1. **Product-Level Planning with Sublines**:
+   - N-2 year historical sales (locked, read-only)
+   - N-1 year historical sales (locked, read-only)
+   - Current year split at current period (actual/plan)
+   - N+1 year future planning (fully editable)
+
+2. **Time Granularity Navigation**:
+   - Daily View: 365 periods per year
+   - Weekly View: 52 weeks per year
+   - Monthly View: 12 months per year
+   - Yearly View: Single annual total
+   - Button-based expansion/collapse between levels
+
+3. **Data Management**:
+   - Auto-save to localStorage
+   - Import/Export JSON format
+   - Maintains version tracking
+   - Preserves user state between sessions
+
+4. **MANGO RULE Compliance**:
+   - Supports Unicode characters (Cyrillic, Arabic, Chinese)
+   - No hardcoded assumptions about products
+   - Works for any country/product combination
+   - Validation endpoint confirms universal support
+
+### Testing Status:
+- ✅ Module structure created
+- ✅ API endpoints defined
+- ✅ MANGO RULE validation included
+- 🔄 Integration testing pending
+- 🔄 Production deployment pending
+
+---
+
 ## 2025-01-21 20:31:00 UTC | 21:31:00 CET - Ch Production Deployed to AWS [🚀 DEPLOYMENT]
 **Deployed to Production**: YES ✅
 **ALB URL**: http://ch-alb-2140286266.us-east-1.elb.amazonaws.com

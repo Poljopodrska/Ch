@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning Module V2 Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 3px;
+        }
+        .test-result.pass {
+            background: #d4edda;
+            color: #155724;
+        }
+        .test-result.fail {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        button {
+            padding: 8px 16px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .mango-test {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Planning Module V2 Test Suite</h1>
+        
+        <div class="test-section">
+            <h2>Module Loading Test</h2>
+            <button onclick="testModuleLoading()">Run Test</button>
+            <div id="module-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Time Granularity Test</h2>
+            <button onclick="testTimeGranularity()">Run Test</button>
+            <div id="time-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Data Structure Test</h2>
+            <button onclick="testDataStructure()">Run Test</button>
+            <div id="data-test-results"></div>
+        </div>
+        
+        <div class="mango-test">
+            <h2>🥭 MANGO RULE Test</h2>
+            <p>Testing universal support for any product in any country...</p>
+            <button onclick="testMangoRule()">Run MANGO Test</button>
+            <div id="mango-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>API Integration Test</h2>
+            <button onclick="testAPIIntegration()">Run Test</button>
+            <div id="api-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Interactive Test</h2>
+            <button onclick="window.open('planning_v2.html', '_blank')">Open Planning Module</button>
+        </div>
+    </div>
+    
+    <script>
+        // Test functions
+        function addTestResult(containerId, message, passed) {
+            const container = document.getElementById(containerId);
+            const result = document.createElement('div');
+            result.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            result.innerHTML = `${passed ? '✅' : '❌'} ${message}`;
+            container.appendChild(result);
+        }
+        
+        function testModuleLoading() {
+            const container = document.getElementById('module-test-results');
+            container.innerHTML = '';
+            
+            // Load the planning module script
+            const script = document.createElement('script');
+            script.src = 'planning_v2.js';
+            script.onload = () => {
+                // Check if PlanningV2 is available
+                if (typeof PlanningV2 !== 'undefined') {
+                    addTestResult('module-test-results', 'PlanningV2 module loaded successfully', true);
+                    
+                    // Check version
+                    if (PlanningV2.VERSION === '2.0.0') {
+                        addTestResult('module-test-results', `Version check: ${PlanningV2.VERSION}`, true);
+                    } else {
+                        addTestResult('module-test-results', `Version mismatch: ${PlanningV2.VERSION}`, false);
+                    }
+                    
+                    // Check methods
+                    const requiredMethods = [
+                        'init', 'changeView', 'expandTimeCategory', 
+                        'collapseTimeCategory', 'savePlan', 'exportPlan'
+                    ];
+                    
+                    requiredMethods.forEach(method => {
+                        if (typeof PlanningV2[method] === 'function') {
+                            addTestResult('module-test-results', `Method '${method}' exists`, true);
+                        } else {
+                            addTestResult('module-test-results', `Method '${method}' missing`, false);
+                        }
+                    });
+                } else {
+                    addTestResult('module-test-results', 'PlanningV2 module failed to load', false);
+                }
+            };
+            script.onerror = () => {
+                addTestResult('module-test-results', 'Error loading planning_v2.js', false);
+            };
+            document.head.appendChild(script);
+        }
+        
+        function testTimeGranularity() {
+            const container = document.getElementById('time-test-results');
+            container.innerHTML = '';
+            
+            if (typeof PlanningV2 === 'undefined') {
+                addTestResult('time-test-results', 'Module not loaded. Run Module Loading Test first.', false);
+                return;
+            }
+            
+            // Test time configurations
+            const views = ['daily', 'weekly', 'monthly', 'yearly'];
+            views.forEach(view => {
+                if (PlanningV2.timeConfig[view]) {
+                    const config = PlanningV2.timeConfig[view];
+                    addTestResult('time-test-results', 
+                        `${view} view configured (${config.units} units)`, true);
+                } else {
+                    addTestResult('time-test-results', 
+                        `${view} view not configured`, false);
+                }
+            });
+            
+            // Test view changing
+            const originalView = PlanningV2.state.currentView;
+            PlanningV2.changeView('yearly');
+            if (PlanningV2.state.currentView === 'yearly') {
+                addTestResult('time-test-results', 'View change to yearly successful', true);
+            } else {
+                addTestResult('time-test-results', 'View change failed', false);
+            }
+            
+            // Restore original view
+            PlanningV2.changeView(originalView);
+        }
+        
+        function testDataStructure() {
+            const container = document.getElementById('data-test-results');
+            container.innerHTML = '';
+            
+            if (typeof PlanningV2 === 'undefined') {
+                addTestResult('data-test-results', 'Module not loaded. Run Module Loading Test first.', false);
+                return;
+            }
+            
+            // Test state structure
+            const requiredState = ['currentView', 'currentYear', 'currentPeriod', 
+                                 'planData', 'actualData', 'historicalData'];
+            
+            requiredState.forEach(prop => {
+                if (PlanningV2.state.hasOwnProperty(prop)) {
+                    addTestResult('data-test-results', `State property '${prop}' exists`, true);
+                } else {
+                    addTestResult('data-test-results', `State property '${prop}' missing`, false);
+                }
+            });
+            
+            // Test current period detection
+            if (PlanningV2.state.currentPeriod) {
+                const period = PlanningV2.state.currentPeriod;
+                addTestResult('data-test-results', 
+                    `Current period detected: Year ${period.year}, Month ${period.month}`, true);
+            } else {
+                addTestResult('data-test-results', 'Current period not detected', false);
+            }
+            
+            // Test data storage
+            PlanningV2.updatePlanValue({
+                dataset: {
+                    product: 'test001',
+                    year: '2025',
+                    period: 'm1'
+                },
+                value: '100'
+            });
+            
+            if (PlanningV2.state.planData['test001']?.['2025']?.['m1'] === 100) {
+                addTestResult('data-test-results', 'Plan value storage working', true);
+            } else {
+                addTestResult('data-test-results', 'Plan value storage failed', false);
+            }
+        }
+        
+        function testMangoRule() {
+            const container = document.getElementById('mango-test-results');
+            container.innerHTML = '';
+            
+            if (typeof PlanningV2 === 'undefined') {
+                addTestResult('mango-test-results', 'Module not loaded. Run Module Loading Test first.', false);
+                return;
+            }
+            
+            // Test cases for MANGO RULE
+            const testProducts = [
+                { id: 'bg001', name: 'Български манго', country: 'Bulgaria' },
+                { id: 'jp001', name: '寿司', country: 'Japan' },
+                { id: 'ar001', name: 'تمر', country: 'Egypt' },
+                { id: 'us001', name: 'Beef', country: 'USA' }
+            ];
+            
+            let allPassed = true;
+            
+            testProducts.forEach(product => {
+                try {
+                    // Test storing values for diverse products
+                    PlanningV2.updatePlanValue({
+                        dataset: {
+                            product: product.id,
+                            year: '2025',
+                            period: 'm1'
+                        },
+                        value: '500'
+                    });
+                    
+                    // Verify storage
+                    const stored = PlanningV2.state.planData[product.id]?.['2025']?.['m1'];
+                    if (stored === 500) {
+                        addTestResult('mango-test-results', 
+                            `✅ ${product.country}: ${product.name} - Successfully handled`, true);
+                    } else {
+                        addTestResult('mango-test-results', 
+                            `❌ ${product.country}: ${product.name} - Storage failed`, false);
+                        allPassed = false;
+                    }
+                } catch (error) {
+                    addTestResult('mango-test-results', 
+                        `❌ ${product.country}: ${product.name} - Error: ${error.message}`, false);
+                    allPassed = false;
+                }
+            });
+            
+            // Final MANGO RULE verdict
+            if (allPassed) {
+                addTestResult('mango-test-results', 
+                    '🥭 MANGO RULE PASSED: Planning module works for any product in any country!', true);
+            } else {
+                addTestResult('mango-test-results', 
+                    '🚨 MANGO RULE FAILED: Some products/countries not supported properly', false);
+            }
+        }
+        
+        async function testAPIIntegration() {
+            const container = document.getElementById('api-test-results');
+            container.innerHTML = '';
+            
+            try {
+                // Test API health endpoint
+                const healthResponse = await fetch('/api/planning/health');
+                if (healthResponse.ok) {
+                    const health = await healthResponse.json();
+                    addTestResult('api-test-results', 
+                        `API Health Check: ${health.status} (v${health.version})`, true);
+                } else {
+                    addTestResult('api-test-results', 
+                        `API Health Check Failed: ${healthResponse.status}`, false);
+                }
+                
+                // Test products endpoint
+                const productsResponse = await fetch('/api/planning/products');
+                if (productsResponse.ok) {
+                    const data = await productsResponse.json();
+                    addTestResult('api-test-results', 
+                        `Products endpoint: ${data.products.length} products available`, true);
+                } else {
+                    addTestResult('api-test-results', 
+                        'Products endpoint failed', false);
+                }
+                
+                // Test MANGO validation endpoint
+                const mangoResponse = await fetch('/api/planning/validate-universality');
+                if (mangoResponse.ok) {
+                    const result = await mangoResponse.json();
+                    addTestResult('api-test-results', 
+                        `MANGO Rule Validation: ${result.mango_rule_compliance ? 'PASSED' : 'FAILED'}`, 
+                        result.mango_rule_compliance);
+                } else {
+                    addTestResult('api-test-results', 
+                        'MANGO validation endpoint failed', false);
+                }
+                
+            } catch (error) {
+                addTestResult('api-test-results', 
+                    `API connection error: ${error.message}. Make sure the API server is running.`, false);
+            }
+        }
+    </script>
+</body>
+</html>

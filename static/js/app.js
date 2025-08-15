@@ -192,38 +192,67 @@ const ChApp = {
         }
     },
     
-    // Planning view
+    // Planning view - Now using Planning V2
     async getPlanningView() {
-        // Use ModuleLoader for better file:// support
+        // Load Planning V2 module
         try {
             let html;
             
-            if (window.ModuleLoader) {
-                // Use the module loader for file:// compatibility
-                html = await ModuleLoader.load('planning');
-            } else {
-                // Fallback to fetch for production
-                const response = await fetch('modules/planning/planning.html');
+            // Try to load the new planning_v2.html
+            if (window.location.protocol === 'file:') {
+                // For file protocol, load the embedded content
+                const response = await fetch('modules/planning/planning_v2.html');
                 html = await response.text();
                 
-                // Initialize after loading
+                // Extract just the body content
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const container = doc.querySelector('.planning-container');
+                html = container ? container.outerHTML : html;
+            } else {
+                // For production, fetch the module
+                const response = await fetch('modules/planning/planning_v2.html');
+                html = await response.text();
+                
+                // Extract just the body content
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const container = doc.querySelector('.planning-container');
+                html = container ? container.outerHTML : html;
+            }
+            
+            // Initialize Planning V2 after loading
+            setTimeout(() => {
+                if (window.PlanningV2) {
+                    PlanningV2.init();
+                } else if (window.Planning) {
+                    // Fallback to old planning if V2 not available
+                    Planning.init();
+                }
+            }, 100);
+            
+            return html;
+        } catch (error) {
+            console.error('Error loading planning module:', error);
+            // Fallback to old planning module
+            try {
+                const response = await fetch('modules/planning/planning.html');
+                const html = await response.text();
                 setTimeout(() => {
                     if (window.Planning) {
                         Planning.init();
                     }
                 }, 100);
+                return html;
+            } catch (fallbackError) {
+                return `
+                    <div class="alert alert-error">
+                        <h3>Error Loading Planning Module</h3>
+                        <p>Could not load the planning module. Please refresh the page.</p>
+                        <p style="font-size: 0.9em; color: #666;">Error: ${error.message}</p>
+                    </div>
+                `;
             }
-            
-            return html;
-        } catch (error) {
-            console.error('Error loading planning module:', error);
-            return `
-                <div class="alert alert-error">
-                    <h3>Error Loading Planning Module</h3>
-                    <p>Could not load the planning module. Please refresh the page.</p>
-                    <p style="font-size: 0.9em; color: #666;">Error: ${error.message}</p>
-                </div>
-            `;
         }
     },
     

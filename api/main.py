@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-VERSION = "0.1.5"
+VERSION = "0.2.0"  # Updated for Planning V2
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 
@@ -72,6 +72,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Import and include planning module
+try:
+    from modules.planning_api import router as planning_router
+    app.include_router(planning_router)
+    print("Planning module loaded successfully")
+except ImportError as e:
+    print(f"Warning: Could not load planning module: {e}")
 
 # Health check endpoint
 @app.get("/health")
