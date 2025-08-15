@@ -198,6 +198,11 @@ const PlanningV3 = {
         
         let html = `
             <div class="planning-v3-container">
+                <!-- YELLOW DEPLOYMENT INDICATOR -->
+                <div style="background: #FFD700; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 2px solid red;">
+                    ⚠️ PLANNING V3 (v0.3.0) - THIS IS THE NEW VERSION! ⚠️
+                </div>
+                
                 <div class="planning-header">
                     <h2>Načrtovanje proizvodnje / Production Planning</h2>
                     <div class="view-controls">

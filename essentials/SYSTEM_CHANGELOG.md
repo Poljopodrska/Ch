@@ -4,6 +4,32 @@ All changes are logged in reverse chronological order with dual timestamps (UTC 
 
 ---
 
+## 2025-08-15 14:30:00 UTC | 16:30:00 CET - Deployment Verification with Yellow Banner [🚨 EMERGENCY]
+**Deployed to Production**: PENDING 🔄
+**Version**: v0.3.0
+**Impact**: Critical - Ensuring deployments are visible
+
+### What Was Fixed:
+- **Added Yellow Banner** to confirm deployment is working
+  - Large yellow banner at top of page
+  - Shows "v0.3.0 DEPLOYED - PLANNING V3 ACTIVE"
+  - Cannot be missed!
+  
+- **Fixed Planning Module Loading**
+  - Changed from planning_v2.js to planning_v3.js
+  - Added yellow indicator inside planning module too
+  
+- **Commit Message Format**
+  - Now using format: `v{VERSION} type: description`
+  - Example: `v0.3.0 fix: Add yellow deployment banner`
+
+### Visual Indicators Added:
+1. Main page: Large yellow banner with red border
+2. Planning module: Yellow warning box
+3. Both show v0.3.0 prominently
+
+---
+
 ## 2025-08-15 14:00:00 UTC | 16:00:00 CET - Planning V3 with Macro/Micro Row Structure [✨ FEATURE]
 **Deployed to Production**: PENDING 🔄
 **Version**: v0.3.0
