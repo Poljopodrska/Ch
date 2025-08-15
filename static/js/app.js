@@ -192,44 +192,41 @@ const ChApp = {
         }
     },
     
-    // Planning view - Now using Planning V2
+    // Planning view - Now using Planning V3
     async getPlanningView() {
-        // Load Planning V2 module
+        // Load Planning V3 module
         try {
             let html;
             
-            // Try to load the new planning_v2.html
-            if (window.location.protocol === 'file:') {
-                // For file protocol, load the embedded content
-                const response = await fetch('modules/planning/planning_v2.html');
-                html = await response.text();
-                
-                // Extract just the body content
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const container = doc.querySelector('.planning-container');
-                html = container ? container.outerHTML : html;
-            } else {
-                // For production, fetch the module
-                const response = await fetch('modules/planning/planning_v2.html');
-                html = await response.text();
-                
-                // Extract just the body content
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const container = doc.querySelector('.planning-container');
-                html = container ? container.outerHTML : html;
-            }
+            // Try to load the new planning_v3.html
+            const response = await fetch('modules/planning/planning_v3.html');
+            html = await response.text();
             
-            // Initialize Planning V2 after loading
-            setTimeout(() => {
-                if (window.PlanningV2) {
-                    PlanningV2.init();
-                } else if (window.Planning) {
-                    // Fallback to old planning if V2 not available
-                    Planning.init();
+            // Extract just the body content
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const container = doc.querySelector('.planning-v3-container');
+            
+            if (container) {
+                html = container.outerHTML;
+                
+                // Load the planning_v3.js script if not already loaded
+                if (!window.PlanningV3) {
+                    const script = document.createElement('script');
+                    script.src = 'modules/planning/planning_v3.js';
+                    script.onload = () => {
+                        if (window.PlanningV3) {
+                            PlanningV3.init();
+                        }
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    // Initialize Planning V3 after loading
+                    setTimeout(() => {
+                        PlanningV3.init();
+                    }, 100);
                 }
-            }, 100);
+            }
             
             return html;
         } catch (error) {

@@ -4,6 +4,55 @@ All changes are logged in reverse chronological order with dual timestamps (UTC 
 
 ---
 
+## 2025-08-15 14:00:00 UTC | 16:00:00 CET - Planning V3 with Macro/Micro Row Structure [✨ FEATURE]
+**Deployed to Production**: PENDING 🔄
+**Version**: v0.3.0
+**Impact**: Major - Complete redesign of planning module
+
+### What Was Added:
+- **Planning V3 Module** (`/modules/planning/planning_v3.js`)
+  - Macro rows for products (expandable/collapsible)
+  - Micro rows for years (N-2, N-1, N, N+1, N+2)
+  - Slovenian product examples with realistic data
+  - Monthly/Quarterly/Yearly view options
+  
+- **Enhanced UI** (`/modules/planning/planning_v3.html`)
+  - Clean table structure with color-coded cells
+  - Visual distinction between historical/actual/planned data
+  - Current month highlighted with orange border
+  - Responsive design with print support
+
+- **Deployment Script with Version** (`/scripts/deploy_with_version.sh`)
+  - Includes version in task definition family name
+  - Creates deployment ID: v{VERSION}-{TIMESTAMP}
+  - Git tags each deployment
+  - Verifies deployment success
+
+### Example Products Created:
+1. **SVP-100** - Svinjska plečka / Pork Shoulder
+2. **GOV-200** - Goveji file / Beef Tenderloin  
+3. **PIŠ-300** - Piščančje prsi / Chicken Breast
+4. **JAG-400** - Jagnječji kotleti / Lamb Chops
+5. **KLB-500** - Domača klobasa / Homemade Sausage
+
+### Data Structure:
+- **N-2 (2023)**: Historical data (locked, gray)
+- **N-1 (2024)**: Historical data (locked, gray)
+- **N (2025)**: Current year
+  - Past months: Actual data (blue, locked)
+  - Current month: Highlighted (orange border)
+  - Future months: Editable plan (yellow)
+- **N+1 (2026)**: Future plan (green, editable)
+- **N+2 (2027)**: Future plan (green, editable)
+
+### Version Naming Pattern:
+- Task Definition: `ch-production-task-v{VERSION}`
+- Docker Image: `ch-production/core:v{VERSION}`
+- Deployment ID: `v{VERSION}-{YYYYMMDD-HHMMSS}`
+- Git Tag: `v{VERSION}-deployed-{TIMESTAMP}`
+
+---
+
 ## 2025-08-15 13:15:00 UTC | 15:15:00 CET - Dynamic Version Management Implementation [🔧 CONFIG]
 **Deployed to Production**: PENDING 🔄
 **Version**: v0.2.0
