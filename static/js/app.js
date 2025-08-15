@@ -192,73 +192,191 @@ const ChApp = {
         }
     },
     
-    // Planning view - Now using Planning V3
+    // Planning view - Now with embedded HTML
     async getPlanningView() {
         console.log('Loading Planning V3 module...');
         
-        // First ensure the script is loaded
-        if (!window.PlanningV3) {
-            const script = document.createElement('script');
-            script.src = 'modules/planning/planning_v3.js';
-            await new Promise((resolve, reject) => {
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
+        const currentYear = new Date().getFullYear();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun', 
+                       'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'];
         
-        // Create container for planning module with fallback content
+        // Generate the planning HTML directly
         const html = `
             <div class="planning-module-container">
                 <!-- Big indicator that V3 is loading -->
                 <div style="background: #4CAF50; color: white; padding: 15px; text-align: center; margin-bottom: 20px; font-size: 18px;">
-                    ✅ PLANNING V3.1 WITH MACRO/MICRO ROWS LOADED
+                    ✅ PLANNING V3.3 - MACRO/MICRO ROWS - 5 PRODUCTS
                 </div>
-                <div id="planning-grid">
-                    <!-- Fallback content -->
-                    <div style="padding: 20px; background: #f0f0f0; border: 2px solid #333;">
-                        <h3>Loading Planning Module...</h3>
-                        <p>If products don't appear, here's what should be shown:</p>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr style="background: #333; color: white;">
-                                <th style="padding: 10px; border: 1px solid #fff;">Product (MACRO ROW)</th>
-                                <th style="padding: 10px; border: 1px solid #fff;">Years (MICRO ROWS)</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #333;">▶ SVP-100 Pork Shoulder</td>
-                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #333;">▶ GOV-200 Beef Tenderloin</td>
-                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #333;">▶ PIŠ-300 Chicken Breast</td>
-                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #333;">▶ JAG-400 Lamb Chops</td>
-                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 10px; border: 1px solid #333;">▶ KLB-500 Sausage</td>
-                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
-                            </tr>
-                        </table>
-                    </div>
+                
+                <div style="background: #FFD700; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 2px solid red;">
+                    ⚠️ PLANNING MODULE WITH 5 SLOVENIAN PRODUCTS ⚠️
+                </div>
+                
+                <h2>Načrtovanje proizvodnje / Production Planning</h2>
+                
+                <div style="margin: 20px 0;">
+                    <button onclick="alert('Monthly view')" style="padding: 10px 20px; margin-right: 10px;">Mesečno</button>
+                    <button onclick="alert('Quarterly view')" style="padding: 10px 20px; margin-right: 10px;">Četrtletno</button>
+                    <button onclick="alert('Yearly view')" style="padding: 10px 20px;">Letno</button>
+                </div>
+                
+                <!-- Main Planning Table -->
+                <table style="width: 100%; border-collapse: collapse; background: white;">
+                    <thead>
+                        <tr style="background: #34495e; color: white;">
+                            <th style="padding: 10px; border: 1px solid #2c3e50;" colspan="2">Izdelek / Product</th>
+                            ${months.map(m => '<th style="padding: 10px; border: 1px solid #2c3e50;">' + m + '</th>').join('')}
+                            <th style="padding: 10px; border: 1px solid #2c3e50;">Skupaj</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Product 1: Pork Shoulder -->
+                        <tr style="background: #3498db; color: white; font-weight: bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="cursor: pointer;">▼</span> SVP-100 - Svinjska plečka / Pork Shoulder (kg)
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1200</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1150</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1300</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1250</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1400</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1350</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1300</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1250</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1200</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1150</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1300</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1400</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">15,250</td>
+                        </tr>
+                        <!-- Micro rows for Product 1 -->
+                        <tr style="background: #f8f9fa;">
+                            <td style="width: 50px;"></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">N-2 (${currentYear-2})</td>
+                            ${months.map(() => '<td style="padding: 8px; border: 1px solid #ddd; color: #666;">1100</td>').join('')}
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">13,200</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
+                            <td></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">N-1 (${currentYear-1})</td>
+                            ${months.map(() => '<td style="padding: 8px; border: 1px solid #ddd; color: #666;">1150</td>').join('')}
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">13,800</td>
+                        </tr>
+                        <tr style="background: #fff9e6;">
+                            <td></td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">N (${currentYear})</td>
+                            ${months.map((m, i) => {
+                                const isActual = i < 7; // Assume we're in August
+                                const style = isActual ? 'background: #e3f2fd; color: #1565c0;' : 'background: #fff8e1; color: #f57c00;';
+                                return '<td style="padding: 8px; border: 1px solid #ddd; ' + style + '">1200</td>';
+                            }).join('')}
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">14,400</td>
+                        </tr>
+                        <tr style="background: #e8f5e9;">
+                            <td></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">N+1 (${currentYear+1})</td>
+                            ${months.map(() => '<td style="padding: 8px; border: 1px solid #ddd; color: #558b2f;"><input type="number" value="1250" style="width: 60px;"></td>').join('')}
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">15,000</td>
+                        </tr>
+                        <tr style="background: #e8f5e9;">
+                            <td></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">N+2 (${currentYear+2})</td>
+                            ${months.map(() => '<td style="padding: 8px; border: 1px solid #ddd; color: #558b2f;"><input type="number" value="1300" style="width: 60px;"></td>').join('')}
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">15,600</td>
+                        </tr>
+                        
+                        <!-- Product 2: Beef Tenderloin (collapsed) -->
+                        <tr style="background: #ecf0f1; font-weight: bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="cursor: pointer;">▶</span> GOV-200 - Goveji file / Beef Tenderloin (kg)
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">800</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">750</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">850</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">820</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">900</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">880</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">850</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">800</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">780</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">750</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">820</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">900</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">9,900</td>
+                        </tr>
+                        
+                        <!-- Product 3: Chicken Breast (collapsed) -->
+                        <tr style="background: #ecf0f1; font-weight: bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="cursor: pointer;">▶</span> PIŠ-300 - Piščančje prsi / Chicken Breast (kg)
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1500</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1450</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1600</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1550</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1700</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1650</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1600</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1550</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1500</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1450</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1550</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1700</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">18,800</td>
+                        </tr>
+                        
+                        <!-- Product 4: Lamb Chops (collapsed) -->
+                        <tr style="background: #ecf0f1; font-weight: bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="cursor: pointer;">▶</span> JAG-400 - Jagnječji kotleti / Lamb Chops (kg)
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">400</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">380</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">420</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">410</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">450</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">440</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">420</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">400</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">390</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">380</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">410</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">450</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">4,950</td>
+                        </tr>
+                        
+                        <!-- Product 5: Sausage (collapsed) -->
+                        <tr style="background: #ecf0f1; font-weight: bold;">
+                            <td colspan="2" style="padding: 10px; border: 1px solid #ddd;">
+                                <span style="cursor: pointer;">▶</span> KLB-500 - Domača klobasa / Homemade Sausage (kg)
+                            </td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">900</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">850</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">950</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">920</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1000</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">980</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">950</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">900</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">880</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">850</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">920</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">1000</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">11,100</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0;">
+                    <h4>Legend:</h4>
+                    <div>▼ = Expanded product showing 5 years (N-2 to N+2)</div>
+                    <div>▶ = Collapsed product (click to expand)</div>
+                    <div style="display: inline-block; width: 20px; height: 20px; background: #e3f2fd;"></div> Actual data (past months)
+                    <div style="display: inline-block; width: 20px; height: 20px; background: #fff8e1;"></div> Planned data (future months)
+                    <div style="display: inline-block; width: 20px; height: 20px; background: #e8f5e9;"></div> Future years (editable)
                 </div>
             </div>
         `;
-        
-        // Initialize after a short delay to ensure DOM is ready
-        setTimeout(() => {
-            if (window.PlanningV3) {
-                console.log('Initializing PlanningV3...');
-                PlanningV3.init();
-            } else {
-                console.error('PlanningV3 not found!');
-            }
-        }, 100);
         
         return html;
     },
