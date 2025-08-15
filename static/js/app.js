@@ -194,41 +194,43 @@ const ChApp = {
     
     // Planning view - Now using Planning V3
     async getPlanningView() {
-        // Load Planning V3 module
-        try {
-            let html;
-            
-            // Try to load the new planning_v3.html
-            const response = await fetch('modules/planning/planning_v3.html');
-            html = await response.text();
-            
-            // Extract just the body content
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const container = doc.querySelector('.planning-v3-container');
-            
-            if (container) {
-                html = container.outerHTML;
-                
-                // Load the planning_v3.js script if not already loaded
-                if (!window.PlanningV3) {
-                    const script = document.createElement('script');
-                    script.src = 'modules/planning/planning_v3.js';
-                    script.onload = () => {
-                        if (window.PlanningV3) {
-                            PlanningV3.init();
-                        }
-                    };
-                    document.head.appendChild(script);
-                } else {
-                    // Initialize Planning V3 after loading
-                    setTimeout(() => {
-                        PlanningV3.init();
-                    }, 100);
-                }
+        console.log('Loading Planning V3 module...');
+        
+        // First ensure the script is loaded
+        if (!window.PlanningV3) {
+            const script = document.createElement('script');
+            script.src = 'modules/planning/planning_v3.js';
+            await new Promise((resolve, reject) => {
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Create container for planning module
+        const html = `
+            <div class="planning-module-container">
+                <!-- Big indicator that V3 is loading -->
+                <div style="background: #4CAF50; color: white; padding: 15px; text-align: center; margin-bottom: 20px; font-size: 18px;">
+                    ✅ PLANNING V3 WITH MACRO/MICRO ROWS LOADED
+                </div>
+                <div id="planning-grid">
+                    <!-- Planning grid will be rendered here -->
+                </div>
+            </div>
+        `;
+        
+        // Initialize after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            if (window.PlanningV3) {
+                console.log('Initializing PlanningV3...');
+                PlanningV3.init();
+            } else {
+                console.error('PlanningV3 not found!');
             }
-            
-            return html;
+        }, 100);
+        
+        return html;
         } catch (error) {
             console.error('Error loading planning module:', error);
             // Fallback to old planning module

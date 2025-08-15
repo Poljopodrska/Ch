@@ -18,6 +18,13 @@ const PlanningV3 = {
         console.log(`Planning Module V${this.VERSION} initializing...`);
         this.loadExampleData();
         this.renderPlanningGrid();
+        
+        // Auto-expand first product to show macro/micro structure
+        setTimeout(() => {
+            if (this.state.products.length > 0 && !this.state.expandedProducts.has('p001')) {
+                this.toggleProduct('p001');
+            }
+        }, 500);
     },
     
     // Load example data for demonstration
@@ -197,10 +204,65 @@ const PlanningV3 = {
                        'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'];
         
         let html = `
+            <style>
+                /* Inline styles to ensure visibility */
+                .planning-table table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    background: white;
+                }
+                .planning-table th {
+                    background: #34495e;
+                    color: white;
+                    padding: 10px;
+                    text-align: center;
+                    border: 1px solid #2c3e50;
+                }
+                .planning-table td {
+                    padding: 8px;
+                    border: 1px solid #ddd;
+                    text-align: center;
+                }
+                .macro-row {
+                    background: #ecf0f1;
+                    font-weight: bold;
+                }
+                .macro-row.expanded {
+                    background: #3498db;
+                    color: white;
+                }
+                .micro-row {
+                    background: white;
+                }
+                .historical-year { background: #f8f9fa; }
+                .current-year { background: #fff9e6; }
+                .future-year { background: #e8f5e9; }
+                .expand-toggle {
+                    cursor: pointer;
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                }
+                .product-info {
+                    display: inline-block;
+                    margin-left: 10px;
+                }
+                .year-label {
+                    text-align: left;
+                    font-weight: 600;
+                }
+                .cell-type-historical { background: #f5f5f5; color: #666; }
+                .cell-type-actual { background: #e3f2fd; color: #1565c0; }
+                .cell-type-current { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+                .cell-type-plan { background: #fff8e1; color: #f57c00; }
+                .cell-type-future { background: #f1f8e9; color: #558b2f; }
+            </style>
+            
             <div class="planning-v3-container">
                 <!-- YELLOW DEPLOYMENT INDICATOR -->
                 <div style="background: #FFD700; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 2px solid red;">
-                    ⚠️ PLANNING V3 (v0.3.0) - THIS IS THE NEW VERSION! ⚠️
+                    ⚠️ PLANNING V3 (v0.3.0) - THIS IS THE NEW VERSION WITH MACRO/MICRO ROWS! ⚠️
+                    <br>Click ▶ to expand products and see 5 years of data
                 </div>
                 
                 <div class="planning-header">
