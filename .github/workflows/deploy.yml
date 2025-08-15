@@ -39,16 +39,22 @@ jobs:
             if echo "$HEALTH" | grep -q "healthy"; then
               echo "✅ Health check passed"
               
-              # Check if version matches expected
-              COMMIT_SHORT="${{ github.sha }}"
-              COMMIT_SHORT=${COMMIT_SHORT:0:7}
+              # Extract version number from commit message (e.g., v0.3.5 from "v0.3.5: Fix...")
+              EXPECTED_VERSION=$(echo "${{ github.event.head_commit.message }}" | grep -oE "^v[0-9]+\.[0-9]+\.[0-9]+" || echo "")
               
-              if echo "$VERSION" | grep -q "$COMMIT_SHORT"; then
-                echo "✅ Deployment completed successfully!"
-                echo "Version: $VERSION"
-                exit 0
+              if [ -n "$EXPECTED_VERSION" ]; then
+                # Check if deployed version matches expected version
+                if echo "$VERSION" | grep -q "$EXPECTED_VERSION"; then
+                  echo "✅ Deployment completed successfully!"
+                  echo "Expected version: $EXPECTED_VERSION"
+                  echo "Deployed version: $VERSION"
+                  exit 0
+                else
+                  echo "⏳ Deployment in progress (waiting for $EXPECTED_VERSION)"
+                fi
               else
-                echo "⏳ Deployment in progress (version not yet updated)"
+                # Fallback: just check if version changed from previous
+                echo "⏳ Deployment in progress (version check)"
               fi
             else
               echo "⏳ Service not yet healthy"
