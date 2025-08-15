@@ -1,4 +1,9 @@
 FROM public.ecr.aws/docker/library/python:3.11-slim
+
+# Accept version as build argument
+ARG VERSION=0.2.0
+ENV APP_VERSION=${VERSION}
+
 WORKDIR /app
 
 # Install system dependencies

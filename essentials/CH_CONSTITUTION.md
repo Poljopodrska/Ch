@@ -26,8 +26,16 @@ Every change must be logged in SYSTEM_CHANGELOG.md with dual timestamps (UTC | C
 ### 8. Zero Regression Tolerance
 Once a feature works, it must continue working. Any regression is a critical failure requiring immediate attention.
 
-### 9. Test Coverage
+### 9. Test Coverage & Universal Design (MANGO RULE)
 Every feature must have comprehensive tests. The MANGO TEST for Ch: "Any feature in Ch project works for any use case in any country."
+
+**CLARIFICATION**: The MANGO RULE ensures true universality. It means:
+- **No assumptions** about "normal" products, languages, or markets
+- **Equal excellence** for common cases (English/standard products) AND edge cases (Bulgarian/exotic products)
+- **Script independence** - works with Latin, Cyrillic, Arabic, Chinese characters
+- **Cultural awareness** without hardcoded biases
+The "Bulgarian mango business" test reminds us that unexpected combinations are equal users.
+See `/essentials/MANGO_RULE_CLARIFICATION.md` for full explanation.
 
 ### 10. Documentation Standards
 All code must be self-documenting. Complex logic requires clear explanations. Task Specifications (TS) drive all development.
@@ -51,4 +59,4 @@ Regular reviews, updates, and optimizations. The system must evolve with user ne
 
 These principles are not suggestions - they are requirements. Every line of code, every design decision, and every deployment must align with these principles.
 
-**The MANGO RULE for Ch**: Any feature must work for any use case in any country, maintaining consistency and reliability across all contexts.
+**The MANGO RULE for Ch**: Any feature must work for any use case in any country, maintaining consistency and reliability across all contexts. This means equal support for both expected scenarios (English speakers using standard products) and unexpected ones (Bulgarian businesses dealing with exotic products in Cyrillic script).

@@ -5,16 +5,20 @@ phases:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 127679825789.dkr.ecr.us-east-1.amazonaws.com
+      - export VERSION=$(grep '"version"' package.json | cut -d '"' -f 4)
+      - echo "Building version $VERSION"
       
   build:
     commands:
       - echo Build started on `date`
-      - docker build -t ch-production .
+      - docker build -t ch-production --build-arg VERSION=$VERSION .
       - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
+      - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v$VERSION
       
   post_build:
     commands:
-      - echo Pushing the Docker image...
+      - echo Pushing the Docker images...
       - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
-      - echo Build completed on `date`
+      - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v$VERSION
+      - echo Build completed on `date` for version v$VERSION
       - aws ecs update-service --cluster ch-production --service ch-production-service --force-new-deployment --region us-east-1

@@ -18,6 +18,49 @@
 - ALWAYS have rollback capability
 - ECS-only deployment (prepare infrastructure from start)
 
+#### ❌ NO HARDCODING OF VERSIONS - CRITICAL RULE!
+**Problem**: Hardcoded versions cause deployments to always show the same version, breaking version tracking and making it impossible to verify successful deployments.
+
+**Examples of what NOT to do:**
+```javascript
+// ❌ NEVER DO THIS
+const VERSION = "1.0.0";  // Hardcoded - will never update!
+
+// ❌ NEVER DO THIS  
+function getVersion() {
+    return "1.0.0";  // Hardcoded!
+}
+
+// ❌ NEVER DO THIS
+app.get('/version', (req, res) => {
+    res.json({ version: "1.0.0" });  // Hardcoded!
+});
+```
+
+**✅ CORRECT Approach:**
+```javascript
+// ✅ Always use dynamic version from package.json
+const packageJson = require('./package.json');
+const VERSION = packageJson.version;
+
+// ✅ Or from environment variable
+const VERSION = process.env.APP_VERSION || 'development';
+
+// ✅ Or from a version file that gets updated
+const fs = require('fs');
+const VERSION = fs.readFileSync('version.txt', 'utf8').trim();
+
+// ✅ Or from git tags
+const { execSync } = require('child_process');
+const VERSION = execSync('git describe --tags').toString().trim();
+```
+
+**Version Update Process:**
+1. Update version in ONE central location (package.json, version.txt, or environment)
+2. All modules import/read from that single source
+3. Deploy scripts update the central version
+4. Verification confirms the new version is live
+
 ### 4. Task Completion Verification
 Before marking any task complete:
 1. Run all tests

@@ -12,7 +12,8 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-VERSION = "0.2.0"  # Updated for Planning V2
+# Version from environment or default
+VERSION = os.environ.get('APP_VERSION', '0.2.0').replace('v', '')  # Remove 'v' prefix if present
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 

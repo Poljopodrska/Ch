@@ -4,6 +4,43 @@ All changes are logged in reverse chronological order with dual timestamps (UTC 
 
 ---
 
+## 2025-08-15 13:15:00 UTC | 15:15:00 CET - Dynamic Version Management Implementation [🔧 CONFIG]
+**Deployed to Production**: PENDING 🔄
+**Version**: v0.2.0
+**Impact**: Critical - Proper version tracking across deployments
+
+### What Was Added:
+- **Dynamic Version System** (`/static/js/version.js`)
+  - Fetches version from API in production
+  - Updates all version displays automatically
+  - No more hardcoded versions (Constitutional requirement)
+  
+- **ECS Version Tagging**
+  - Docker images tagged with version numbers
+  - Environment variable APP_VERSION passed to containers
+  - Deployment IDs include version and timestamp
+  
+- **Build Process Updates**
+  - buildspec.yml reads version from package.json
+  - Creates versioned Docker tags (e.g., v0.2.0)
+  - Maintains both 'latest' and versioned tags
+
+### Changes Made:
+1. Created version.js for dynamic version management
+2. Updated ch_app.html to load version dynamically
+3. Modified buildspec.yml to tag images with versions
+4. Updated Dockerfile to accept VERSION build arg
+5. Modified api/main.py to use APP_VERSION environment variable
+
+### AVA OLO Pattern Implementation:
+- ✅ Version displayed in UI (top-right corner)
+- ✅ Version in deployment names
+- ✅ Version tags in ECR
+- ✅ No hardcoded versions
+- ✅ Single source of truth (package.json)
+
+---
+
 ## 2025-08-14 14:30:00 UTC | 16:30:00 CET - Planning Module V2 Implementation [✨ FEATURE]
 **Deployed to Production**: NO 🔄
 **Version**: API v0.2.0

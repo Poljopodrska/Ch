@@ -44,9 +44,12 @@ When receiving instructions, web-based Claude should:
 ### Communication Flow
 1. Receive instruction
 2. Ask clarifying questions (if needed, using numbered/lettered format)
-3. Determine if c.code can handle the task
-4. If YES: Assign to c.code with clear specification
-5. If NO: Document why and assign to human
+3. **WAIT for all answers before proceeding**
+4. Once all questions are answered, determine if c.code can handle the task
+5. If YES: Create TS (Task Specification) for c.code
+6. If NO: Document why and assign to human
+
+**IMPORTANT**: Do NOT write a TS until all clarifying questions have been answered. First clarify, then specify.
 
 ---
 
@@ -99,6 +102,8 @@ When receiving instructions, web-based Claude should:
 - Deployment strategy
 
 ## TS (Task Specification) Template
+
+**Format**: Always provide the complete TS in a code block (using triple backticks ```) so it can be easily copied with the copy button. This makes it convenient for users to copy the entire specification with a single click.
 
 ```markdown
 # TS - TASK SPECIFICATION FOR CLAUDE CODE
