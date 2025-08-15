@@ -261,28 +261,6 @@ const ChApp = {
         }, 100);
         
         return html;
-        } catch (error) {
-            console.error('Error loading planning module:', error);
-            // Fallback to old planning module
-            try {
-                const response = await fetch('modules/planning/planning.html');
-                const html = await response.text();
-                setTimeout(() => {
-                    if (window.Planning) {
-                        Planning.init();
-                    }
-                }, 100);
-                return html;
-            } catch (fallbackError) {
-                return `
-                    <div class="alert alert-error">
-                        <h3>Error Loading Planning Module</h3>
-                        <p>Could not load the planning module. Please refresh the page.</p>
-                        <p style="font-size: 0.9em; color: #666;">Error: ${error.message}</p>
-                    </div>
-                `;
-            }
-        }
     },
     
     // Production Planning view
