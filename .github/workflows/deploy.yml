@@ -7,8 +7,80 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 12  # Fail if deployment takes longer than 12 minutes
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      
       - name: Trigger CodeBuild
+        id: codebuild
         run: |
-          echo "CodeBuild will be triggered by webhook"
+          BUILD_ID=$(aws codebuild start-build \
+            --project-name ch-production-docker-build \
+            --region us-east-1 \
+            --query 'build.id' \
+            --output text)
+          echo "Build ID: $BUILD_ID"
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+      
+      - name: Wait for CodeBuild completion
+        timeout-minutes: 10
+        run: |
+          BUILD_ID="${{ steps.codebuild.outputs.build_id }}"
+          echo "Monitoring build: $BUILD_ID"
+          
+          for i in {1..40}; do
+            STATUS=$(aws codebuild batch-get-builds \
+              --ids "$BUILD_ID" \
+              --query 'builds[0].buildStatus' \
+              --output text)
+            
+            echo "[$i/40] Build status: $STATUS"
+            
+            if [ "$STATUS" = "SUCCEEDED" ]; then
+              echo "✅ Build succeeded!"
+              exit 0
+            elif [ "$STATUS" = "FAILED" ] || [ "$STATUS" = "FAULT" ] || [ "$STATUS" = "TIMED_OUT" ] || [ "$STATUS" = "STOPPED" ]; then
+              echo "❌ Build failed with status: $STATUS"
+              exit 1
+            fi
+            
+            sleep 15
+          done
+          
+          echo "❌ Build timeout - exceeded 10 minutes"
+          exit 1
+      
+      - name: Wait for ECS deployment
+        timeout-minutes: 5
+        run: |
+          echo "Waiting for ECS service to stabilize..."
+          aws ecs wait services-stable \
+            --cluster ch-production \
+            --services ch-production-service \
+            --region us-east-1 || {
+              echo "❌ ECS deployment failed or timed out"
+              exit 1
+            }
+          echo "✅ ECS service is stable!"
+      
+      - name: Verify deployment
+        run: |
+          VERSION=$(curl -s http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/version | python3 -c "import sys, json; print(json.load(sys.stdin)['version'])")
+          echo "Deployed version: $VERSION"
+          
+          HEALTH=$(curl -s http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/health | python3 -c "import sys, json; print(json.load(sys.stdin)['status'])")
+          echo "Health status: $HEALTH"
+          
+          if [ "$HEALTH" != "healthy" ]; then
+            echo "❌ Health check failed!"
+            exit 1
+          fi
+          
+          echo "✅ Deployment verified successfully!"
