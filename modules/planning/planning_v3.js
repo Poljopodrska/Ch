@@ -16,12 +16,33 @@ const PlanningV3 = {
     // Initialize with example data
     init() {
         console.log(`Planning Module V${this.VERSION} initializing...`);
+        
+        // Add debug info
+        const container = document.getElementById('planning-grid');
+        if (!container) {
+            console.error('ERROR: planning-grid container not found!');
+            // Try to create it
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) {
+                const newContainer = document.createElement('div');
+                newContainer.id = 'planning-grid';
+                mainContent.appendChild(newContainer);
+                console.log('Created planning-grid container');
+            }
+        } else {
+            console.log('Found planning-grid container');
+        }
+        
         this.loadExampleData();
+        console.log(`Loaded ${this.state.products.length} products`);
+        
         this.renderPlanningGrid();
+        console.log('Grid rendered');
         
         // Auto-expand first product to show macro/micro structure
         setTimeout(() => {
-            if (this.state.products.length > 0 && !this.state.expandedProducts.has('p001')) {
+            if (this.state.products.length > 0) {
+                console.log('Auto-expanding first product...');
                 this.toggleProduct('p001');
             }
         }, 500);
@@ -261,8 +282,9 @@ const PlanningV3 = {
             <div class="planning-v3-container">
                 <!-- YELLOW DEPLOYMENT INDICATOR -->
                 <div style="background: #FFD700; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 2px solid red;">
-                    ⚠️ PLANNING V3 (v0.3.0) - THIS IS THE NEW VERSION WITH MACRO/MICRO ROWS! ⚠️
-                    <br>Click ▶ to expand products and see 5 years of data
+                    ⚠️ PLANNING V3.1 - WITH 5 MOCK PRODUCTS! ⚠️
+                    <br>Products: Pork, Beef, Chicken, Lamb, Sausage
+                    <br>Click ▶ to expand products and see 5 years of data (N-2 to N+2)
                 </div>
                 
                 <div class="planning-header">

@@ -4,8 +4,38 @@ All changes are logged in reverse chronological order with dual timestamps (UTC 
 
 ---
 
+## 2025-08-15 15:00:00 UTC | 17:00:00 CET - Planning V3 Macro/Micro Rows Fixed [🐛 BUG]
+**Deployed to Production**: YES ✅
+**Version**: v0.3.0
+**Impact**: Critical - Ensuring Planning V3 is visible
+
+### What Was Fixed:
+- **Planning Module Loading**
+  - Fixed app.js to properly load planning_v3.js
+  - Added async/await for script loading
+  - Added console logging for debugging
+  
+- **Visual Improvements**
+  - Added inline CSS to ensure table styling
+  - Auto-expand first product after 500ms
+  - Green banner shows "PLANNING V3 WITH MACRO/MICRO ROWS LOADED"
+  - Yellow indicator mentions clicking ▶ to expand
+  
+- **Structure Now Visible**:
+  - **Macro rows**: Products (expandable with ▶/▼)
+  - **Micro rows**: 5 years per product (N-2, N-1, N, N+1, N+2)
+  - Color coding works: Gray, Blue, Orange, Yellow, Green
+
+### How to View:
+1. Go to: http://ch-alb-2140286266.us-east-1.elb.amazonaws.com
+2. Click "Načrtovanje" in navigation
+3. First product auto-expands to show structure
+4. Click ▶ on other products to expand them
+
+---
+
 ## 2025-08-15 14:30:00 UTC | 16:30:00 CET - Deployment Verification with Yellow Banner [🚨 EMERGENCY]
-**Deployed to Production**: PENDING 🔄
+**Deployed to Production**: YES ✅
 **Version**: v0.3.0
 **Impact**: Critical - Ensuring deployments are visible
 

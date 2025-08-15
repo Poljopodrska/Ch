@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Version from environment or default
-VERSION = os.environ.get('APP_VERSION', '0.3.0').replace('v', '')  # Remove 'v' prefix if present
+VERSION = os.environ.get('APP_VERSION', '0.3.1').replace('v', '')  # Remove 'v' prefix if present
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 

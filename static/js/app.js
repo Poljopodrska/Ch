@@ -207,15 +207,45 @@ const ChApp = {
             });
         }
         
-        // Create container for planning module
+        // Create container for planning module with fallback content
         const html = `
             <div class="planning-module-container">
                 <!-- Big indicator that V3 is loading -->
                 <div style="background: #4CAF50; color: white; padding: 15px; text-align: center; margin-bottom: 20px; font-size: 18px;">
-                    ✅ PLANNING V3 WITH MACRO/MICRO ROWS LOADED
+                    ✅ PLANNING V3.1 WITH MACRO/MICRO ROWS LOADED
                 </div>
                 <div id="planning-grid">
-                    <!-- Planning grid will be rendered here -->
+                    <!-- Fallback content -->
+                    <div style="padding: 20px; background: #f0f0f0; border: 2px solid #333;">
+                        <h3>Loading Planning Module...</h3>
+                        <p>If products don't appear, here's what should be shown:</p>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background: #333; color: white;">
+                                <th style="padding: 10px; border: 1px solid #fff;">Product (MACRO ROW)</th>
+                                <th style="padding: 10px; border: 1px solid #fff;">Years (MICRO ROWS)</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #333;">▶ SVP-100 Pork Shoulder</td>
+                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #333;">▶ GOV-200 Beef Tenderloin</td>
+                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #333;">▶ PIŠ-300 Chicken Breast</td>
+                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #333;">▶ JAG-400 Lamb Chops</td>
+                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border: 1px solid #333;">▶ KLB-500 Sausage</td>
+                                <td style="padding: 10px; border: 1px solid #333;">N-2, N-1, N, N+1, N+2</td>
+                            </tr>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;

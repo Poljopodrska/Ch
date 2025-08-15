@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Planning V3 - Direct</title>
+</head>
+<body>
+    <h1>Direct Test of Planning V3</h1>
+    <p>This page loads Planning V3 directly to test if it works.</p>
+    
+    <div id="planning-grid"></div>
+    
+    <script src="http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/modules/planning/planning_v3.js"></script>
+    <script>
+        // Wait for DOM and then initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Initializing PlanningV3...');
+            if (typeof PlanningV3 !== 'undefined') {
+                PlanningV3.init();
+                console.log('PlanningV3 initialized successfully');
+            } else {
+                console.error('PlanningV3 not found!');
+            }
+        });
+    </script>
+</body>
+</html>
