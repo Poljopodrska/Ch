@@ -112,7 +112,17 @@ const ChApp = {
     
     // Dashboard view
     async getDashboardView() {
-        const data = await MockAPI.getDashboardData();
+        // Use mock data directly in production to avoid MockAPI dependency
+        const data = {
+            activeModules: 5,
+            totalOperations: 1234,
+            lastUpdate: new Date().toLocaleString('sl-SI'),
+            recentActivity: [
+                { time: '10:30', action: 'Planning module loaded', status: 'success' },
+                { time: '10:25', action: 'System initialized', status: 'success' },
+                { time: '10:20', action: 'Database connected', status: 'info' }
+            ]
+        };
         return `
             <h2>Dashboard</h2>
             <div class="grid grid-2">
@@ -454,7 +464,14 @@ const ChApp = {
     
     // Modules view
     async getModulesView() {
-        const modules = await MockAPI.getModules();
+        // Use mock data directly in production
+        const modules = [
+            { id: 'pricing', name: 'Cene', icon: '💰', description: 'Product pricing management', status: 'active' },
+            { id: 'planning', name: 'Načrtovanje', icon: '📊', description: 'Production planning with macro/micro rows', status: 'active' },
+            { id: 'production', name: 'BOM in proizvodnja', icon: '🏭', description: 'Bill of materials and production', status: 'active' },
+            { id: 'reports', name: 'Poročila', icon: '📈', description: 'Analytics and reporting', status: 'planned' },
+            { id: 'inventory', name: 'Zaloge', icon: '📦', description: 'Inventory management', status: 'planned' }
+        ];
         return `
             <h2>Modules</h2>
             <div class="alert alert-info">
