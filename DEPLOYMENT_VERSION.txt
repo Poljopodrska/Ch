@@ -1,7 +1,9 @@
-v0.5.4 - LEGACY MEAT PLANNER REMOVED
+v0.5.5 - STREAMLINED & DESIGN LOCKED
 Deployed: 2025-08-18
 Changes:
-- Removed all "Načrtovalec mesa" references
-- Cleaned up navigation
-- Deleted legacy modules
-- Updated to version 0.5.4
+- Removed Dashboard, Modules, Settings, and About tabs
+- Kept only essential tabs: Pricing, Sales Planning, Production, Stock Report, BOM & Capacity
+- Created DESIGN_LOCK.json to preserve approved design
+- Created design-locked.css with fixed styles
+- Set Pricing as default landing page
+- Version 0.5.5 - Clean, focused interface

@@ -1,0 +1,102 @@
+{
+  "locked": true,
+  "lockedDate": "2025-08-18",
+  "version": "0.5.5",
+  "message": "Design locked by user request - DO NOT CHANGE",
+  "preservedDesign": {
+    "colors": {
+      "primary": "#1976d2",
+      "primaryDark": "#0d47a1",
+      "primaryLight": "#42a5f5",
+      "secondary": "#424242",
+      "accent": "#ff6f00",
+      "success": "#388e3c",
+      "warning": "#f57c00",
+      "error": "#d32f2f",
+      "background": "#f5f5f5",
+      "cardBackground": "#ffffff",
+      "textPrimary": "#212121",
+      "textSecondary": "#757575",
+      "borderColor": "#e0e0e0"
+    },
+    "gradients": {
+      "header": "linear-gradient(135deg, #1976d2 0%, #0d47a1 100%)",
+      "productionHeader": "linear-gradient(135deg, #42a5f5 0%, #1976d2 100%)",
+      "stockHeader": "linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%)",
+      "bomHeader": "linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%)"
+    },
+    "layout": {
+      "maxWidth": "1400px",
+      "padding": "20px",
+      "borderRadius": "8px",
+      "boxShadow": "0 2px 10px rgba(0,0,0,0.1)",
+      "headerHeight": "auto",
+      "navSpacing": "5px"
+    },
+    "typography": {
+      "fontFamily": "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      "headerSize": "28px",
+      "navSize": "14px",
+      "bodySize": "14px",
+      "tableSize": "12px"
+    },
+    "components": {
+      "navButtons": {
+        "padding": "10px 16px",
+        "borderRadius": "8px",
+        "gap": "8px",
+        "iconSize": "18px",
+        "hoverEffect": "translateY(-2px)"
+      },
+      "cards": {
+        "borderRadius": "8px",
+        "boxShadow": "0 2px 8px rgba(0,0,0,0.1)",
+        "headerPadding": "15px",
+        "contentPadding": "15px"
+      },
+      "tables": {
+        "headerBackground": "#1565c0",
+        "headerColor": "white",
+        "cellPadding": "6px 4px",
+        "borderColor": "#ddd",
+        "hoverBackground": "#f5f5f5"
+      },
+      "versionDisplay": {
+        "position": "fixed",
+        "top": "10px",
+        "right": "10px",
+        "padding": "5px 10px",
+        "borderRadius": "4px",
+        "fontSize": "12px",
+        "fontWeight": "bold",
+        "zIndex": "1000"
+      }
+    },
+    "preservedTabs": [
+      "Pricing",
+      "Sales Planning", 
+      "Production",
+      "Stock Report",
+      "BOM & Capacity"
+    ],
+    "removedTabs": [
+      "Dashboard",
+      "Modules",
+      "Settings",
+      "About",
+      "Legacy Planner"
+    ]
+  },
+  "rules": [
+    "DO NOT change color scheme - it's perfect as is",
+    "DO NOT modify gradients - they look great",
+    "DO NOT change fonts - Segoe UI works perfectly",
+    "DO NOT adjust spacing or padding - current layout is optimal",
+    "DO NOT modify border radius or shadows - they're well balanced",
+    "DO NOT add new navigation items without explicit permission",
+    "DO NOT change table styling - it's clean and readable",
+    "KEEP the version display in top-right corner",
+    "PRESERVE the current responsive layout",
+    "MAINTAIN the current card and component styles"
+  ]
+}

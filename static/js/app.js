@@ -1,7 +1,7 @@
 // Ch Project Main Application
 const ChApp = {
     config: null,
-    currentView: 'dashboard',
+    currentView: 'pricing',
     
     // Initialize application
     init(options) {
@@ -11,8 +11,8 @@ const ChApp = {
         // Set up navigation
         this.setupNavigation();
         
-        // Load initial view
-        this.loadView('dashboard');
+        // Load initial view - Pricing is now default
+        this.loadView('pricing');
         
         // Update status
         this.updateStatus('Ready');
@@ -89,8 +89,6 @@ const ChApp = {
     // Get view content
     async getViewContent(viewName) {
         switch (viewName) {
-            case 'dashboard':
-                return this.getDashboardView();
             case 'pricing':
                 return this.getPricingView();
             case 'planning':
@@ -101,74 +99,10 @@ const ChApp = {
                 return this.getStockReportView();
             case 'bom':
                 return this.getBOMView();
-            case 'modules':
-                return this.getModulesView();
-            case 'settings':
-                return this.getSettingsView();
-            case 'about':
-                return this.getAboutView();
             default:
-                throw new Error(`Unknown view: ${viewName}`);
+                // Default to pricing if unknown view
+                return this.getPricingView();
         }
-    },
-    
-    // Dashboard view
-    async getDashboardView() {
-        // Use mock data directly in production to avoid MockAPI dependency
-        const data = {
-            activeModules: 5,
-            totalOperations: 1234,
-            lastUpdate: new Date().toLocaleString('sl-SI'),
-            recentActivity: [
-                { time: '10:30', action: 'Planning module loaded', status: 'success' },
-                { time: '10:25', action: 'System initialized', status: 'success' },
-                { time: '10:20', action: 'Database connected', status: 'info' }
-            ]
-        };
-        return `
-            <h2>Dashboard</h2>
-            <div class="grid grid-2">
-                <div class="card">
-                    <div class="card-header">System Status</div>
-                    <div class="card-content">
-                        <p>Mode: <span class="badge badge-primary">${this.config.mode}</span></p>
-                        <p>Version: <strong>${this.config.version}</strong></p>
-                        <p>API: <code>${this.config.api[this.config.mode]}</code></p>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-header">Quick Stats</div>
-                    <div class="card-content">
-                        <p>Active Modules: <strong>${data.activeModules}</strong></p>
-                        <p>Total Operations: <strong>${data.totalOperations}</strong></p>
-                        <p>Last Update: <strong>${data.lastUpdate}</strong></p>
-                    </div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-header">Recent Activity</div>
-                <div class="card-content">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Action</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.recentActivity.map(activity => `
-                                <tr>
-                                    <td>${activity.time}</td>
-                                    <td>${activity.action}</td>
-                                    <td><span class="badge badge-${activity.status}">${activity.status}</span></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
     },
     
     // Pricing view
@@ -414,125 +348,6 @@ const ChApp = {
         }, 100);
         
         return html;
-    },
-    
-    // Modules view
-    async getModulesView() {
-        // Use mock data directly in production
-        const modules = [
-            { id: 'pricing', name: 'Cene', icon: '💰', description: 'Product pricing management', status: 'active' },
-            { id: 'planning', name: 'Načrtovanje', icon: '📊', description: 'Production planning with macro/micro rows', status: 'active' },
-            { id: 'production', name: 'BOM in proizvodnja', icon: '🏭', description: 'Bill of materials and production', status: 'active' },
-            { id: 'reports', name: 'Poročila', icon: '📈', description: 'Analytics and reporting', status: 'planned' },
-            { id: 'inventory', name: 'Zaloge', icon: '📦', description: 'Inventory management', status: 'planned' }
-        ];
-        return `
-            <h2>Modules</h2>
-            <div class="alert alert-info">
-                <strong>Module System:</strong> Each module operates independently following constitutional principles.
-            </div>
-            <div class="grid grid-3">
-                ${modules.map(module => `
-                    <div class="module-card" onclick="ChApp.showModuleDetails('${module.id}')">
-                        <div class="module-icon">${module.icon}</div>
-                        <div class="module-title">${module.name}</div>
-                        <div class="module-description">${module.description}</div>
-                        <div style="margin-top: 1rem;">
-                            <span class="badge badge-${module.status === 'active' ? 'success' : 'warning'}">
-                                ${module.status}
-                            </span>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    },
-    
-    // Settings view
-    getSettingsView() {
-        return `
-            <h2>Settings</h2>
-            <div class="card">
-                <div class="card-header">Application Settings</div>
-                <div class="card-content">
-                    <form onsubmit="return false;">
-                        <div class="form-group">
-                            <label class="form-label">Application Mode</label>
-                            <input type="text" class="form-control" value="${this.config.mode}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Version</label>
-                            <input type="text" class="form-control" value="${this.config.version}" readonly>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Theme</label>
-                            <select class="form-control">
-                                <option>Default</option>
-                                <option>Dark</option>
-                                <option>Light</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">
-                                <input type="checkbox" ${this.config.ui.animations ? 'checked' : ''}>
-                                Enable Animations
-                            </label>
-                        </div>
-                        <button class="btn btn-primary" onclick="ChApp.saveSettings()">Save Settings</button>
-                    </form>
-                </div>
-            </div>
-        `;
-    },
-    
-    // About view
-    getAboutView() {
-        return `
-            <h2>About Ch Project</h2>
-            <div class="card">
-                <div class="card-header">Ch Project Information</div>
-                <div class="card-content">
-                    <h3>Version ${this.config.version}</h3>
-                    <p>Ch Project is built following constitutional principles with LLM-first development approach.</p>
-                    
-                    <h4>Core Principles:</h4>
-                    <ul>
-                        <li>LLM-First Development</li>
-                        <li>Privacy-First Architecture</li>
-                        <li>Module Independence</li>
-                        <li>Error Isolation</li>
-                        <li>Version Visibility</li>
-                    </ul>
-                    
-                    <h4>MANGO TEST:</h4>
-                    <p><em>"Any feature in Ch project works for any use case in any country"</em></p>
-                    
-                    <h4>Development Mode:</h4>
-                    <p>Currently running in <strong>${this.config.mode}</strong> mode.</p>
-                    <p>Double-click <code>ch_app.html</code> to run the application.</p>
-                </div>
-            </div>
-        `;
-    },
-    
-    // Show module details
-    showModuleDetails(moduleId) {
-        if (moduleId === 'pricing') {
-            // Navigate to pricing module
-            this.loadView('pricing');
-            // Update nav
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.toggle('active', link.getAttribute('href') === '#pricing');
-            });
-        } else {
-            alert(`Module Details: ${moduleId}\n\nThis would show detailed information about the module.`);
-        }
-    },
-    
-    // Save settings
-    saveSettings() {
-        this.updateStatus('Settings saved (mock)');
-        alert('Settings saved successfully!\n\nNote: In development mode, settings are not persisted.');
     },
     
     // Update status indicator
