@@ -3,7 +3,7 @@
 // Months shown by default → expandable to weeks → expandable to days
 
 const PlanningV4 = {
-    VERSION: '4.0.3',
+    VERSION: '4.0.4',
     
     state: {
         currentYear: new Date().getFullYear(),
@@ -22,10 +22,12 @@ const PlanningV4 = {
     init() {
         console.log(`Planning Module V${this.VERSION} - 5 rows per product initializing...`);
         
-        // Prevent double initialization
+        // Reset state for re-initialization
         if (this.initialized) {
-            console.log('Planning V4 already initialized, skipping...');
-            return;
+            console.log('Planning V4 re-initializing, resetting state...');
+            this.initialized = false;
+            this.state.expanded.months.clear();
+            this.state.expanded.weeks.clear();
         }
         
         const container = document.getElementById('planning-grid');
@@ -41,6 +43,12 @@ const PlanningV4 = {
                 console.error('ERROR: Could not find main-content element either!');
                 return;
             }
+        }
+        
+        // Clear any existing content
+        const gridContainer = document.getElementById('planning-grid');
+        if (gridContainer) {
+            gridContainer.innerHTML = '';
         }
         
         this.loadExampleData();

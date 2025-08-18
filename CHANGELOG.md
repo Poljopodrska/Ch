@@ -15,6 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.4.4] - 2025-08-18 - Planning Module Integration Fix
+
+### 🐛 Bug Fix - Načrtovanje Tab Integration
+- **FIXED**: Planning module now properly loads in the Načrtovanje tab
+- **IMPROVED**: Script loading prevents duplicate loads
+- **ENHANCED**: Re-initialization clears previous state properly
+- **ADDED**: Better error handling and logging
+
+### Changed
+- Improved script loading logic to check if PlanningV4 already exists
+- Planning module now properly resets when navigating back to the tab
+- Clear existing content before re-rendering
+
+### Technical Details
+- Files modified:
+  - `static/js/app.js` - Improved getPlanningView() with duplicate prevention
+  - `modules/planning/planning_v4.js` - Better re-initialization support
+  - Version bumped to 0.4.4
+
+---
+
 ## [v0.4.3] - 2025-08-18 - Five-Row Product Layout with Calendar Weeks
 
 ### 🚀 Major Feature - Structured 5-Year Planning View

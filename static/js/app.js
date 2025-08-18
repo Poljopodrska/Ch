@@ -216,6 +216,21 @@ const ChApp = {
         // Load the planning V4 module after DOM is ready
         setTimeout(async () => {
             try {
+                // Check if PlanningV4 is already loaded
+                if (typeof PlanningV4 !== 'undefined') {
+                    console.log('PlanningV4 already loaded, initializing...');
+                    PlanningV4.init();
+                    console.log('Planning V4 initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/planning/planning_v4.js"]');
+                if (existingScript) {
+                    console.log('Planning V4 script already in DOM, waiting for load...');
+                    return;
+                }
+                
                 // Load planning_v4.js module
                 const script = document.createElement('script');
                 script.src = 'modules/planning/planning_v4.js';
