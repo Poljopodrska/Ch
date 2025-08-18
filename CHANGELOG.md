@@ -15,6 +15,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.4.5] - 2025-08-18 - Actual vs Plan Data with Extra Row
+
+### 🚀 Major Feature - Actual Sales vs Plan Data
+- **NEW**: Data before today shows actual sales, after today shows plan
+- **ADDED**: Extra row for year N showing only plan data
+- **ENHANCED**: 6 rows per product: N-2, N-1, N (Act+Plan), N (Plan), N+1, N+2
+- **IMPROVED**: Different data patterns for actual vs planned values
+
+### Added
+- Real-time date comparison using today() like Excel
+- Year N split into two rows: Actual+Plan and Plan-only
+- Visual distinction between actual sales and planned data
+- Current date display in legend
+
+### Changed
+- Data type determined by comparing with today's date
+- Historical data shows more variation (actual sales pattern)
+- Plan data shows smoother patterns
+- Updated from 5 to 6 rows per product
+
+### Technical Details
+- Files modified:
+  - `modules/planning/planning_v4.js` - Version 4.0.5
+  - Version bumped to 0.4.5
+
+---
+
 ## [v0.4.4] - 2025-08-18 - Planning Module Integration Fix
 
 ### 🐛 Bug Fix - Načrtovanje Tab Integration

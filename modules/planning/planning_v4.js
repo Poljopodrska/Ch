@@ -1,15 +1,16 @@
-// Ch Planning Module V4 - Horizontal Layout with 5 Year Rows per Product
-// Each product has 5 rows: N-2, N-1, N, N+1, N+2
+// Ch Planning Module V4 - Horizontal Layout with 6 Year Rows per Product
+// Each product has 6 rows: N-2, N-1, N (Actual+Plan), N (Plan only), N+1, N+2
 // Months shown by default → expandable to weeks → expandable to days
 
 const PlanningV4 = {
-    VERSION: '4.0.4',
+    VERSION: '4.0.5',
     
     state: {
         currentYear: new Date().getFullYear(),
         currentMonth: new Date().getMonth() + 1,
         currentWeek: Math.ceil((new Date().getDate() + new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay()) / 7),
         currentDay: new Date().getDate(),
+        today: new Date(),
         expanded: {
             months: new Set(),  // Which months are expanded to show weeks
             weeks: new Set()    // Which weeks are expanded to show days
@@ -118,59 +119,78 @@ const PlanningV4 = {
     generateProductData(productId, currentYear) {
         const data = {};
         
-        // Generate data for years N-2 to N+2
+        // Generate data for years N-2 to N+2, plus extra row for N (plan only)
         for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
             const year = currentYear + yearOffset;
-            data[year] = {
-                label: `${year}`,
-                shortLabel: this.getYearLabel(yearOffset),
-                total: 0,
-                type: yearOffset < 0 ? 'historical' : yearOffset > 0 ? 'future' : 'current',
-                months: {}
-            };
             
-            // Generate monthly data
-            for (let month = 1; month <= 12; month++) {
-                const monthData = {
-                    label: this.getMonthName(month),
-                    shortLabel: this.getMonthShort(month),
-                    total: 0,
-                    type: this.getDataType(yearOffset, month, 15),
-                    weeks: {}
-                };
-                
-                // Generate weekly data (calendar weeks)
-                const weeksInMonth = this.getCalendarWeeksInMonth(year, month);
-                weeksInMonth.forEach(weekNum => {
-                    const weekData = {
-                        label: `KW${weekNum}`, // Calendar Week
-                        total: 0,
-                        days: {}
-                    };
-                    
-                    // Generate daily data for this week in this month
-                    const daysInWeek = this.getDaysOfWeekInMonth(year, month, weekNum);
-                    daysInWeek.forEach(day => {
-                        const value = this.generateDailyValue(productId, year, month, day, yearOffset);
-                        weekData.days[day] = {
-                            label: day.toString(),
-                            dayName: this.getDayShort(new Date(year, month - 1, day).getDay()),
-                            value: value,
-                            type: this.getDataType(yearOffset, month, day)
-                        };
-                        weekData.total += value;
-                    });
-                    
-                    monthData.weeks[weekNum] = weekData;
-                    monthData.total += weekData.total;
-                });
-                
-                data[year].months[month] = monthData;
-                data[year].total += monthData.total;
+            // For year N, create two versions: actual+plan and plan-only
+            if (yearOffset === 0) {
+                // First version: N (Actual + Plan)
+                data[`${year}_actual`] = this.generateYearData(productId, year, yearOffset, false);
+                // Second version: N (Plan only)
+                data[`${year}_plan`] = this.generateYearData(productId, year, yearOffset, true);
+            } else {
+                // Other years: just one version
+                data[year] = this.generateYearData(productId, year, yearOffset, false);
             }
         }
         
         return data;
+    },
+    
+    // Generate data for a single year
+    generateYearData(productId, year, yearOffset, planOnlyMode = false) {
+        const yearData = {
+            label: `${year}`,
+            shortLabel: yearOffset === 0 ? (planOnlyMode ? 'N (Plan)' : 'N (Act+Plan)') : this.getYearLabel(yearOffset),
+            total: 0,
+            type: yearOffset < 0 ? 'historical' : yearOffset > 0 ? 'future' : 'current',
+            isPlanOnly: planOnlyMode,
+            months: {}
+        };
+        
+        // Generate monthly data
+        for (let month = 1; month <= 12; month++) {
+            const monthData = {
+                label: this.getMonthName(month),
+                shortLabel: this.getMonthShort(month),
+                total: 0,
+                type: this.getDataType(yearOffset, month, 15, planOnlyMode),
+                weeks: {}
+            };
+            
+            // Generate weekly data (calendar weeks)
+            const weeksInMonth = this.getCalendarWeeksInMonth(year, month);
+            weeksInMonth.forEach(weekNum => {
+                const weekData = {
+                    label: `KW${weekNum}`, // Calendar Week
+                    total: 0,
+                    days: {}
+                };
+                
+                // Generate daily data for this week in this month
+                const daysInWeek = this.getDaysOfWeekInMonth(year, month, weekNum);
+                daysInWeek.forEach(day => {
+                    const dataType = this.getDataType(yearOffset, month, day, planOnlyMode);
+                    const value = this.generateDailyValue(productId, year, month, day, yearOffset, dataType);
+                    weekData.days[day] = {
+                        label: day.toString(),
+                        dayName: this.getDayShort(new Date(year, month - 1, day).getDay()),
+                        value: value,
+                        type: dataType
+                    };
+                    weekData.total += value;
+                });
+                
+                monthData.weeks[weekNum] = weekData;
+                monthData.total += weekData.total;
+            });
+            
+            yearData.months[month] = monthData;
+            yearData.total += monthData.total;
+        }
+        
+        return yearData;
     },
     
     // Get calendar weeks that contain days from this month
@@ -224,7 +244,7 @@ const PlanningV4 = {
     },
     
     // Generate realistic daily values
-    generateDailyValue(productId, year, month, day, yearOffset) {
+    generateDailyValue(productId, year, month, day, yearOffset, dataType) {
         const bases = {
             'p001': 40,
             'p002': 25,
@@ -240,26 +260,49 @@ const PlanningV4 = {
         if (dayOfWeek === 0) dayFactor = 0.2;
         
         const seasonalFactor = 1 + 0.2 * Math.sin((month - 1) * Math.PI / 6);
-        const randomFactor = 0.8 + Math.random() * 0.4;
         const yearGrowth = Math.pow(1.03, year - 2020);
+        
+        // Different variation for actual (sales) vs plan data
+        let randomFactor;
+        if (dataType === 'actual' || dataType === 'historical') {
+            // Actual sales data has more variation
+            randomFactor = 0.7 + Math.random() * 0.6;
+        } else {
+            // Plan data is smoother
+            randomFactor = 0.9 + Math.random() * 0.2;
+        }
         
         return Math.round(base * dayFactor * seasonalFactor * randomFactor * yearGrowth);
     },
     
-    // Get data type
-    getDataType(yearOffset, month, day) {
-        const currentMonth = this.state.currentMonth;
-        const currentDay = this.state.currentDay;
+    // Get data type based on today's date
+    getDataType(yearOffset, month, day, planOnlyMode = false) {
+        // If plan only mode, always return plan
+        if (planOnlyMode) return 'plan';
         
+        const today = this.state.today;
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentDay = today.getDate();
+        const year = currentYear + yearOffset;
+        
+        // Past years are always historical/actual
         if (yearOffset < 0) return 'historical';
+        
+        // Future years are always plan
         if (yearOffset > 0) return 'future';
         
-        if (month < currentMonth) return 'actual';
-        if (month > currentMonth) return 'plan';
+        // For current year (N), compare with today's date
+        const dateToCheck = new Date(year, month - 1, day);
+        const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         
-        if (day < currentDay) return 'actual';
-        if (day === currentDay) return 'current';
-        return 'plan';
+        if (dateToCheck < todayMidnight) {
+            return 'actual';  // Past data = actual sales
+        } else if (dateToCheck.getTime() === todayMidnight.getTime()) {
+            return 'current'; // Today
+        } else {
+            return 'plan';    // Future data = plan
+        }
     },
     
     // Render the planning grid
@@ -455,6 +498,7 @@ const PlanningV4 = {
                 .year-n-2 { background: #f5f5f5; }
                 .year-n-1 { background: #fafafa; }
                 .year-n { background: #fff8e1; font-weight: 600; }
+                .year-n-plan { background: #e3f2fd; font-style: italic; }
                 .year-n1 { background: #f1f8e9; }
                 .year-n2 { background: #e8f5e9; }
                 
@@ -477,6 +521,7 @@ const PlanningV4 = {
                     <div class="planning-info">
                         Meseci → Kliknite za tedne (KW = Koledarski teden) → Kliknite za dneve
                         <br>Months → Click for weeks (KW = Calendar Week) → Click for days
+                        <br><strong>Podatki do danes = Dejanske prodaje | Data until today = Actual sales</strong>
                     </div>
                 </div>
                 
@@ -487,10 +532,13 @@ const PlanningV4 = {
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
                     <h4>Legenda / Legend:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>📅 Vsak izdelek ima 5 vrstic: N-2, N-1, N (trenutno leto), N+1, N+2</li>
+                        <li>📅 Vsak izdelek ima 6 vrstic: N-2, N-1, N (Dejanske+Plan), N (Samo Plan), N+1, N+2</li>
+                        <li>📊 N (Act+Plan): Dejanske prodaje do danes, plan za naprej</li>
+                        <li>📈 N (Plan): Samo planski podatki za celotno leto</li>
                         <li>🔽 Kliknite mesec za prikaz tednov (KW = koledarski teden)</li>
                         <li>🔽 Kliknite teden za prikaz dni</li>
                         <li>✏️ Zelene celice (prihodnost) lahko urejate</li>
+                        <li>🗓️ Današnji datum: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></li>
                     </ul>
                 </div>
             </div>
@@ -623,54 +671,78 @@ const PlanningV4 = {
         return html;
     },
     
-    // Render 5 rows for a single product
+    // Render 6 rows for a single product (now includes N plan-only row)
     renderProductRows(product) {
         let html = '';
         const currentYear = this.state.currentYear;
+        let rowIndex = 0;
         
         for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
             const year = currentYear + yearOffset;
-            const yearData = this.state.data[product.id][year];
-            const yearClass = yearOffset === -2 ? 'year-n-2' : 
-                             yearOffset === -1 ? 'year-n-1' :
-                             yearOffset === 0 ? 'year-n' :
-                             yearOffset === 1 ? 'year-n1' : 'year-n2';
             
-            html += `<tr class="${yearClass}">`;
-            
-            // Product cell (only for first year row)
-            if (yearOffset === -2) {
-                html += `
-                    <td class="product-cell" rowspan="5">
-                        <strong>${product.code}</strong><br>
-                        ${product.name}<br>
-                        <small>${product.nameEn}</small><br>
-                        <em>${product.unit}</em>
-                    </td>
-                `;
+            // For year N, render two rows
+            if (yearOffset === 0) {
+                // First row: N (Actual + Plan)
+                const actualData = this.state.data[product.id][`${year}_actual`];
+                html += this.renderSingleRow(product, actualData, year, 'year-n', rowIndex === 0, rowIndex);
+                rowIndex++;
+                
+                // Second row: N (Plan only)
+                const planData = this.state.data[product.id][`${year}_plan`];
+                html += this.renderSingleRow(product, planData, year, 'year-n-plan', false, rowIndex);
+                rowIndex++;
+            } else {
+                // Other years: single row
+                const yearData = this.state.data[product.id][year];
+                const yearClass = yearOffset === -2 ? 'year-n-2' : 
+                                 yearOffset === -1 ? 'year-n-1' :
+                                 yearOffset === 1 ? 'year-n1' : 'year-n2';
+                html += this.renderSingleRow(product, yearData, year, yearClass, rowIndex === 0, rowIndex);
+                rowIndex++;
             }
-            
-            // Year cell
-            html += `
-                <td class="year-cell">
-                    ${year}<br>
-                    <small>${yearData.shortLabel}</small>
-                </td>
-            `;
-            
-            // Data cells for each month/week/day
-            html += this.renderDataCells(product.id, year);
-            
-            // Total cell
-            html += `
-                <td class="cell-total">
-                    ${this.formatNumber(yearData.total)}
-                </td>
-            `;
-            
-            html += '</tr>';
         }
         
+        return html;
+    },
+    
+    // Render a single row
+    renderSingleRow(product, yearData, year, yearClass, isFirstRow, rowIndex) {
+        let html = `<tr class="${yearClass}">`;
+        
+        // Product cell (only for first year row)
+        if (isFirstRow) {
+            html += `
+                <td class="product-cell" rowspan="6">
+                    <strong>${product.code}</strong><br>
+                    ${product.name}<br>
+                    <small>${product.nameEn}</small><br>
+                    <em>${product.unit}</em>
+                </td>
+            `;
+        }
+        
+        // Year cell
+        html += `
+            <td class="year-cell">
+                ${year}<br>
+                <small>${yearData.shortLabel}</small>
+            </td>
+        `;
+        
+        // Data cells for each month/week/day
+        const dataKey = yearData.isPlanOnly ? `${year}_plan` : 
+                       (year === this.state.currentYear && !yearData.isPlanOnly) ? `${year}_actual` : 
+                       year.toString();
+        html += this.renderDataCells(product.id, dataKey);
+        
+        // Total cell
+        html += `
+            <td class="cell-total">
+                ${this.formatNumber(yearData.total)}
+            </td>
+        `;
+        
+        html += '</tr>';
         return html;
     },
     
