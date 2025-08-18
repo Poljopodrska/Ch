@@ -22,6 +22,12 @@ const PlanningV4 = {
     init() {
         console.log(`Planning Module V${this.VERSION} - 5 rows per product initializing...`);
         
+        // Prevent double initialization
+        if (this.initialized) {
+            console.log('Planning V4 already initialized, skipping...');
+            return;
+        }
+        
         const container = document.getElementById('planning-grid');
         if (!container) {
             console.error('ERROR: planning-grid container not found!');
@@ -31,14 +37,20 @@ const PlanningV4 = {
                 newContainer.id = 'planning-grid';
                 mainContent.appendChild(newContainer);
                 console.log('Created planning-grid container');
+            } else {
+                console.error('ERROR: Could not find main-content element either!');
+                return;
             }
         }
         
         this.loadExampleData();
         this.renderPlanningGrid();
         
+        this.initialized = true;
         console.log('Planning V4 initialized - 5 year rows per product');
     },
+    
+    initialized: false,
     
     // Load example data
     loadExampleData() {
@@ -842,9 +854,10 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = PlanningV4;
 }
 
-// Auto-initialize
-if (typeof document !== 'undefined' && document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => PlanningV4.init());
-} else if (typeof document !== 'undefined') {
-    setTimeout(() => PlanningV4.init(), 100);
+// Make globally available
+if (typeof window !== 'undefined') {
+    window.PlanningV4 = PlanningV4;
 }
+
+// Note: Initialization is handled by app.js when the planning view is loaded
+// This prevents double initialization and ensures proper timing
