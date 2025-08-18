@@ -15,6 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.5.0] - 2025-08-18 - Production Planning Stage 1
+
+### 🏭 New Module - Production Planning
+- **NEW**: Production Planning module under "BOM in proizvodnja" tab
+- **ADDED**: Basic production planning table structure
+- **SHOWS**: Current stock levels for each product
+- **STAGE 1**: Foundation for production planning system
+
+### Added
+- Production Planning V1 module (modules/production/production_planning_v1.js)
+- 3-year view: N-1, N (Actual+Prod), N (Plan), N+1
+- Current stock display for each product
+- Production-optimized data generation (Mon-Fri focus)
+
+### Coming Next (Stages 2-4)
+- Stage 2: Stock calculation, Stock Report tab
+- Stage 3: BOM with shelf life, production capacity
+- Stage 4: Product/Production groups, capacity constraints
+
+---
+
 ## [v0.4.5] - 2025-08-18 - Actual vs Plan Data with Extra Row
 
 ### 🚀 Major Feature - Actual Sales vs Plan Data

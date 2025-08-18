@@ -446,37 +446,55 @@ const ChApp = {
     
     // Production Planning view
     async getProductionPlanningView() {
-        // Use ModuleLoader for better file:// support
-        try {
-            let html;
-            
-            if (window.ModuleLoader) {
-                // Use the module loader for file:// compatibility
-                html = await ModuleLoader.load('production-planning');
-            } else {
-                // Fallback to fetch for production
-                const response = await fetch('modules/production-planning/production-planning.html');
-                html = await response.text();
-            }
-            
-            // Initialize after loading
-            setTimeout(() => {
-                if (window.ProductionPlanning) {
-                    ProductionPlanning.init();
+        console.log('Loading Production Planning V1 module...');
+        
+        // Create container for production planning module
+        const html = `
+            <div id="production-planning-grid">
+                <!-- Production Planning V1 will be loaded here -->
+            </div>
+        `;
+        
+        // Load the production planning module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if ProductionPlanningV1 is already loaded
+                if (typeof ProductionPlanningV1 !== 'undefined') {
+                    console.log('ProductionPlanningV1 already loaded, initializing...');
+                    ProductionPlanningV1.init();
+                    console.log('Production Planning V1 initialized');
+                    return;
                 }
-            }, 100);
-            
-            return html;
-        } catch (error) {
-            console.error('Error loading production planning module:', error);
-            return `
-                <div class="alert alert-error">
-                    <h3>Error Loading Production Planning Module</h3>
-                    <p>Could not load the production planning module. Please refresh the page.</p>
-                    <p style="font-size: 0.9em; color: #666;">Error: ${error.message}</p>
-                </div>
-            `;
-        }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/production/production_planning_v1.js"]');
+                if (existingScript) {
+                    console.log('Production Planning V1 script already in DOM, waiting for load...');
+                    return;
+                }
+                
+                // Load production_planning_v1.js module
+                const script = document.createElement('script');
+                script.src = 'modules/production/production_planning_v1.js';
+                script.onload = () => {
+                    console.log('Production Planning V1 script loaded');
+                    if (typeof ProductionPlanningV1 !== 'undefined') {
+                        ProductionPlanningV1.init();
+                        console.log('Production Planning V1 initialized');
+                    } else {
+                        console.error('ProductionPlanningV1 not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load production_planning_v1.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Production Planning V1:', error);
+            }
+        }, 100);
+        
+        return html;
     },
     
     // Legacy Meat Planner view
