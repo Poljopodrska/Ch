@@ -150,6 +150,23 @@ app.mount("/meat-production-planner",
           StaticFiles(directory="meat-production-planner", html=True), 
           name="meat-production-planner")
 
+# Serve debug pages
+@app.get("/planning_debug.html")
+async def planning_debug():
+    try:
+        with open("planning_debug.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Debug page not found")
+
+@app.get("/test_planning.html")
+async def test_planning():
+    try:
+        with open("test_planning.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Test page not found")
+
 # API routes for modules
 @app.get("/api/v1/products")
 async def get_products():

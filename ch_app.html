@@ -62,9 +62,6 @@
     <script src="static/js/config.js"></script>
     <script src="static/js/version.js"></script>
     
-    <!-- Module Loader for file:// protocol -->
-    <script src="development/module-loader.js"></script>
-    
     <!-- Module bundles for file:// protocol -->
     <script>
         if (window.location.protocol === 'file:') {
@@ -82,11 +79,12 @@
     <!-- Main application -->
     <script src="static/js/app.js"></script>
     <script>
-        // Initialize app in file:// mode
+        // Initialize app based on protocol
         window.addEventListener('DOMContentLoaded', () => {
+            const isProduction = window.location.protocol !== 'file:';
             ChApp.init({
-                mode: 'development',
-                mockApi: true
+                mode: isProduction ? 'production' : 'development',
+                mockApi: !isProduction
             });
         });
     </script>

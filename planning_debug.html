@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planning V4 Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffcdd2; }
+        .success { background: #c8e6c9; }
+        #log { font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>Planning V4 Debug Page</h1>
+    
+    <div class="debug" id="status">Starting debug...</div>
+    
+    <div id="planning-grid"></div>
+    
+    <h3>Debug Log:</h3>
+    <div id="log" class="debug"></div>
+    
+    <script>
+        const log = (msg) => {
+            console.log(msg);
+            document.getElementById('log').innerHTML += msg + '<br>';
+        };
+        
+        const status = (msg, isError = false) => {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            el.className = isError ? 'debug error' : 'debug success';
+        };
+        
+        log('1. Starting Planning V4 debug...');
+        log('2. Current URL: ' + window.location.href);
+        
+        // Load the module
+        const script = document.createElement('script');
+        script.src = 'modules/planning/planning_v4.js';
+        
+        script.onload = () => {
+            log('3. Script loaded successfully');
+            
+            if (typeof PlanningV4 !== 'undefined') {
+                log('4. PlanningV4 object found');
+                log('5. Version: ' + PlanningV4.VERSION);
+                
+                try {
+                    log('6. Calling PlanningV4.init()...');
+                    PlanningV4.init();
+                    log('7. Init completed');
+                    status('✓ Planning V4 initialized successfully!');
+                    
+                    // Check if content was rendered
+                    const grid = document.getElementById('planning-grid');
+                    if (grid && grid.innerHTML.length > 100) {
+                        log('8. Content rendered: ' + grid.innerHTML.length + ' characters');
+                    } else {
+                        log('8. WARNING: No content rendered');
+                        status('⚠ Module loaded but no content rendered', true);
+                    }
+                } catch (error) {
+                    log('ERROR during init: ' + error.message);
+                    log('Stack: ' + error.stack);
+                    status('✗ Error: ' + error.message, true);
+                }
+            } else {
+                log('ERROR: PlanningV4 object not found!');
+                status('✗ PlanningV4 not defined', true);
+            }
+        };
+        
+        script.onerror = (e) => {
+            log('ERROR: Failed to load script');
+            status('✗ Failed to load planning_v4.js', true);
+        };
+        
+        log('2.5. Appending script to document head...');
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
