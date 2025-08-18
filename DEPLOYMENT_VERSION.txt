@@ -1,0 +1,7 @@
+v0.5.4 - LEGACY MEAT PLANNER REMOVED
+Deployed: 2025-08-18
+Changes:
+- Removed all "Načrtovalec mesa" references
+- Cleaned up navigation
+- Deleted legacy modules
+- Updated to version 0.5.4
