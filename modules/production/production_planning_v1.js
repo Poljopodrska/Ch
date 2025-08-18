@@ -1,9 +1,9 @@
 // Ch Production Planning Module V1 - Based on Planning V4 structure
-// Stage 1: Basic production planning table
-// Future stages will add: stock calculation, BOM, capacity planning
+// Stage 2: Production planning with stock calculation
+// Production Need = Sales Plan - Current Stock
 
 const ProductionPlanningV1 = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
     
     state: {
         currentYear: new Date().getFullYear(),

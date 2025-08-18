@@ -97,6 +97,8 @@ const ChApp = {
                 return this.getPlanningView();
             case 'production-planning':
                 return this.getProductionPlanningView();
+            case 'stock-report':
+                return this.getStockReportView();
             case 'meat-planner-legacy':
                 return this.getLegacyMeatPlannerView();
             case 'modules':
@@ -491,6 +493,59 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading Production Planning V1:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Stock Report view
+    async getStockReportView() {
+        console.log('Loading Stock Report V1 module...');
+        
+        // Create container for stock report module
+        const html = `
+            <div id="stock-report-container">
+                <!-- Stock Report V1 will be loaded here -->
+            </div>
+        `;
+        
+        // Load the stock report module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if StockReportV1 is already loaded
+                if (typeof StockReportV1 !== 'undefined') {
+                    console.log('StockReportV1 already loaded, initializing...');
+                    StockReportV1.init();
+                    console.log('Stock Report V1 initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/stock/stock_report_v1.js"]');
+                if (existingScript) {
+                    console.log('Stock Report V1 script already in DOM, waiting for load...');
+                    return;
+                }
+                
+                // Load stock_report_v1.js module
+                const script = document.createElement('script');
+                script.src = 'modules/stock/stock_report_v1.js';
+                script.onload = () => {
+                    console.log('Stock Report V1 script loaded');
+                    if (typeof StockReportV1 !== 'undefined') {
+                        StockReportV1.init();
+                        console.log('Stock Report V1 initialized');
+                    } else {
+                        console.error('StockReportV1 not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load stock_report_v1.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Stock Report V1:', error);
             }
         }, 100);
         

@@ -15,6 +15,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.5.1] - 2025-08-18 - Stock Report & Calculation (Stage 2)
+
+### 📦 Stock Management Features
+- **NEW**: Stock Report tab ("Zaloge") with comprehensive stock overview
+- **ADDED**: Stock movements tracking (IN/OUT/PRODUCTION/ADJUSTMENT)
+- **ADDED**: Stock projections and reorder calculations
+- **ENHANCED**: Production planning with stock integration
+
+### Added
+- Stock Report V1 module (modules/stock/stock_report_v1.js)
+- Three tabs: Overview, Movements, Projections
+- Stock status indicators (Critical/Low/Optimal/High)
+- Reorder point calculations based on lead time and safety stock
+- Days of stock remaining calculation
+- Recent stock movements history
+
+### Features
+- Visual stock level bars with color coding
+- Automatic reorder quantity suggestions
+- Stock-out date predictions
+- Movement history with references
+
+---
+
 ## [v0.5.0] - 2025-08-18 - Production Planning Stage 1
 
 ### 🏭 New Module - Production Planning
