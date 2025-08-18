@@ -1,20 +1,19 @@
-// Ch Planning Module V4 - Multi-level Expandable Planning
-// Supports: Yearly → Monthly → Weekly → Daily views
-// Each level can be expanded/collapsed independently
+// Ch Planning Module V4 - Row-based Expandable Planning
+// Supports: Product → Year → Month → Week → Day expansion
+// No view buttons - pure row expansion hierarchy
 
 const PlanningV4 = {
-    VERSION: '4.0.0',
+    VERSION: '4.0.1',
     
     state: {
-        currentView: 'yearly',
         currentYear: new Date().getFullYear(),
         currentMonth: new Date().getMonth() + 1,
         currentWeek: Math.ceil((new Date().getDate() + new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay()) / 7),
         expanded: {
-            products: new Set(['p001']), // Expanded products
-            years: new Set(), // Expanded years (for monthly view)
-            months: new Set(), // Expanded months (for weekly view)
-            weeks: new Set() // Expanded weeks (for daily view)
+            products: new Set(), // Start with all collapsed
+            years: new Set(),
+            months: new Set(),
+            weeks: new Set()
         },
         data: {},
         products: []
@@ -38,9 +37,8 @@ const PlanningV4 = {
         
         this.loadExampleData();
         this.renderPlanningGrid();
-        this.attachEventListeners();
         
-        console.log('Planning V4 initialized with expandable hierarchy');
+        console.log('Planning V4 initialized - click rows to expand');
     },
     
     // Load example data with full hierarchy
@@ -124,7 +122,7 @@ const PlanningV4 = {
                         days: {}
                     };
                     
-                    // Generate daily data (assuming 5-7 working days per week)
+                    // Generate daily data
                     const daysInWeek = week === weeksInMonth ? this.getDaysInLastWeek(year, month) : 7;
                     const startDay = (week - 1) * 7 + 1;
                     
@@ -156,7 +154,7 @@ const PlanningV4 = {
     // Generate realistic daily values
     generateDailyValue(productId, year, month, day, yearOffset) {
         const bases = {
-            'p001': 40,  // Pork shoulder - daily average
+            'p001': 40,  // Pork shoulder
             'p002': 25,  // Beef tenderloin
             'p003': 50,  // Chicken breast
             'p004': 15,  // Lamb chops
@@ -165,7 +163,7 @@ const PlanningV4 = {
         
         const base = bases[productId] || 30;
         
-        // Weekend reduction (Saturday 50%, Sunday 20%)
+        // Weekend reduction
         const dayOfWeek = new Date(year, month - 1, day).getDay();
         let dayFactor = 1;
         if (dayOfWeek === 6) dayFactor = 0.5; // Saturday
@@ -174,7 +172,7 @@ const PlanningV4 = {
         // Seasonal variation
         const seasonalFactor = 1 + 0.2 * Math.sin((month - 1) * Math.PI / 6);
         
-        // Random daily variation
+        // Random variation
         const randomFactor = 0.8 + Math.random() * 0.4;
         
         // Growth over years
@@ -214,9 +212,6 @@ const PlanningV4 = {
                 }
                 
                 .planning-header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
                     margin-bottom: 20px;
                     padding: 15px;
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -224,28 +219,15 @@ const PlanningV4 = {
                     border-radius: 8px;
                 }
                 
-                .view-controls {
-                    display: flex;
-                    gap: 10px;
+                .planning-header h2 {
+                    margin: 0;
+                    font-size: 24px;
                 }
                 
-                .view-btn {
-                    padding: 8px 16px;
-                    background: rgba(255,255,255,0.2);
-                    color: white;
-                    border: 1px solid rgba(255,255,255,0.3);
-                    border-radius: 4px;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                }
-                
-                .view-btn:hover {
-                    background: rgba(255,255,255,0.3);
-                }
-                
-                .view-btn.active {
-                    background: white;
-                    color: #667eea;
+                .planning-info {
+                    margin-top: 10px;
+                    font-size: 14px;
+                    opacity: 0.9;
                 }
                 
                 .planning-table {
@@ -277,28 +259,30 @@ const PlanningV4 = {
                 .expandable-row {
                     cursor: pointer;
                     transition: background 0.3s;
+                    user-select: none;
                 }
                 
                 .expandable-row:hover {
-                    background: #f8f9fa;
+                    background: #f8f9fa !important;
                 }
                 
                 .expand-icon {
                     display: inline-block;
                     width: 20px;
                     transition: transform 0.3s;
+                    font-size: 12px;
                 }
                 
                 .expanded .expand-icon {
                     transform: rotate(90deg);
                 }
                 
-                /* Level-specific styling */
+                /* Indentation for hierarchy levels */
                 .level-0 { background: #ecf0f1; font-weight: bold; } /* Product */
-                .level-1 { background: #f8f9fa; padding-left: 30px !important; } /* Year */
-                .level-2 { background: #ffffff; padding-left: 60px !important; } /* Month */
-                .level-3 { background: #fafbfc; padding-left: 90px !important; } /* Week */
-                .level-4 { background: #ffffff; padding-left: 120px !important; } /* Day */
+                .level-1 { padding-left: 30px !important; background: #f8f9fa; } /* Year */
+                .level-2 { padding-left: 60px !important; background: #ffffff; } /* Month */
+                .level-3 { padding-left: 90px !important; background: #fafbfc; } /* Week */
+                .level-4 { padding-left: 120px !important; background: #ffffff; } /* Day */
                 
                 /* Data type colors */
                 .data-historical { color: #7f8c8d; }
@@ -310,15 +294,27 @@ const PlanningV4 = {
                 .value-cell {
                     text-align: right;
                     font-family: 'Courier New', monospace;
+                    min-width: 100px;
                 }
                 
                 .editable {
                     cursor: text;
                     position: relative;
+                    padding: 4px 8px;
+                    border: 1px solid transparent;
+                    border-radius: 4px;
                 }
                 
                 .editable:hover {
                     background: #fff9c4;
+                    border-color: #fdd835;
+                }
+                
+                .editable:focus {
+                    outline: none;
+                    background: white;
+                    border-color: #2196f3;
+                    box-shadow: 0 0 0 2px rgba(33,150,243,0.2);
                 }
                 
                 .info-badge {
@@ -331,33 +327,30 @@ const PlanningV4 = {
                     color: #1976d2;
                 }
                 
-                .hierarchy-indicator {
-                    display: inline-block;
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    margin-right: 8px;
+                /* Year color coding */
+                .year-n-2 { background: #f5f5f5 !important; }
+                .year-n-1 { background: #fafafa !important; }
+                .year-n { background: #fff8e1 !important; }
+                .year-n1 { background: #f1f8e9 !important; }
+                .year-n2 { background: #e8f5e9 !important; }
+                
+                /* Status indicators */
+                .status-icon {
+                    margin-right: 5px;
                 }
                 
-                .hierarchy-year { background: #9c27b0; }
-                .hierarchy-month { background: #2196f3; }
-                .hierarchy-week { background: #4caf50; }
-                .hierarchy-day { background: #ff9800; }
+                .total-row {
+                    font-weight: bold;
+                    background: #e3f2fd !important;
+                }
             </style>
             
             <div class="planning-v4-container">
-                <div style="background: #4CAF50; color: white; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border-radius: 8px;">
-                    🚀 PLANNING V4.0.0 - MULTI-LEVEL EXPANDABLE PLANNING 🚀
-                    <br>Click on rows to expand: Year → Month → Week → Day
-                </div>
-                
                 <div class="planning-header">
                     <h2>📊 Načrtovanje proizvodnje / Production Planning</h2>
-                    <div class="view-controls">
-                        <button onclick="PlanningV4.setViewLevel('yearly')" class="view-btn ${this.state.currentView === 'yearly' ? 'active' : ''}">Letno / Yearly</button>
-                        <button onclick="PlanningV4.setViewLevel('monthly')" class="view-btn ${this.state.currentView === 'monthly' ? 'active' : ''}">Mesečno / Monthly</button>
-                        <button onclick="PlanningV4.setViewLevel('weekly')" class="view-btn ${this.state.currentView === 'weekly' ? 'active' : ''}">Tedensko / Weekly</button>
-                        <button onclick="PlanningV4.setViewLevel('daily')" class="view-btn ${this.state.currentView === 'daily' ? 'active' : ''}">Dnevno / Daily</button>
+                    <div class="planning-info">
+                        Kliknite na vrstice za razširitev: Izdelek → Leto → Mesec → Teden → Dan
+                        <br>Click rows to expand: Product → Year → Month → Week → Day
                     </div>
                 </div>
                 
@@ -365,10 +358,10 @@ const PlanningV4 = {
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 40%;">Izdelek / Obdobje</th>
-                                <th style="width: 15%;">Količina (kg)</th>
+                                <th style="width: 50%;">Izdelek / Obdobje / Product / Period</th>
+                                <th style="width: 20%; text-align: right;">Količina / Quantity (kg)</th>
                                 <th style="width: 15%;">Status</th>
-                                <th style="width: 30%;">Opombe</th>
+                                <th style="width: 15%;">Tip / Type</th>
                             </tr>
                         </thead>
                         <tbody id="planning-tbody">
@@ -378,13 +371,13 @@ const PlanningV4 = {
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <h4>Legenda / Legend:</h4>
-                    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                        <span><span class="hierarchy-indicator hierarchy-year"></span>Leto / Year</span>
-                        <span><span class="hierarchy-indicator hierarchy-month"></span>Mesec / Month</span>
-                        <span><span class="hierarchy-indicator hierarchy-week"></span>Teden / Week</span>
-                        <span><span class="hierarchy-indicator hierarchy-day"></span>Dan / Day</span>
-                    </div>
+                    <h4>Navodila / Instructions:</h4>
+                    <ul style="margin: 10px 0; line-height: 1.6;">
+                        <li>🖱️ Kliknite na ▶ za razširitev vrstice / Click ▶ to expand row</li>
+                        <li>📅 Struktura: Izdelek → Leto (N-2 do N+2) → Mesec → Teden → Dan</li>
+                        <li>✏️ Zelene celice lahko urejate (prihodnje načrtovanje) / Green cells are editable</li>
+                        <li>📊 Vsote se samodejno posodabljajo / Totals update automatically</li>
+                    </ul>
                 </div>
             </div>
         `;
@@ -392,13 +385,15 @@ const PlanningV4 = {
         container.innerHTML = html;
     },
     
-    // Render table rows based on current view and expanded state
+    // Render table rows based on expanded state
     renderTableRows() {
         let html = '';
         
         this.state.products.forEach(product => {
             // Product row (always visible)
             const productExpanded = this.state.expanded.products.has(product.id);
+            const productTotal = this.getProductTotal(product.id);
+            
             html += `
                 <tr class="expandable-row level-0 ${productExpanded ? 'expanded' : ''}" 
                     onclick="PlanningV4.toggleExpand('product', '${product.id}')">
@@ -408,12 +403,12 @@ const PlanningV4 = {
                         <span class="info-badge">${product.category}</span>
                     </td>
                     <td class="value-cell">
-                        ${this.formatNumber(this.getProductTotal(product.id))}
+                        <strong>${this.formatNumber(productTotal)}</strong>
                     </td>
                     <td>
-                        <span style="color: #27ae60;">✓ Aktivno</span>
+                        <span class="status-icon">📦</span>Izdelek
                     </td>
-                    <td>Klikni za razširitev</td>
+                    <td>${product.unit}</td>
                 </tr>
             `;
             
@@ -437,23 +432,27 @@ const PlanningV4 = {
             const yearKey = `${productId}-${year}`;
             const yearExpanded = this.state.expanded.years.has(yearKey);
             
+            const yearClass = yearOffset === -2 ? 'year-n-2' : 
+                             yearOffset === -1 ? 'year-n-1' :
+                             yearOffset === 0 ? 'year-n' :
+                             yearOffset === 1 ? 'year-n1' : 'year-n2';
+            
             html += `
-                <tr class="expandable-row level-1 ${yearExpanded ? 'expanded' : ''}" 
+                <tr class="expandable-row level-1 ${yearClass} ${yearExpanded ? 'expanded' : ''}" 
                     onclick="PlanningV4.toggleExpand('year', '${yearKey}')">
                     <td>
-                        <span class="hierarchy-indicator hierarchy-year"></span>
                         <span class="expand-icon">${yearExpanded ? '▼' : '▶'}</span>
-                        ${year} (${yearData.label})
+                        <strong>${year}</strong> - ${yearData.label}
                     </td>
                     <td class="value-cell data-${yearOffset < 0 ? 'historical' : yearOffset > 0 ? 'future' : 'actual'}">
                         ${this.formatNumber(yearData.total)}
                     </td>
                     <td>${this.getYearStatus(yearOffset)}</td>
-                    <td>${this.getYearNote(yearOffset)}</td>
+                    <td>${this.getYearType(yearOffset)}</td>
                 </tr>
             `;
             
-            if (yearExpanded && (this.state.currentView === 'monthly' || this.state.currentView === 'weekly' || this.state.currentView === 'daily')) {
+            if (yearExpanded) {
                 html += this.renderMonthRows(productId, year);
             }
         }
@@ -470,24 +469,24 @@ const PlanningV4 = {
             const monthData = yearData.months[month];
             const monthKey = `${productId}-${year}-${month}`;
             const monthExpanded = this.state.expanded.months.has(monthKey);
+            const monthType = this.getMonthType(year, month);
             
             html += `
                 <tr class="expandable-row level-2 ${monthExpanded ? 'expanded' : ''}" 
                     onclick="PlanningV4.toggleExpand('month', '${monthKey}')">
                     <td>
-                        <span class="hierarchy-indicator hierarchy-month"></span>
                         <span class="expand-icon">${monthExpanded ? '▼' : '▶'}</span>
-                        ${monthData.label}
+                        ${monthData.label} ${year}
                     </td>
-                    <td class="value-cell">
+                    <td class="value-cell data-${monthType}">
                         ${this.formatNumber(monthData.total)}
                     </td>
                     <td>${this.getMonthStatus(year, month)}</td>
-                    <td>Tednov: ${Object.keys(monthData.weeks).length}</td>
+                    <td>Mesec / Month</td>
                 </tr>
             `;
             
-            if (monthExpanded && (this.state.currentView === 'weekly' || this.state.currentView === 'daily')) {
+            if (monthExpanded) {
                 html += this.renderWeekRows(productId, year, month);
             }
         }
@@ -509,19 +508,18 @@ const PlanningV4 = {
                 <tr class="expandable-row level-3 ${weekExpanded ? 'expanded' : ''}" 
                     onclick="PlanningV4.toggleExpand('week', '${weekKey}')">
                     <td>
-                        <span class="hierarchy-indicator hierarchy-week"></span>
                         <span class="expand-icon">${weekExpanded ? '▼' : '▶'}</span>
                         ${weekData.label}
                     </td>
                     <td class="value-cell">
                         ${this.formatNumber(weekData.total)}
                     </td>
-                    <td>Delovnih dni: ${Object.keys(weekData.days).length}</td>
-                    <td>Povprečje: ${this.formatNumber(Math.round(weekData.total / Object.keys(weekData.days).length))} kg/dan</td>
+                    <td>📅 ${Object.keys(weekData.days).length} dni</td>
+                    <td>Teden / Week</td>
                 </tr>
             `;
             
-            if (weekExpanded && this.state.currentView === 'daily') {
+            if (weekExpanded) {
                 html += this.renderDayRows(productId, year, month, week);
             }
         });
@@ -537,21 +535,23 @@ const PlanningV4 = {
         Object.keys(weekData.days).forEach(day => {
             const dayData = weekData.days[day];
             const isEditable = dayData.type === 'plan' || dayData.type === 'future';
+            const dayKey = `${productId}-${year}-${month}-${day}`;
             
             html += `
                 <tr class="level-4">
                     <td>
-                        <span class="hierarchy-indicator hierarchy-day"></span>
                         ${day}. ${this.getMonthName(month)} - ${dayData.label}
                     </td>
-                    <td class="value-cell data-${dayData.type} ${isEditable ? 'editable' : ''}" 
-                        ${isEditable ? `contenteditable="true" onblur="PlanningV4.updateValue('${productId}', ${year}, ${month}, ${day}, this.textContent)"` : ''}>
-                        ${this.formatNumber(dayData.value)}
+                    <td class="value-cell data-${dayData.type}">
+                        ${isEditable ? 
+                            `<span class="editable" contenteditable="true" 
+                                   onblur="PlanningV4.updateValue('${productId}', ${year}, ${month}, ${day}, this.textContent)"
+                                   onkeypress="if(event.key==='Enter'){event.preventDefault();this.blur();}">${this.formatNumber(dayData.value)}</span>` :
+                            this.formatNumber(dayData.value)
+                        }
                     </td>
-                    <td>
-                        <span class="data-${dayData.type}">${this.getDataTypeLabel(dayData.type)}</span>
-                    </td>
-                    <td>${isEditable ? '✏️ Lahko uredite' : '🔒 Zaklenjeno'}</td>
+                    <td>${this.getDayStatus(dayData.type)}</td>
+                    <td>Dan / Day</td>
                 </tr>
             `;
         });
@@ -572,6 +572,26 @@ const PlanningV4 = {
         
         if (expandSet.has(key)) {
             expandSet.delete(key);
+            // Collapse all children
+            if (level === 'product') {
+                // Collapse all years for this product
+                const productId = key;
+                [...this.state.expanded.years].forEach(yearKey => {
+                    if (yearKey.startsWith(productId + '-')) {
+                        this.state.expanded.years.delete(yearKey);
+                    }
+                });
+                [...this.state.expanded.months].forEach(monthKey => {
+                    if (monthKey.startsWith(productId + '-')) {
+                        this.state.expanded.months.delete(monthKey);
+                    }
+                });
+                [...this.state.expanded.weeks].forEach(weekKey => {
+                    if (weekKey.startsWith(productId + '-')) {
+                        this.state.expanded.weeks.delete(weekKey);
+                    }
+                });
+            }
         } else {
             expandSet.add(key);
         }
@@ -579,31 +599,15 @@ const PlanningV4 = {
         this.renderPlanningGrid();
     },
     
-    // Set view level and expand accordingly
-    setViewLevel(level) {
-        this.state.currentView = level;
-        
-        // Auto-expand first items for demo
-        if (level === 'monthly' || level === 'weekly' || level === 'daily') {
-            this.state.expanded.years.add('p001-' + this.state.currentYear);
-        }
-        if (level === 'weekly' || level === 'daily') {
-            this.state.expanded.months.add('p001-' + this.state.currentYear + '-' + this.state.currentMonth);
-        }
-        if (level === 'daily') {
-            this.state.expanded.weeks.add('p001-' + this.state.currentYear + '-' + this.state.currentMonth + '-1');
-        }
-        
-        this.renderPlanningGrid();
-    },
-    
     // Update value (for editable cells)
     updateValue(productId, year, month, day, newValue) {
-        const value = parseInt(newValue) || 0;
-        this.state.data[productId][year].months[month].weeks[Math.ceil(day / 7)].days[day].value = value;
+        const value = parseInt(newValue.replace(/[^\d]/g, '')) || 0;
+        const weekNum = Math.ceil(day / 7);
+        this.state.data[productId][year].months[month].weeks[weekNum].days[day].value = value;
         
         // Recalculate totals
         this.recalculateTotals(productId, year, month);
+        this.renderPlanningGrid();
         
         console.log(`Updated: Product ${productId}, ${year}-${month}-${day} = ${value} kg`);
     },
@@ -638,11 +642,11 @@ const PlanningV4 = {
     
     getYearLabel(offset) {
         switch(offset) {
-            case -2: return 'N-2 (Zgodovina)';
-            case -1: return 'N-1 (Lani)';
-            case 0: return 'N (Trenutno)';
-            case 1: return 'N+1 (Prihodnje)';
-            case 2: return 'N+2 (Čez 2 leti)';
+            case -2: return 'N-2';
+            case -1: return 'N-1';
+            case 0: return 'N (Trenutno/Current)';
+            case 1: return 'N+1';
+            case 2: return 'N+2';
             default: return `N${offset > 0 ? '+' : ''}${offset}`;
         }
     },
@@ -653,10 +657,10 @@ const PlanningV4 = {
         return '📅 Načrtovano';
     },
     
-    getYearNote(offset) {
-        if (offset < 0) return 'Zgodovinski podatki';
-        if (offset === 0) return 'Trenutno leto';
-        return 'Napoved za prihodnost';
+    getYearType(offset) {
+        if (offset < 0) return 'Preteklo';
+        if (offset === 0) return 'Trenutno';
+        return 'Prihodnje';
     },
     
     getMonthStatus(year, month) {
@@ -664,12 +668,35 @@ const PlanningV4 = {
         const currentMonth = this.state.currentMonth;
         
         if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            return '✅ Zaključeno';
+            return '✅ Končano';
         }
         if (year === currentYear && month === currentMonth) {
-            return '⏳ V teku';
+            return '⏳ Aktivno';
         }
-        return '📝 Načrtovano';
+        return '📝 Plan';
+    },
+    
+    getMonthType(year, month) {
+        const currentYear = this.state.currentYear;
+        const currentMonth = this.state.currentMonth;
+        
+        if (year < currentYear) return 'historical';
+        if (year > currentYear) return 'future';
+        
+        if (month < currentMonth) return 'actual';
+        if (month === currentMonth) return 'current';
+        return 'plan';
+    },
+    
+    getDayStatus(type) {
+        const statuses = {
+            'historical': '📚 Arhiv',
+            'actual': '✓ Dejanski',
+            'current': '📍 Danes',
+            'plan': '📝 Plan',
+            'future': '🔮 Napoved'
+        };
+        return statuses[type] || type;
     },
     
     getMonthName(month) {
@@ -679,19 +706,8 @@ const PlanningV4 = {
     },
     
     getDayName(dayOfWeek) {
-        const days = ['Ned', 'Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob'];
+        const days = ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'];
         return days[dayOfWeek];
-    },
-    
-    getDataTypeLabel(type) {
-        const labels = {
-            'historical': 'Zgodovinski',
-            'actual': 'Dejanski',
-            'current': 'Trenutni',
-            'plan': 'Načrtovan',
-            'future': 'Prihodnji'
-        };
-        return labels[type] || type;
     },
     
     getWeeksInMonth(year, month) {
@@ -709,21 +725,6 @@ const PlanningV4 = {
         const firstDay = new Date(year, month - 1, 1).getDay();
         const fullWeeks = Math.floor((firstDay + daysInMonth) / 7);
         return (firstDay + daysInMonth) % 7 || 7;
-    },
-    
-    // Attach event listeners
-    attachEventListeners() {
-        // Add keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey) {
-                switch(e.key) {
-                    case '1': this.setViewLevel('yearly'); break;
-                    case '2': this.setViewLevel('monthly'); break;
-                    case '3': this.setViewLevel('weekly'); break;
-                    case '4': this.setViewLevel('daily'); break;
-                }
-            }
-        });
     }
 };
 

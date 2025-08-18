@@ -15,6 +15,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.4.1] - 2025-08-18 - Fixed Planning V4 Pure Row Expansion
+
+### 🐛 Bug Fix - Corrected Planning Implementation
+- **FIXED**: Removed view buttons - now uses pure row expansion
+- **IMPROVED**: Cleaner UI with single interaction model
+- **ENHANCED**: Better visual hierarchy with indentation
+
+### Changed
+- Removed Yearly/Monthly/Weekly/Daily view buttons
+- Planning now works purely by clicking rows to expand
+- Click product → shows years (N-2 to N+2)
+- Click year → shows months
+- Click month → shows weeks
+- Click week → shows days
+- All expansion happens inline in the same table
+
+### Technical Details
+- Files modified:
+  - `modules/planning/planning_v4.js` - Removed view controls, improved row expansion
+  - Version bumped to 0.4.1
+
+---
+
 ## [v0.4.0] - 2025-08-18 - Multi-Level Expandable Planning System
 
 ### 🚀 Major Feature - Hierarchical Planning with 4 Levels
