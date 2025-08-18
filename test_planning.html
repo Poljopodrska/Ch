@@ -3,24 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Planning V3 - Direct</title>
+    <title>Test Planning V4 - Direct</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #ffcdd2;
+        }
+        .success {
+            background: #c8e6c9;
+        }
+    </style>
 </head>
 <body>
-    <h1>Direct Test of Planning V3</h1>
-    <p>This page loads Planning V3 directly to test if it works.</p>
+    <h1>Direct Test of Planning V4</h1>
+    <p>This page loads Planning V4 directly from the deployed server to test if it works.</p>
+    
+    <div class="status" id="status">Loading Planning V4 module...</div>
     
     <div id="planning-grid"></div>
     
-    <script src="http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/modules/planning/planning_v3.js"></script>
+    <script src="http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/modules/planning/planning_v4.js"></script>
     <script>
         // Wait for DOM and then initialize
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('Initializing PlanningV3...');
-            if (typeof PlanningV3 !== 'undefined') {
-                PlanningV3.init();
-                console.log('PlanningV3 initialized successfully');
+            const status = document.getElementById('status');
+            
+            console.log('DOM loaded, checking for PlanningV4...');
+            
+            if (typeof PlanningV4 !== 'undefined') {
+                console.log('PlanningV4 found, version:', PlanningV4.VERSION);
+                status.textContent = 'PlanningV4 loaded (v' + PlanningV4.VERSION + '), initializing...';
+                
+                try {
+                    PlanningV4.init();
+                    status.textContent = 'PlanningV4 initialized successfully!';
+                    status.className = 'status success';
+                    console.log('PlanningV4 initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing PlanningV4:', error);
+                    status.textContent = 'Error initializing: ' + error.message;
+                    status.className = 'status error';
+                }
             } else {
-                console.error('PlanningV3 not found!');
+                console.error('PlanningV4 not found!');
+                status.textContent = 'ERROR: PlanningV4 module not loaded!';
+                status.className = 'status error';
             }
         });
     </script>
