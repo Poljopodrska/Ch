@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ch Planning V4 Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        #main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+        
+        .test-info ul {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-content">
+        <h1>Ch Planning V4 - Local Test</h1>
+        
+        <div class="test-info">
+            <h3>📋 Test Instructions:</h3>
+            <ul>
+                <li>Click on product rows (with ▶/▼ icons) to expand/collapse</li>
+                <li>Use the view buttons to switch between Yearly/Monthly/Weekly/Daily views</li>
+                <li>In Monthly view: Expand a product, then expand a year to see months</li>
+                <li>In Weekly view: Expand product → year → month to see weeks</li>
+                <li>In Daily view: Expand all levels to see individual days</li>
+                <li>Try keyboard shortcuts: Ctrl+1 (Yearly), Ctrl+2 (Monthly), Ctrl+3 (Weekly), Ctrl+4 (Daily)</li>
+                <li>Edit future values (green cells) by clicking on them</li>
+            </ul>
+        </div>
+        
+        <!-- Planning grid will be loaded here -->
+        <div id="planning-grid"></div>
+    </div>
+    
+    <!-- Load Planning V4 module -->
+    <script src="modules/planning/planning_v4.js"></script>
+    
+    <script>
+        // Initialize Planning V4 when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing Planning V4...');
+            
+            // Check if PlanningV4 is available
+            if (typeof PlanningV4 !== 'undefined') {
+                PlanningV4.init();
+                console.log('Planning V4 initialized successfully');
+            } else {
+                console.error('PlanningV4 module not found!');
+                document.getElementById('planning-grid').innerHTML = `
+                    <div style="background: #ffebee; color: #c62828; padding: 20px; border-radius: 8px; text-align: center;">
+                        <h3>⚠️ Error Loading Planning Module</h3>
+                        <p>Could not load planning_v4.js. Please check that the file exists at:</p>
+                        <code>modules/planning/planning_v4.js</code>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

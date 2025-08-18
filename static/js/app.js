@@ -202,8 +202,46 @@ const ChApp = {
         }
     },
     
-    // Planning view - Now with embedded HTML
+    // Planning view - Now with V4 expandable hierarchy
     async getPlanningView() {
+        console.log('Loading Planning V4 module...');
+        
+        // Create container for planning module
+        const html = `
+            <div id="planning-grid">
+                <!-- Planning V4 will be loaded here -->
+            </div>
+        `;
+        
+        // Load the planning V4 module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Load planning_v4.js module
+                const script = document.createElement('script');
+                script.src = 'modules/planning/planning_v4.js';
+                script.onload = () => {
+                    console.log('Planning V4 script loaded');
+                    if (typeof PlanningV4 !== 'undefined') {
+                        PlanningV4.init();
+                        console.log('Planning V4 initialized');
+                    } else {
+                        console.error('PlanningV4 not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load planning_v4.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Planning V4:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Legacy Planning V3 view (kept for reference)
+    async getPlanningV3View() {
         console.log('Loading Planning V3 module...');
         
         const currentYear = new Date().getFullYear();
