@@ -1,27 +1,28 @@
-// Ch Planning Module V4 - Row-based Expandable Planning
-// Supports: Product → Year → Month → Week → Day expansion
-// No view buttons - pure row expansion hierarchy
+// Ch Planning Module V4 - Horizontal Expandable Planning
+// Columns expand horizontally: Year → Months → Weeks → Days
+// Products are rows, time periods are columns
 
 const PlanningV4 = {
-    VERSION: '4.0.1',
+    VERSION: '4.0.2',
     
     state: {
         currentYear: new Date().getFullYear(),
         currentMonth: new Date().getMonth() + 1,
         currentWeek: Math.ceil((new Date().getDate() + new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay()) / 7),
+        currentDay: new Date().getDate(),
         expanded: {
-            products: new Set(), // Start with all collapsed
-            years: new Set(),
-            months: new Set(),
-            weeks: new Set()
+            years: new Set(),   // Which years are expanded to show months
+            months: new Set(),  // Which months are expanded to show weeks
+            weeks: new Set()    // Which weeks are expanded to show days
         },
+        viewLevel: 'year', // 'year', 'month', 'week', 'day'
         data: {},
         products: []
     },
     
     // Initialize the planning module
     init() {
-        console.log(`Planning Module V${this.VERSION} initializing...`);
+        console.log(`Planning Module V${this.VERSION} - Horizontal Layout initializing...`);
         
         const container = document.getElementById('planning-grid');
         if (!container) {
@@ -38,10 +39,10 @@ const PlanningV4 = {
         this.loadExampleData();
         this.renderPlanningGrid();
         
-        console.log('Planning V4 initialized - click rows to expand');
+        console.log('Planning V4 Horizontal initialized');
     },
     
-    // Load example data with full hierarchy
+    // Load example data
     loadExampleData() {
         const currentYear = this.state.currentYear;
         
@@ -50,47 +51,52 @@ const PlanningV4 = {
             {
                 id: 'p001',
                 code: 'SVP-100',
-                name: 'Svinjska plečka / Pork Shoulder',
+                name: 'Svinjska plečka',
+                nameEn: 'Pork Shoulder',
                 unit: 'kg',
                 category: 'Sveže meso'
             },
             {
                 id: 'p002',
                 code: 'GOV-200',
-                name: 'Goveji file / Beef Tenderloin',
+                name: 'Goveji file',
+                nameEn: 'Beef Tenderloin',
                 unit: 'kg',
                 category: 'Premium meso'
             },
             {
                 id: 'p003',
                 code: 'PIŠ-300',
-                name: 'Piščančje prsi / Chicken Breast',
+                name: 'Piščančje prsi',
+                nameEn: 'Chicken Breast',
                 unit: 'kg',
                 category: 'Perutnina'
             },
             {
                 id: 'p004',
                 code: 'JAG-400',
-                name: 'Jagnječji kotleti / Lamb Chops',
+                name: 'Jagnječji kotleti',
+                nameEn: 'Lamb Chops',
                 unit: 'kg',
                 category: 'Specialitete'
             },
             {
                 id: 'p005',
                 code: 'KLB-500',
-                name: 'Domača klobasa / Homemade Sausage',
+                name: 'Domača klobasa',
+                nameEn: 'Homemade Sausage',
                 unit: 'kg',
                 category: 'Mesni izdelki'
             }
         ];
         
-        // Generate hierarchical data for each product
+        // Generate data for each product
         this.state.products.forEach(product => {
             this.state.data[product.id] = this.generateProductData(product.id, currentYear);
         });
     },
     
-    // Generate complete hierarchical data for a product
+    // Generate hierarchical data for a product
     generateProductData(productId, currentYear) {
         const data = {};
         
@@ -98,8 +104,10 @@ const PlanningV4 = {
         for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
             const year = currentYear + yearOffset;
             data[year] = {
-                label: this.getYearLabel(yearOffset),
+                label: `${year}`,
+                shortLabel: this.getYearLabel(yearOffset),
                 total: 0,
+                type: yearOffset < 0 ? 'historical' : yearOffset > 0 ? 'future' : 'current',
                 months: {}
             };
             
@@ -107,17 +115,17 @@ const PlanningV4 = {
             for (let month = 1; month <= 12; month++) {
                 const monthData = {
                     label: this.getMonthName(month),
+                    shortLabel: this.getMonthShort(month),
                     total: 0,
+                    type: this.getDataType(yearOffset, month, 15),
                     weeks: {}
                 };
                 
-                // Calculate weeks in month
-                const weeksInMonth = this.getWeeksInMonth(year, month);
-                
                 // Generate weekly data
+                const weeksInMonth = this.getWeeksInMonth(year, month);
                 for (let week = 1; week <= weeksInMonth; week++) {
                     const weekData = {
-                        label: `Teden ${week}`,
+                        label: `T${week}`,
                         total: 0,
                         days: {}
                     };
@@ -131,7 +139,8 @@ const PlanningV4 = {
                         if (day <= this.getDaysInMonth(year, month)) {
                             const value = this.generateDailyValue(productId, year, month, day, yearOffset);
                             weekData.days[day] = {
-                                label: this.getDayName(new Date(year, month - 1, day).getDay()),
+                                label: day.toString(),
+                                dayName: this.getDayShort(new Date(year, month - 1, day).getDay()),
                                 value: value,
                                 type: this.getDataType(yearOffset, month, day)
                             };
@@ -154,46 +163,37 @@ const PlanningV4 = {
     // Generate realistic daily values
     generateDailyValue(productId, year, month, day, yearOffset) {
         const bases = {
-            'p001': 40,  // Pork shoulder
-            'p002': 25,  // Beef tenderloin
-            'p003': 50,  // Chicken breast
-            'p004': 15,  // Lamb chops
-            'p005': 30   // Sausage
+            'p001': 40,
+            'p002': 25,
+            'p003': 50,
+            'p004': 15,
+            'p005': 30
         };
         
         const base = bases[productId] || 30;
-        
-        // Weekend reduction
         const dayOfWeek = new Date(year, month - 1, day).getDay();
         let dayFactor = 1;
-        if (dayOfWeek === 6) dayFactor = 0.5; // Saturday
-        if (dayOfWeek === 0) dayFactor = 0.2; // Sunday
+        if (dayOfWeek === 6) dayFactor = 0.5;
+        if (dayOfWeek === 0) dayFactor = 0.2;
         
-        // Seasonal variation
         const seasonalFactor = 1 + 0.2 * Math.sin((month - 1) * Math.PI / 6);
-        
-        // Random variation
         const randomFactor = 0.8 + Math.random() * 0.4;
-        
-        // Growth over years
         const yearGrowth = Math.pow(1.03, year - 2020);
         
         return Math.round(base * dayFactor * seasonalFactor * randomFactor * yearGrowth);
     },
     
-    // Get data type based on time
+    // Get data type
     getDataType(yearOffset, month, day) {
         const currentMonth = this.state.currentMonth;
-        const currentDay = new Date().getDate();
+        const currentDay = this.state.currentDay;
         
         if (yearOffset < 0) return 'historical';
         if (yearOffset > 0) return 'future';
         
-        // Current year
         if (month < currentMonth) return 'actual';
         if (month > currentMonth) return 'plan';
         
-        // Current month
         if (day < currentDay) return 'actual';
         if (day === currentDay) return 'current';
         return 'plan';
@@ -217,6 +217,9 @@ const PlanningV4 = {
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white;
                     border-radius: 8px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
                 }
                 
                 .planning-header h2 {
@@ -224,159 +227,212 @@ const PlanningV4 = {
                     font-size: 24px;
                 }
                 
-                .planning-info {
-                    margin-top: 10px;
-                    font-size: 14px;
-                    opacity: 0.9;
+                .view-controls {
+                    display: flex;
+                    gap: 10px;
                 }
                 
-                .planning-table {
+                .view-btn {
+                    padding: 8px 16px;
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                    border: 1px solid rgba(255,255,255,0.3);
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                
+                .view-btn:hover {
+                    background: rgba(255,255,255,0.3);
+                }
+                
+                .view-btn.active {
+                    background: white;
+                    color: #667eea;
+                }
+                
+                .planning-table-wrapper {
                     background: white;
                     border-radius: 8px;
-                    overflow: hidden;
+                    overflow-x: auto;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 }
                 
-                .planning-table table {
+                .planning-table {
                     width: 100%;
                     border-collapse: collapse;
+                    min-width: 1200px;
                 }
                 
                 .planning-table th {
                     background: #34495e;
                     color: white;
-                    padding: 12px;
-                    text-align: left;
+                    padding: 10px;
+                    text-align: center;
                     font-weight: 600;
-                    border-bottom: 2px solid #2c3e50;
+                    border: 1px solid #2c3e50;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                }
+                
+                .planning-table th.product-header {
+                    text-align: left;
+                    min-width: 200px;
+                    background: #2c3e50;
                 }
                 
                 .planning-table td {
-                    padding: 10px;
-                    border-bottom: 1px solid #ecf0f1;
+                    padding: 8px;
+                    border: 1px solid #ecf0f1;
+                    text-align: center;
+                    min-width: 60px;
                 }
                 
-                .expandable-row {
+                .planning-table td.product-cell {
+                    text-align: left;
+                    font-weight: 600;
+                    background: #f8f9fa;
+                    position: sticky;
+                    left: 0;
+                    z-index: 5;
+                }
+                
+                /* Column group headers */
+                .year-header {
+                    background: #34495e;
                     cursor: pointer;
-                    transition: background 0.3s;
                     user-select: none;
                 }
                 
-                .expandable-row:hover {
-                    background: #f8f9fa !important;
+                .year-header:hover {
+                    background: #2c3e50;
+                }
+                
+                .month-header {
+                    background: #546e7a;
+                    font-size: 12px;
+                    cursor: pointer;
+                }
+                
+                .month-header:hover {
+                    background: #455a64;
+                }
+                
+                .week-header {
+                    background: #607d8b;
+                    font-size: 11px;
+                    cursor: pointer;
+                }
+                
+                .day-header {
+                    background: #78909c;
+                    font-size: 10px;
+                }
+                
+                /* Data cell types */
+                .cell-historical {
+                    background: #f5f5f5;
+                    color: #7f8c8d;
+                }
+                
+                .cell-actual {
+                    background: #e3f2fd;
+                    color: #1565c0;
+                    font-weight: 600;
+                }
+                
+                .cell-current {
+                    background: #fff3e0;
+                    color: #e65100;
+                    font-weight: bold;
+                    border: 2px solid #ff9800;
+                }
+                
+                .cell-plan {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+                
+                .cell-future {
+                    background: #f3e5f5;
+                    color: #6a1b9a;
+                }
+                
+                .cell-total {
+                    background: #fff8e1;
+                    font-weight: bold;
+                }
+                
+                .editable {
+                    cursor: text;
+                }
+                
+                .editable:hover {
+                    background: #fff9c4;
+                    outline: 2px solid #fdd835;
+                }
+                
+                .editable:focus {
+                    outline: 2px solid #2196f3;
+                    background: white;
                 }
                 
                 .expand-icon {
                     display: inline-block;
-                    width: 20px;
+                    width: 16px;
                     transition: transform 0.3s;
-                    font-size: 12px;
+                    margin-right: 4px;
                 }
                 
                 .expanded .expand-icon {
                     transform: rotate(90deg);
                 }
                 
-                /* Indentation for hierarchy levels */
-                .level-0 { background: #ecf0f1; font-weight: bold; } /* Product */
-                .level-1 { padding-left: 30px !important; background: #f8f9fa; } /* Year */
-                .level-2 { padding-left: 60px !important; background: #ffffff; } /* Month */
-                .level-3 { padding-left: 90px !important; background: #fafbfc; } /* Week */
-                .level-4 { padding-left: 120px !important; background: #ffffff; } /* Day */
-                
-                /* Data type colors */
-                .data-historical { color: #7f8c8d; }
-                .data-actual { color: #2980b9; font-weight: 600; }
-                .data-current { color: #e67e22; font-weight: bold; background: #fff3e0; }
-                .data-plan { color: #27ae60; }
-                .data-future { color: #95a5a6; font-style: italic; }
-                
-                .value-cell {
-                    text-align: right;
-                    font-family: 'Courier New', monospace;
-                    min-width: 100px;
-                }
-                
-                .editable {
-                    cursor: text;
-                    position: relative;
-                    padding: 4px 8px;
-                    border: 1px solid transparent;
-                    border-radius: 4px;
-                }
-                
-                .editable:hover {
-                    background: #fff9c4;
-                    border-color: #fdd835;
-                }
-                
-                .editable:focus {
-                    outline: none;
-                    background: white;
-                    border-color: #2196f3;
-                    box-shadow: 0 0 0 2px rgba(33,150,243,0.2);
-                }
-                
-                .info-badge {
-                    display: inline-block;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 11px;
-                    margin-left: 10px;
-                    background: #e3f2fd;
-                    color: #1976d2;
-                }
-                
-                /* Year color coding */
-                .year-n-2 { background: #f5f5f5 !important; }
-                .year-n-1 { background: #fafafa !important; }
+                /* Year labels */
+                .year-n-2 { background: #fafafa !important; }
+                .year-n-1 { background: #f5f5f5 !important; }
                 .year-n { background: #fff8e1 !important; }
                 .year-n1 { background: #f1f8e9 !important; }
                 .year-n2 { background: #e8f5e9 !important; }
                 
-                /* Status indicators */
-                .status-icon {
-                    margin-right: 5px;
-                }
-                
-                .total-row {
-                    font-weight: bold;
-                    background: #e3f2fd !important;
+                .info-badge {
+                    display: inline-block;
+                    padding: 2px 6px;
+                    border-radius: 10px;
+                    font-size: 10px;
+                    margin-left: 8px;
+                    background: #e3f2fd;
+                    color: #1976d2;
                 }
             </style>
             
             <div class="planning-v4-container">
                 <div class="planning-header">
                     <h2>📊 Načrtovanje proizvodnje / Production Planning</h2>
-                    <div class="planning-info">
-                        Kliknite na vrstice za razširitev: Izdelek → Leto → Mesec → Teden → Dan
-                        <br>Click rows to expand: Product → Year → Month → Week → Day
+                    <div class="view-controls">
+                        <button class="view-btn ${this.state.viewLevel === 'year' ? 'active' : ''}" 
+                                onclick="PlanningV4.setViewLevel('year')">Letni pregled</button>
+                        <button class="view-btn ${this.state.viewLevel === 'month' ? 'active' : ''}" 
+                                onclick="PlanningV4.setViewLevel('month')">Mesečni pregled</button>
+                        <button class="view-btn ${this.state.viewLevel === 'week' ? 'active' : ''}" 
+                                onclick="PlanningV4.setViewLevel('week')">Tedenski pregled</button>
+                        <button class="view-btn ${this.state.viewLevel === 'day' ? 'active' : ''}" 
+                                onclick="PlanningV4.setViewLevel('day')">Dnevni pregled</button>
                     </div>
                 </div>
                 
-                <div class="planning-table">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 50%;">Izdelek / Obdobje / Product / Period</th>
-                                <th style="width: 20%; text-align: right;">Količina / Quantity (kg)</th>
-                                <th style="width: 15%;">Status</th>
-                                <th style="width: 15%;">Tip / Type</th>
-                            </tr>
-                        </thead>
-                        <tbody id="planning-tbody">
-                            ${this.renderTableRows()}
-                        </tbody>
-                    </table>
+                <div class="planning-table-wrapper">
+                    ${this.renderTable()}
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
                     <h4>Navodila / Instructions:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>🖱️ Kliknite na ▶ za razširitev vrstice / Click ▶ to expand row</li>
-                        <li>📅 Struktura: Izdelek → Leto (N-2 do N+2) → Mesec → Teden → Dan</li>
-                        <li>✏️ Zelene celice lahko urejate (prihodnje načrtovanje) / Green cells are editable</li>
-                        <li>📊 Vsote se samodejno posodabljajo / Totals update automatically</li>
+                        <li>📅 Kliknite na leto/mesec/teden za razširitev</li>
+                        <li>✏️ Zelene celice lahko urejate (prihodnje načrtovanje)</li>
+                        <li>📊 Vsote se samodejno posodabljajo</li>
+                        <li>🔄 Preklapljajte med pogledi z gumbi zgoraj</li>
                     </ul>
                 </div>
             </div>
@@ -385,248 +441,394 @@ const PlanningV4 = {
         container.innerHTML = html;
     },
     
-    // Render table rows based on expanded state
-    renderTableRows() {
-        let html = '';
+    // Render the table based on current view level
+    renderTable() {
+        const currentYear = this.state.currentYear;
         
-        this.state.products.forEach(product => {
-            // Product row (always visible)
-            const productExpanded = this.state.expanded.products.has(product.id);
-            const productTotal = this.getProductTotal(product.id);
-            
-            html += `
-                <tr class="expandable-row level-0 ${productExpanded ? 'expanded' : ''}" 
-                    onclick="PlanningV4.toggleExpand('product', '${product.id}')">
-                    <td>
-                        <span class="expand-icon">${productExpanded ? '▼' : '▶'}</span>
-                        <strong>${product.code}</strong> - ${product.name}
-                        <span class="info-badge">${product.category}</span>
-                    </td>
-                    <td class="value-cell">
-                        <strong>${this.formatNumber(productTotal)}</strong>
-                    </td>
-                    <td>
-                        <span class="status-icon">📦</span>Izdelek
-                    </td>
-                    <td>${product.unit}</td>
-                </tr>
-            `;
-            
-            if (productExpanded) {
-                html += this.renderYearRows(product.id);
-            }
-        });
+        // Build column headers based on view level
+        let columnHeaders = '';
+        let dataRows = '';
         
-        return html;
+        if (this.state.viewLevel === 'year') {
+            // Year view - show only years
+            columnHeaders = this.renderYearHeaders();
+        } else if (this.state.viewLevel === 'month') {
+            // Month view - show years and their months
+            columnHeaders = this.renderMonthHeaders();
+        } else if (this.state.viewLevel === 'week') {
+            // Week view - show expanded months with weeks
+            columnHeaders = this.renderWeekHeaders();
+        } else {
+            // Day view - show full detail
+            columnHeaders = this.renderDayHeaders();
+        }
+        
+        // Build product rows
+        dataRows = this.renderProductRows();
+        
+        return `
+            <table class="planning-table">
+                ${columnHeaders}
+                <tbody>
+                    ${dataRows}
+                </tbody>
+            </table>
+        `;
     },
     
-    // Render year rows for a product
-    renderYearRows(productId) {
-        let html = '';
-        const productData = this.state.data[productId];
+    // Render year-level headers
+    renderYearHeaders() {
         const currentYear = this.state.currentYear;
+        let headerHtml = '<thead><tr><th class="product-header">Izdelek / Product</th>';
         
         for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
             const year = currentYear + yearOffset;
-            const yearData = productData[year];
-            const yearKey = `${productId}-${year}`;
-            const yearExpanded = this.state.expanded.years.has(yearKey);
+            const yearClass = `year-n${yearOffset === 0 ? '' : yearOffset > 0 ? yearOffset : yearOffset}`;
+            headerHtml += `
+                <th class="year-header ${yearClass}" onclick="PlanningV4.toggleYear(${year})">
+                    <span class="expand-icon">▶</span>
+                    ${year}<br>
+                    <small>${this.getYearLabel(yearOffset)}</small>
+                </th>
+            `;
+        }
+        
+        headerHtml += '<th>Skupaj / Total</th></tr></thead>';
+        return headerHtml;
+    },
+    
+    // Render month-level headers
+    renderMonthHeaders() {
+        const currentYear = this.state.currentYear;
+        let headerHtml = '<thead>';
+        
+        // First row - year groups
+        headerHtml += '<tr><th class="product-header" rowspan="2">Izdelek / Product</th>';
+        
+        for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+            const year = currentYear + yearOffset;
+            const isExpanded = this.state.expanded.years.has(year);
+            const colspan = isExpanded ? 12 : 1;
+            const yearClass = `year-n${yearOffset === 0 ? '' : yearOffset > 0 ? yearOffset : yearOffset}`;
             
-            const yearClass = yearOffset === -2 ? 'year-n-2' : 
-                             yearOffset === -1 ? 'year-n-1' :
-                             yearOffset === 0 ? 'year-n' :
-                             yearOffset === 1 ? 'year-n1' : 'year-n2';
+            headerHtml += `
+                <th class="year-header ${yearClass} ${isExpanded ? 'expanded' : ''}" 
+                    colspan="${colspan}" 
+                    onclick="PlanningV4.toggleYear(${year})">
+                    <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
+                    ${year} ${this.getYearLabel(yearOffset)}
+                </th>
+            `;
+        }
+        
+        headerHtml += '<th rowspan="2">Skupaj</th></tr>';
+        
+        // Second row - months (if year is expanded)
+        headerHtml += '<tr>';
+        
+        for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+            const year = currentYear + yearOffset;
+            if (this.state.expanded.years.has(year)) {
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = `${year}-${month}`;
+                    headerHtml += `
+                        <th class="month-header" onclick="PlanningV4.toggleMonth('${monthKey}')">
+                            <span class="expand-icon">▶</span>
+                            ${this.getMonthShort(month)}
+                        </th>
+                    `;
+                }
+            } else {
+                headerHtml += `<th class="year-total">${year}</th>`;
+            }
+        }
+        
+        headerHtml += '</tr></thead>';
+        return headerHtml;
+    },
+    
+    // Render week-level headers
+    renderWeekHeaders() {
+        const currentYear = this.state.currentYear;
+        let headerHtml = '<thead>';
+        
+        // Complex header for weeks view
+        // We'll show months and their weeks when expanded
+        headerHtml += '<tr><th class="product-header">Izdelek / Product</th>';
+        
+        let totalCols = 0;
+        for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+            const year = currentYear + yearOffset;
             
+            if (this.state.expanded.years.has(year)) {
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = `${year}-${month}`;
+                    if (this.state.expanded.months.has(monthKey)) {
+                        const weeksInMonth = this.getWeeksInMonth(year, month);
+                        headerHtml += `
+                            <th class="month-header expanded" colspan="${weeksInMonth}" 
+                                onclick="PlanningV4.toggleMonth('${monthKey}')">
+                                <span class="expand-icon">▼</span>
+                                ${this.getMonthShort(month)} ${year}
+                            </th>
+                        `;
+                        totalCols += weeksInMonth;
+                    } else {
+                        headerHtml += `
+                            <th class="month-header" onclick="PlanningV4.toggleMonth('${monthKey}')">
+                                <span class="expand-icon">▶</span>
+                                ${this.getMonthShort(month)}
+                            </th>
+                        `;
+                        totalCols++;
+                    }
+                }
+            } else {
+                headerHtml += `
+                    <th class="year-header" onclick="PlanningV4.toggleYear(${year})">
+                        <span class="expand-icon">▶</span>
+                        ${year}
+                    </th>
+                `;
+                totalCols++;
+            }
+        }
+        
+        headerHtml += '<th>Skupaj</th></tr>';
+        
+        // Week headers row
+        headerHtml += '<tr><th class="product-header">Teden / Week</th>';
+        
+        for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+            const year = currentYear + yearOffset;
+            
+            if (this.state.expanded.years.has(year)) {
+                for (let month = 1; month <= 12; month++) {
+                    const monthKey = `${year}-${month}`;
+                    if (this.state.expanded.months.has(monthKey)) {
+                        const weeksInMonth = this.getWeeksInMonth(year, month);
+                        for (let week = 1; week <= weeksInMonth; week++) {
+                            headerHtml += `<th class="week-header">T${week}</th>`;
+                        }
+                    } else {
+                        headerHtml += `<th>-</th>`;
+                    }
+                }
+            } else {
+                headerHtml += `<th>-</th>`;
+            }
+        }
+        
+        headerHtml += '<th>-</th></tr></thead>';
+        return headerHtml;
+    },
+    
+    // Render day-level headers (full detail)
+    renderDayHeaders() {
+        // This would be very wide - simplified for now
+        return this.renderWeekHeaders(); // Use week view for now
+    },
+    
+    // Render product rows
+    renderProductRows() {
+        let html = '';
+        
+        this.state.products.forEach(product => {
             html += `
-                <tr class="expandable-row level-1 ${yearClass} ${yearExpanded ? 'expanded' : ''}" 
-                    onclick="PlanningV4.toggleExpand('year', '${yearKey}')">
-                    <td>
-                        <span class="expand-icon">${yearExpanded ? '▼' : '▶'}</span>
-                        <strong>${year}</strong> - ${yearData.label}
+                <tr>
+                    <td class="product-cell">
+                        <strong>${product.code}</strong><br>
+                        ${product.name}
+                        <span class="info-badge">${product.unit}</span>
                     </td>
-                    <td class="value-cell data-${yearOffset < 0 ? 'historical' : yearOffset > 0 ? 'future' : 'actual'}">
+                    ${this.renderProductData(product.id)}
+                    <td class="cell-total">
+                        ${this.formatNumber(this.getProductTotal(product.id))}
+                    </td>
+                </tr>
+            `;
+        });
+        
+        return html;
+    },
+    
+    // Render product data cells based on view level
+    renderProductData(productId) {
+        const currentYear = this.state.currentYear;
+        let html = '';
+        
+        if (this.state.viewLevel === 'year') {
+            // Year view - show year totals
+            for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+                const year = currentYear + yearOffset;
+                const yearData = this.state.data[productId][year];
+                const cellClass = `cell-${yearData.type}`;
+                
+                html += `
+                    <td class="${cellClass}">
                         ${this.formatNumber(yearData.total)}
                     </td>
-                    <td>${this.getYearStatus(yearOffset)}</td>
-                    <td>${this.getYearType(yearOffset)}</td>
-                </tr>
-            `;
-            
-            if (yearExpanded) {
-                html += this.renderMonthRows(productId, year);
+                `;
             }
-        }
-        
-        return html;
-    },
-    
-    // Render month rows for a year
-    renderMonthRows(productId, year) {
-        let html = '';
-        const yearData = this.state.data[productId][year];
-        
-        for (let month = 1; month <= 12; month++) {
-            const monthData = yearData.months[month];
-            const monthKey = `${productId}-${year}-${month}`;
-            const monthExpanded = this.state.expanded.months.has(monthKey);
-            const monthType = this.getMonthType(year, month);
-            
-            html += `
-                <tr class="expandable-row level-2 ${monthExpanded ? 'expanded' : ''}" 
-                    onclick="PlanningV4.toggleExpand('month', '${monthKey}')">
-                    <td>
-                        <span class="expand-icon">${monthExpanded ? '▼' : '▶'}</span>
-                        ${monthData.label} ${year}
-                    </td>
-                    <td class="value-cell data-${monthType}">
-                        ${this.formatNumber(monthData.total)}
-                    </td>
-                    <td>${this.getMonthStatus(year, month)}</td>
-                    <td>Mesec / Month</td>
-                </tr>
-            `;
-            
-            if (monthExpanded) {
-                html += this.renderWeekRows(productId, year, month);
-            }
-        }
-        
-        return html;
-    },
-    
-    // Render week rows for a month
-    renderWeekRows(productId, year, month) {
-        let html = '';
-        const monthData = this.state.data[productId][year].months[month];
-        
-        Object.keys(monthData.weeks).forEach(week => {
-            const weekData = monthData.weeks[week];
-            const weekKey = `${productId}-${year}-${month}-${week}`;
-            const weekExpanded = this.state.expanded.weeks.has(weekKey);
-            
-            html += `
-                <tr class="expandable-row level-3 ${weekExpanded ? 'expanded' : ''}" 
-                    onclick="PlanningV4.toggleExpand('week', '${weekKey}')">
-                    <td>
-                        <span class="expand-icon">${weekExpanded ? '▼' : '▶'}</span>
-                        ${weekData.label}
-                    </td>
-                    <td class="value-cell">
-                        ${this.formatNumber(weekData.total)}
-                    </td>
-                    <td>📅 ${Object.keys(weekData.days).length} dni</td>
-                    <td>Teden / Week</td>
-                </tr>
-            `;
-            
-            if (weekExpanded) {
-                html += this.renderDayRows(productId, year, month, week);
-            }
-        });
-        
-        return html;
-    },
-    
-    // Render day rows for a week
-    renderDayRows(productId, year, month, week) {
-        let html = '';
-        const weekData = this.state.data[productId][year].months[month].weeks[week];
-        
-        Object.keys(weekData.days).forEach(day => {
-            const dayData = weekData.days[day];
-            const isEditable = dayData.type === 'plan' || dayData.type === 'future';
-            const dayKey = `${productId}-${year}-${month}-${day}`;
-            
-            html += `
-                <tr class="level-4">
-                    <td>
-                        ${day}. ${this.getMonthName(month)} - ${dayData.label}
-                    </td>
-                    <td class="value-cell data-${dayData.type}">
-                        ${isEditable ? 
-                            `<span class="editable" contenteditable="true" 
-                                   onblur="PlanningV4.updateValue('${productId}', ${year}, ${month}, ${day}, this.textContent)"
-                                   onkeypress="if(event.key==='Enter'){event.preventDefault();this.blur();}">${this.formatNumber(dayData.value)}</span>` :
-                            this.formatNumber(dayData.value)
+        } else if (this.state.viewLevel === 'month') {
+            // Month view - show months for expanded years
+            for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+                const year = currentYear + yearOffset;
+                const yearData = this.state.data[productId][year];
+                
+                if (this.state.expanded.years.has(year)) {
+                    // Show all months
+                    for (let month = 1; month <= 12; month++) {
+                        const monthData = yearData.months[month];
+                        const cellClass = `cell-${monthData.type}`;
+                        const isEditable = monthData.type === 'plan' || monthData.type === 'future';
+                        
+                        if (isEditable) {
+                            html += `
+                                <td class="${cellClass} editable" 
+                                    contenteditable="true"
+                                    onblur="PlanningV4.updateMonthValue('${productId}', ${year}, ${month}, this.textContent)">
+                                    ${this.formatNumber(monthData.total)}
+                                </td>
+                            `;
+                        } else {
+                            html += `
+                                <td class="${cellClass}">
+                                    ${this.formatNumber(monthData.total)}
+                                </td>
+                            `;
                         }
-                    </td>
-                    <td>${this.getDayStatus(dayData.type)}</td>
-                    <td>Dan / Day</td>
-                </tr>
-            `;
-        });
+                    }
+                } else {
+                    // Show year total
+                    const cellClass = `cell-${yearData.type}`;
+                    html += `
+                        <td class="${cellClass}">
+                            ${this.formatNumber(yearData.total)}
+                        </td>
+                    `;
+                }
+            }
+        } else if (this.state.viewLevel === 'week') {
+            // Week view - show weeks for expanded months
+            for (let yearOffset = -2; yearOffset <= 2; yearOffset++) {
+                const year = currentYear + yearOffset;
+                const yearData = this.state.data[productId][year];
+                
+                if (this.state.expanded.years.has(year)) {
+                    for (let month = 1; month <= 12; month++) {
+                        const monthKey = `${year}-${month}`;
+                        const monthData = yearData.months[month];
+                        
+                        if (this.state.expanded.months.has(monthKey)) {
+                            // Show all weeks
+                            Object.keys(monthData.weeks).forEach(week => {
+                                const weekData = monthData.weeks[week];
+                                const cellClass = `cell-${monthData.type}`;
+                                
+                                html += `
+                                    <td class="${cellClass}">
+                                        ${this.formatNumber(weekData.total)}
+                                    </td>
+                                `;
+                            });
+                        } else {
+                            // Show month total
+                            const cellClass = `cell-${monthData.type}`;
+                            html += `
+                                <td class="${cellClass}">
+                                    ${this.formatNumber(monthData.total)}
+                                </td>
+                            `;
+                        }
+                    }
+                } else {
+                    // Show year total
+                    const cellClass = `cell-${yearData.type}`;
+                    html += `
+                        <td class="${cellClass}">
+                            ${this.formatNumber(yearData.total)}
+                        </td>
+                    `;
+                }
+            }
+        }
         
         return html;
     },
     
-    // Toggle expand/collapse
-    toggleExpand(level, key) {
-        event.stopPropagation();
-        
-        const expandSet = {
-            'product': this.state.expanded.products,
-            'year': this.state.expanded.years,
-            'month': this.state.expanded.months,
-            'week': this.state.expanded.weeks
-        }[level];
-        
-        if (expandSet.has(key)) {
-            expandSet.delete(key);
-            // Collapse all children
-            if (level === 'product') {
-                // Collapse all years for this product
-                const productId = key;
-                [...this.state.expanded.years].forEach(yearKey => {
-                    if (yearKey.startsWith(productId + '-')) {
-                        this.state.expanded.years.delete(yearKey);
-                    }
-                });
-                [...this.state.expanded.months].forEach(monthKey => {
-                    if (monthKey.startsWith(productId + '-')) {
-                        this.state.expanded.months.delete(monthKey);
-                    }
-                });
-                [...this.state.expanded.weeks].forEach(weekKey => {
-                    if (weekKey.startsWith(productId + '-')) {
-                        this.state.expanded.weeks.delete(weekKey);
-                    }
-                });
+    // Toggle year expansion
+    toggleYear(year) {
+        if (this.state.expanded.years.has(year)) {
+            this.state.expanded.years.delete(year);
+            // Also collapse all months in this year
+            for (let month = 1; month <= 12; month++) {
+                this.state.expanded.months.delete(`${year}-${month}`);
             }
         } else {
-            expandSet.add(key);
+            this.state.expanded.years.add(year);
+        }
+        this.renderPlanningGrid();
+    },
+    
+    // Toggle month expansion
+    toggleMonth(monthKey) {
+        if (this.state.expanded.months.has(monthKey)) {
+            this.state.expanded.months.delete(monthKey);
+            // Also collapse all weeks in this month
+            const [year, month] = monthKey.split('-');
+            for (let week = 1; week <= 5; week++) {
+                this.state.expanded.weeks.delete(`${monthKey}-${week}`);
+            }
+        } else {
+            this.state.expanded.months.add(monthKey);
+        }
+        this.renderPlanningGrid();
+    },
+    
+    // Set view level
+    setViewLevel(level) {
+        this.state.viewLevel = level;
+        
+        // Auto-expand some items for demonstration
+        if (level === 'month' && this.state.expanded.years.size === 0) {
+            this.state.expanded.years.add(this.state.currentYear);
+        } else if (level === 'week' && this.state.expanded.months.size === 0) {
+            this.state.expanded.years.add(this.state.currentYear);
+            this.state.expanded.months.add(`${this.state.currentYear}-${this.state.currentMonth}`);
         }
         
         this.renderPlanningGrid();
     },
     
-    // Update value (for editable cells)
-    updateValue(productId, year, month, day, newValue) {
+    // Update month value
+    updateMonthValue(productId, year, month, newValue) {
         const value = parseInt(newValue.replace(/[^\d]/g, '')) || 0;
-        const weekNum = Math.ceil(day / 7);
-        this.state.data[productId][year].months[month].weeks[weekNum].days[day].value = value;
+        // For simplicity, distribute evenly across weeks/days
+        const monthData = this.state.data[productId][year].months[month];
+        const weeksCount = Object.keys(monthData.weeks).length;
+        const valuePerWeek = Math.round(value / weeksCount);
         
-        // Recalculate totals
-        this.recalculateTotals(productId, year, month);
-        this.renderPlanningGrid();
-        
-        console.log(`Updated: Product ${productId}, ${year}-${month}-${day} = ${value} kg`);
-    },
-    
-    // Recalculate totals after update
-    recalculateTotals(productId, year, month) {
-        const yearData = this.state.data[productId][year];
-        const monthData = yearData.months[month];
-        
-        // Recalculate week totals
         Object.keys(monthData.weeks).forEach(week => {
             const weekData = monthData.weeks[week];
-            weekData.total = Object.values(weekData.days).reduce((sum, day) => sum + day.value, 0);
+            const daysCount = Object.keys(weekData.days).length;
+            const valuePerDay = Math.round(valuePerWeek / daysCount);
+            
+            Object.keys(weekData.days).forEach(day => {
+                weekData.days[day].value = valuePerDay;
+            });
+            
+            weekData.total = valuePerWeek;
         });
         
-        // Recalculate month total
-        monthData.total = Object.values(monthData.weeks).reduce((sum, week) => sum + week.total, 0);
-        
-        // Recalculate year total
+        monthData.total = value;
+        this.recalculateYearTotal(productId, year);
+        this.renderPlanningGrid();
+    },
+    
+    // Recalculate year total
+    recalculateYearTotal(productId, year) {
+        const yearData = this.state.data[productId][year];
         yearData.total = Object.values(yearData.months).reduce((sum, month) => sum + month.total, 0);
     },
     
@@ -644,59 +846,11 @@ const PlanningV4 = {
         switch(offset) {
             case -2: return 'N-2';
             case -1: return 'N-1';
-            case 0: return 'N (Trenutno/Current)';
+            case 0: return 'N';
             case 1: return 'N+1';
             case 2: return 'N+2';
-            default: return `N${offset > 0 ? '+' : ''}${offset}`;
+            default: return '';
         }
-    },
-    
-    getYearStatus(offset) {
-        if (offset < 0) return '📊 Zaključeno';
-        if (offset === 0) return '🔄 V teku';
-        return '📅 Načrtovano';
-    },
-    
-    getYearType(offset) {
-        if (offset < 0) return 'Preteklo';
-        if (offset === 0) return 'Trenutno';
-        return 'Prihodnje';
-    },
-    
-    getMonthStatus(year, month) {
-        const currentYear = this.state.currentYear;
-        const currentMonth = this.state.currentMonth;
-        
-        if (year < currentYear || (year === currentYear && month < currentMonth)) {
-            return '✅ Končano';
-        }
-        if (year === currentYear && month === currentMonth) {
-            return '⏳ Aktivno';
-        }
-        return '📝 Plan';
-    },
-    
-    getMonthType(year, month) {
-        const currentYear = this.state.currentYear;
-        const currentMonth = this.state.currentMonth;
-        
-        if (year < currentYear) return 'historical';
-        if (year > currentYear) return 'future';
-        
-        if (month < currentMonth) return 'actual';
-        if (month === currentMonth) return 'current';
-        return 'plan';
-    },
-    
-    getDayStatus(type) {
-        const statuses = {
-            'historical': '📚 Arhiv',
-            'actual': '✓ Dejanski',
-            'current': '📍 Danes',
-            'plan': '📝 Plan',
-            'future': '🔮 Napoved'
-        };
-        return statuses[type] || type;
     },
     
     getMonthName(month) {
@@ -705,8 +859,14 @@ const PlanningV4 = {
         return months[month - 1];
     },
     
-    getDayName(dayOfWeek) {
-        const days = ['Nedelja', 'Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota'];
+    getMonthShort(month) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun',
+                       'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'];
+        return months[month - 1];
+    },
+    
+    getDayShort(dayOfWeek) {
+        const days = ['Ned', 'Pon', 'Tor', 'Sre', 'Čet', 'Pet', 'Sob'];
         return days[dayOfWeek];
     },
     
@@ -723,20 +883,18 @@ const PlanningV4 = {
     getDaysInLastWeek(year, month) {
         const daysInMonth = this.getDaysInMonth(year, month);
         const firstDay = new Date(year, month - 1, 1).getDay();
-        const fullWeeks = Math.floor((firstDay + daysInMonth) / 7);
         return (firstDay + daysInMonth) % 7 || 7;
     }
 };
 
-// Export for use in app
+// Export for use
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = PlanningV4;
 }
 
-// Auto-initialize if script is loaded directly
+// Auto-initialize
 if (typeof document !== 'undefined' && document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => PlanningV4.init());
 } else if (typeof document !== 'undefined') {
-    // Document already loaded
     setTimeout(() => PlanningV4.init(), 100);
 }

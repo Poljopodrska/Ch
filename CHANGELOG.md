@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.4.2] - 2025-08-18 - Horizontal Planning Layout
+
+### 🚀 Major Feature - Horizontal Expandable Columns
+- **NEW**: Complete redesign to horizontal layout
+- **CHANGED**: Products are now rows, time periods are columns
+- **ADDED**: Clickable column headers to expand/collapse time periods
+- **IMPROVED**: Much better use of screen space for planning
+
+### Added
+- Horizontal table layout with expandable columns
+- View level buttons: Letni (Year), Mesečni (Month), Tedenski (Week), Dnevni (Day)
+- Click year columns to expand into months
+- Click month columns to expand into weeks
+- Sticky product column for easy navigation
+- Horizontal scrolling for wide tables
+
+### Changed
+- Complete restructure from vertical to horizontal layout
+- Time periods now expand horizontally (left to right)
+- Products remain as fixed rows on the left
+- Better visual hierarchy with column grouping
+
+### Technical Details
+- Files modified:
+  - `modules/planning/planning_v4.js` - Complete rewrite for horizontal layout
+  - Version bumped to 0.4.2
+
+---
+
 ## [v0.4.1] - 2025-08-18 - Fixed Planning V4 Pure Row Expansion
 
 ### 🐛 Bug Fix - Corrected Planning Implementation

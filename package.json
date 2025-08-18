@@ -1,6 +1,6 @@
 {
   "name": "ch-project",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Ch Project - Built with AVA OLO best practices",
   "main": "index.js",
   "type": "module",
