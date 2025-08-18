@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Version from environment or default
-VERSION = os.environ.get('APP_VERSION', '0.5.1').replace('v', '')  # Remove 'v' prefix if present
+VERSION = os.environ.get('APP_VERSION', '0.5.4').replace('v', '')  # Remove 'v' prefix if present
 BUILD_ID = os.environ.get('BUILD_ID', 'local')
 DEPLOYMENT_ID = os.environ.get('DEPLOYMENT_ID', 'local')
 
@@ -127,28 +127,22 @@ async def database_health():
 @app.get("/")
 async def root():
     try:
-        with open("ch_app.html", "r", encoding="utf-8") as f:
+        with open("index.html", "r", encoding="utf-8") as f:
             return HTMLResponse(content=f.read())
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Application not found")
+        # Fallback to ch_app.html if index.html doesn't exist
+        try:
+            with open("ch_app.html", "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="Application not found")
 
-# Legacy meat planner support (TEMPORARY)
-@app.post("/api/v1/legacy/meat-planner/sync")
-async def sync_meat_planner(data: dict):
-    """Temporary endpoint for legacy meat planner data sync"""
-    return {"status": "synced", "message": "Legacy sync - to be implemented"}
-
-@app.get("/api/v1/legacy/meat-planner/data")
-async def get_meat_planner_data():
-    """Retrieve legacy meat planner data"""
-    return {}  # Placeholder for legacy data
+# No legacy endpoints - removed in v0.5.4
 
 # Mount static directories
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/modules", StaticFiles(directory="modules"), name="modules")
-app.mount("/meat-production-planner", 
-          StaticFiles(directory="meat-production-planner", html=True), 
-          name="meat-production-planner")
+# Legacy meat-production-planner removed in v0.5.4
 
 # Serve debug pages
 @app.get("/planning_debug.html")
