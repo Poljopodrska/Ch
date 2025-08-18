@@ -15,6 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.4.3] - 2025-08-18 - Five-Row Product Layout with Calendar Weeks
+
+### 🚀 Major Feature - Structured 5-Year Planning View
+- **REDESIGNED**: Each product now has exactly 5 rows (N-2, N-1, N, N+1, N+2)
+- **SIMPLIFIED**: Months shown by default in columns
+- **ENHANCED**: Calendar weeks (KW) properly calculated using ISO week numbers
+- **IMPROVED**: Clear hierarchical expansion: Months → Calendar Weeks → Days
+
+### Added
+- 5-row structure per product (years N-2 through N+2)
+- ISO week number calculation for proper calendar weeks
+- Calendar week notation (KW1, KW2, etc.) for clarity
+- Day names in Slovenian (N, P, T, S, Č, P, S)
+- Visual year indicators (N-2, N-1, N, N+1, N+2) in year cells
+
+### Changed
+- Restructured from single expandable row to 5 fixed year rows per product
+- Months are now visible by default (no need to expand from years)
+- Improved visual hierarchy with year-based row coloring
+- Better data organization with year offsets clearly labeled
+
+### Technical Details
+- Files modified:
+  - `modules/planning/planning_v4.js` - Complete rewrite with 5-row structure
+  - Version bumped to 0.4.3
+
+---
+
 ## [v0.4.2] - 2025-08-18 - Horizontal Planning Layout
 
 ### 🚀 Major Feature - Horizontal Expandable Columns
@@ -241,6 +269,10 @@ The Ch application is now live and accessible on AWS, completely separate from t
 
 | Version | Date       | Type          | Summary                                    |
 |---------|------------|---------------|---------------------------------------------|
+| v0.4.3  | 2025-08-18 | Major Feature | 5-row product layout with calendar weeks   |
+| v0.4.2  | 2025-08-18 | Major Feature | Horizontal expandable planning layout      |
+| v0.4.1  | 2025-08-18 | Bug Fix       | Fixed pure row expansion (removed buttons) |
+| v0.4.0  | 2025-08-18 | Major Feature | Multi-level expandable planning system     |
 | v0.3.0  | 2025-08-15 | Major Feature | Planning V3 with macro/micro rows          |
 | v0.2.0  | 2025-07-21 | Infrastructure| PostgreSQL database integration            |
 | v0.1.1  | 2025-07-21 | Automation    | CI/CD pipeline activation                  |
