@@ -99,6 +99,8 @@ const ChApp = {
                 return this.getProductionPlanningView();
             case 'stock-report':
                 return this.getStockReportView();
+            case 'bom':
+                return this.getBOMView();
             case 'meat-planner-legacy':
                 return this.getLegacyMeatPlannerView();
             case 'modules':
@@ -546,6 +548,59 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading Stock Report V1:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // BOM view
+    async getBOMView() {
+        console.log('Loading BOM V1 module...');
+        
+        // Create container for BOM module
+        const html = `
+            <div id="bom-container">
+                <!-- BOM V1 will be loaded here -->
+            </div>
+        `;
+        
+        // Load the BOM module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if BOMV1 is already loaded
+                if (typeof BOMV1 !== 'undefined') {
+                    console.log('BOMV1 already loaded, initializing...');
+                    BOMV1.init();
+                    console.log('BOM V1 initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/bom/bom_v1.js"]');
+                if (existingScript) {
+                    console.log('BOM V1 script already in DOM, waiting for load...');
+                    return;
+                }
+                
+                // Load bom_v1.js module
+                const script = document.createElement('script');
+                script.src = 'modules/bom/bom_v1.js';
+                script.onload = () => {
+                    console.log('BOM V1 script loaded');
+                    if (typeof BOMV1 !== 'undefined') {
+                        BOMV1.init();
+                        console.log('BOM V1 initialized');
+                    } else {
+                        console.error('BOMV1 not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load bom_v1.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading BOM V1:', error);
             }
         }, 100);
         

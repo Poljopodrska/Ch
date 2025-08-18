@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ch Project v0.5.2</title>
+    
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/components.css">
+    
+    <!-- Modern Navigation CSS -->
+    <style>
+        :root {
+            --primary-color: #1976d2;
+            --primary-dark: #0d47a1;
+            --primary-light: #42a5f5;
+            --secondary-color: #424242;
+            --accent-color: #ff6f00;
+            --success-color: #388e3c;
+            --warning-color: #f57c00;
+            --error-color: #d32f2f;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --border-color: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Version Display */
+        .version-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+        
+        /* Navigation */
+        #main-nav {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            background: white;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-icon {
+            font-size: 18px;
+        }
+        
+        /* Main Content */
+        #main-content {
+            flex: 1;
+            padding: 20px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        
+        .status-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            font-size: 13px;
+        }
+        
+        .status-indicator .separator {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .loading h2 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            padding: 15px;
+            background: var(--primary-light);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            padding: 15px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            #main-nav {
+                flex-direction: column;
+            }
+            
+            .nav-link {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Version Display -->
+    <div class="version-display">v0.5.2</div>
+    
+    <!-- Main Application -->
+    <div id="app">
+        <header>
+            <h1>🏭 Ch Project - Production Planning System</h1>
+            <nav id="main-nav">
+                <a href="#dashboard" class="nav-link active">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#pricing" class="nav-link">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Pricing</span>
+                </a>
+                <a href="#planning" class="nav-link">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-text">Sales Planning</span>
+                </a>
+                <a href="#production-planning" class="nav-link">
+                    <span class="nav-icon">🏭</span>
+                    <span class="nav-text">Production</span>
+                </a>
+                <a href="#stock-report" class="nav-link">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Stock Report</span>
+                </a>
+                <a href="#bom" class="nav-link">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">BOM & Capacity</span>
+                </a>
+                <a href="#meat-planner-legacy" class="nav-link">
+                    <span class="nav-icon">🥩</span>
+                    <span class="nav-text">Legacy Planner</span>
+                </a>
+                <a href="#modules" class="nav-link">
+                    <span class="nav-icon">🧩</span>
+                    <span class="nav-text">Modules</span>
+                </a>
+                <a href="#settings" class="nav-link">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Settings</span>
+                </a>
+                <a href="#about" class="nav-link">
+                    <span class="nav-icon">ℹ️</span>
+                    <span class="nav-text">About</span>
+                </a>
+            </nav>
+        </header>
+        
+        <main id="main-content">
+            <!-- Dynamic content loads here -->
+            <div class="loading">
+                <h2>Loading Ch Project...</h2>
+                <p>Initializing production planning system v0.5.2</p>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="status-indicator">
+                <span class="mode">Mode: Development</span>
+                <span class="separator">|</span>
+                <span class="status">Ready</span>
+                <span class="separator">|</span>
+                <span class="version">Version 0.5.2</span>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- Core Scripts -->
+    <script src="static/js/config.js"></script>
+    <script src="static/js/app.js"></script>
+    
+    <script>
+        // Initialize app
+        window.addEventListener('DOMContentLoaded', () => {
+            // Update config version
+            if (window.ChConfig) {
+                window.ChConfig.version = '0.5.2';
+            }
+            
+            // Initialize app
+            ChApp.init({
+                mode: window.location.protocol === 'file:' ? 'development' : 'production'
+            });
+            
+            // Update version display
+            const versionDisplay = document.querySelector('.version-display');
+            if (versionDisplay) {
+                versionDisplay.textContent = 'v0.5.2';
+            }
+        });
+    </script>
+</body>
+</html>
