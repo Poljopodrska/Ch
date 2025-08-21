@@ -851,5 +851,8 @@ const StockReadyProducts = {
     }
 };
 
+// Expose to global scope
+window.StockReadyProducts = StockReadyProducts;
+
 // Don't auto-initialize - wait for explicit init call from app.js
 // This prevents issues with container being cleared after load
