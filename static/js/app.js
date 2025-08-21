@@ -244,57 +244,136 @@ const ChApp = {
         return html;
     },
     
-    // Stock Report view
+    // Stock Report view - Now with two stock modules
     async getStockReportView() {
-        console.log('Loading Stock Report V1 module...');
+        console.log('Loading Stock modules...');
         
-        // Create container for stock report module
+        // Create container with tabs for both stock types
         const html = `
-            <div id="stock-report-container">
-                <!-- Stock Report V1 will be loaded here -->
+            <div class="stock-module-container">
+                <div class="stock-tabs">
+                    <button class="stock-tab-btn active" onclick="ChApp.switchStockView('ready')">
+                        📦 Ready Products
+                    </button>
+                    <button class="stock-tab-btn" onclick="ChApp.switchStockView('raw')">
+                        🏭 Raw Materials
+                    </button>
+                </div>
+                <div id="stock-report-container">
+                    <!-- Stock modules will be loaded here -->
+                </div>
             </div>
+            <style>
+                .stock-module-container {
+                    padding: 20px;
+                }
+                .stock-tabs {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                }
+                .stock-tab-btn {
+                    padding: 10px 20px;
+                    border: 1px solid #ddd;
+                    background: white;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                    font-weight: 500;
+                    transition: all 0.3s;
+                }
+                .stock-tab-btn:hover {
+                    background: #f0f0f0;
+                }
+                .stock-tab-btn.active {
+                    background: #3498db;
+                    color: white;
+                    border-color: #3498db;
+                }
+            </style>
         `;
         
-        // Load the stock report module after DOM is ready
-        setTimeout(async () => {
-            try {
-                // Check if StockReportV1 is already loaded
-                if (typeof StockReportV1 !== 'undefined') {
-                    console.log('StockReportV1 already loaded, initializing...');
-                    StockReportV1.init();
-                    console.log('Stock Report V1 initialized');
-                    return;
-                }
-                
-                // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/stock/stock_report_v1.js"]');
-                if (existingScript) {
-                    console.log('Stock Report V1 script already in DOM, waiting for load...');
-                    return;
-                }
-                
-                // Load stock_report_v1.js module
-                const script = document.createElement('script');
-                script.src = 'modules/stock/stock_report_v1.js';
-                script.onload = () => {
-                    console.log('Stock Report V1 script loaded');
-                    if (typeof StockReportV1 !== 'undefined') {
-                        StockReportV1.init();
-                        console.log('Stock Report V1 initialized');
-                    } else {
-                        console.error('StockReportV1 not found after loading script');
-                    }
-                };
-                script.onerror = (e) => {
-                    console.error('Failed to load stock_report_v1.js:', e);
-                };
-                document.head.appendChild(script);
-            } catch (error) {
-                console.error('Error loading Stock Report V1:', error);
-            }
+        // Load the default stock module (Ready Products) after DOM is ready
+        setTimeout(() => {
+            this.loadStockModule('ready');
         }, 100);
         
         return html;
+    },
+    
+    // Switch between stock views
+    switchStockView(type) {
+        // Update tab buttons
+        document.querySelectorAll('.stock-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        
+        // Load the appropriate module
+        this.loadStockModule(type);
+    },
+    
+    // Load specific stock module
+    async loadStockModule(type) {
+        const container = document.getElementById('stock-report-container');
+        if (!container) return;
+        
+        // Clear existing content
+        container.innerHTML = '<div class="loading">Loading...</div>';
+        
+        try {
+            let moduleName, scriptPath, moduleObj;
+            
+            if (type === 'ready') {
+                moduleName = 'StockReadyProducts';
+                scriptPath = 'modules/stock/stock_ready_products.js';
+                moduleObj = window.StockReadyProducts;
+            } else if (type === 'raw') {
+                moduleName = 'StockRawMaterials';
+                scriptPath = 'modules/stock/stock_raw_materials.js';
+                moduleObj = window.StockRawMaterials;
+            }
+            
+            // Check if module is already loaded
+            if (moduleObj) {
+                console.log(`${moduleName} already loaded, initializing...`);
+                moduleObj.init();
+                return;
+            }
+            
+            // Check if script is already loading
+            const existingScript = document.querySelector(`script[src="${scriptPath}"]`);
+            if (existingScript) {
+                console.log(`${moduleName} script already in DOM, waiting for load...`);
+                return;
+            }
+            
+            // Load the module script
+            const script = document.createElement('script');
+            script.src = scriptPath;
+            script.onload = () => {
+                console.log(`${moduleName} script loaded`);
+                const loadedModule = window[moduleName];
+                if (loadedModule) {
+                    loadedModule.init();
+                    console.log(`${moduleName} initialized`);
+                } else {
+                    console.error(`${moduleName} not found after loading script`);
+                }
+            };
+            script.onerror = (e) => {
+                console.error(`Failed to load ${scriptPath}:`, e);
+                container.innerHTML = `<div class="alert alert-error">Failed to load ${type} stock module</div>`;
+            };
+            document.head.appendChild(script);
+        } catch (error) {
+            console.error('Error loading stock module:', error);
+            container.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+        }
     },
     
     // BOM view
