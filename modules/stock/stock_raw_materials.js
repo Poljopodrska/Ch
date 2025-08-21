@@ -1013,15 +1013,5 @@ const StockRawMaterials = {
     }
 };
 
-// Auto-initialize when loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('stock-raw-materials-container')) {
-            StockRawMaterials.init();
-        }
-    });
-} else {
-    if (document.getElementById('stock-raw-materials-container')) {
-        StockRawMaterials.init();
-    }
-}
+// Don't auto-initialize - wait for explicit init call from app.js
+// This prevents issues with container being cleared after load

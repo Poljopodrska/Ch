@@ -851,17 +851,5 @@ const StockReadyProducts = {
     }
 };
 
-// Auto-initialize when loaded
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        if (document.getElementById('stock-ready-products-container') || 
-            document.getElementById('stock-report-container')) {
-            StockReadyProducts.init();
-        }
-    });
-} else {
-    if (document.getElementById('stock-ready-products-container') || 
-        document.getElementById('stock-report-container')) {
-        StockReadyProducts.init();
-    }
-}
+// Don't auto-initialize - wait for explicit init call from app.js
+// This prevents issues with container being cleared after load

@@ -340,7 +340,9 @@ const ChApp = {
             
             // Check if module is already loaded
             if (moduleObj) {
-                console.log(`${moduleName} already loaded, initializing...`);
+                console.log(`${moduleName} already loaded, re-initializing...`);
+                // Clear loading message before init
+                container.innerHTML = '';
                 moduleObj.init();
                 return;
             }
@@ -348,7 +350,16 @@ const ChApp = {
             // Check if script is already loading
             const existingScript = document.querySelector(`script[src="${scriptPath}"]`);
             if (existingScript) {
-                console.log(`${moduleName} script already in DOM, waiting for load...`);
+                console.log(`${moduleName} script already in DOM, checking if loaded...`);
+                // Try to init after a small delay
+                setTimeout(() => {
+                    const loadedModule = window[moduleName];
+                    if (loadedModule) {
+                        container.innerHTML = '';
+                        loadedModule.init();
+                        console.log(`${moduleName} initialized from existing script`);
+                    }
+                }, 100);
                 return;
             }
             
@@ -357,13 +368,19 @@ const ChApp = {
             script.src = scriptPath;
             script.onload = () => {
                 console.log(`${moduleName} script loaded`);
-                const loadedModule = window[moduleName];
-                if (loadedModule) {
-                    loadedModule.init();
-                    console.log(`${moduleName} initialized`);
-                } else {
-                    console.error(`${moduleName} not found after loading script`);
-                }
+                // Small delay to ensure script is fully evaluated
+                setTimeout(() => {
+                    const loadedModule = window[moduleName];
+                    if (loadedModule) {
+                        // Clear loading message before init
+                        container.innerHTML = '';
+                        loadedModule.init();
+                        console.log(`${moduleName} initialized`);
+                    } else {
+                        console.error(`${moduleName} not found after loading script`);
+                        container.innerHTML = `<div class="alert alert-error">Module ${moduleName} not found</div>`;
+                    }
+                }, 50);
             };
             script.onerror = (e) => {
                 console.error(`Failed to load ${scriptPath}:`, e);
