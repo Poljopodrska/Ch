@@ -1,10 +1,12 @@
-v0.5.6 - EDITABLE SALES PLANNING
-Deployed: 2025-08-18
+v0.5.7 - ADVANCED BOM SYSTEM
+Deployed: 2025-08-21
 Changes:
-- Upgraded Sales Planning module to V5 with full editing capabilities
-- Added click-to-edit functionality for all future planning values
-- Visual indicators for edited cells (green background + asterisk)
-- Save/Export/Reset functionality with localStorage persistence
-- Enhanced user experience with hover effects and edit states
-- Maintained design lock compliance while adding functionality
-- Version 0.5.6 - Fully editable sales planning
+- Replaced old BOM v1 with comprehensive BOM v2 Advanced system
+- Database-ready structure for RDS migration
+- Complete resource tracking: Ingredients (Main/Supporting), Energy, Water, Packaging, Workforce
+- Click-to-edit functionality throughout all BOM fields
+- SQL export capability for database preparation
+- Cost summary with real-time calculations
+- Removed old capacity features to focus on BOM
+- Simplified navigation: "BOM & Capacity" → "BOM"
+- Version 0.5.7 - Advanced BOM management system

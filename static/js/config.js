@@ -1,6 +1,6 @@
 // Ch Project Configuration
 const ChConfig = {
-    version: '0.5.6', // Should match package.json
+    version: '0.5.7', // Should match package.json
     mode: window.location.protocol === 'file:' ? 'development' : 'production',
     api: {
         development: 'mock://', // Uses mock_api.js
