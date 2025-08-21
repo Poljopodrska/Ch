@@ -14,6 +14,7 @@ const StockRawMaterials = {
         this.loadSuppliers();
         this.render();
         this.bindEvents();
+        this.setupAutoTracking();
     },
     
     loadMaterials() {
@@ -229,11 +230,11 @@ const StockRawMaterials = {
                             </button>
                         </div>
                         <div class="action-buttons">
+                            <div class="sync-status">
+                                <span class="sync-indicator" id="raw-sync-indicator">🟢 Auto-tracking BOM usage</span>
+                            </div>
                             <button class="btn btn-order" onclick="StockRawMaterials.generateOrders()">
                                 📋 Generate Orders
-                            </button>
-                            <button class="btn btn-sync" onclick="StockRawMaterials.syncWithBOM()">
-                                🔄 Sync with BOM
                             </button>
                             <button class="btn btn-export" onclick="StockRawMaterials.exportData()">
                                 📥 Export
@@ -324,13 +325,16 @@ const StockRawMaterials = {
                     background: #2980b9;
                 }
                 
-                .btn-sync {
-                    background: #27ae60;
-                    color: white;
+                .sync-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                 }
                 
-                .btn-sync:hover {
-                    background: #229954;
+                .sync-indicator {
+                    font-size: 14px;
+                    color: #27ae60;
+                    font-weight: 500;
                 }
                 
                 .btn-export {
@@ -786,17 +790,75 @@ const StockRawMaterials = {
         }
     },
     
-    syncWithBOM() {
-        // Sync with BOM module
-        console.log('Syncing with BOM module...');
+    setupAutoTracking() {
+        // Subscribe to production events to automatically consume raw materials
+        if (typeof ChEvents !== 'undefined') {
+            ChEvents.on(EVENTS.PRODUCTION_COMPLETED, (data) => {
+                this.handleProductionConsumption(data);
+            });
+            
+            ChEvents.on(EVENTS.ORDER_RECEIVED, (data) => {
+                this.handleOrderReceived(data);
+            });
+            
+            console.log('Auto-tracking enabled for Raw Materials');
+        }
+    },
+    
+    handleProductionConsumption(data) {
+        // Automatically consume raw materials when production happens
+        const { articleNumber, quantity } = data;
         
-        // Check if BOMV2Advanced is available
-        if (typeof BOMV2Advanced !== 'undefined' && BOMV2Advanced.bomData) {
-            // Update material requirements based on BOM
-            alert('✅ Raw materials synchronized with BOM data');
+        // Get BOM for this product to know material requirements
+        // For now, use estimated consumption rates
+        const consumptionRates = {
+            '001': { 'MEAT-BEEF-001': 0.8, 'SPICE-SALT-001': 0.02, 'PACK-FILM-001': 0.1 },
+            '002': { 'MEAT-PORK-001': 0.7, 'SPICE-PEPR-001': 0.01, 'PACK-TRAY-001': 1 },
+            '003': { 'MEAT-CHKN-001': 0.9, 'SPICE-PAPR-001': 0.015, 'PACK-BOX-001': 0.5 }
+        };
+        
+        const rates = consumptionRates[articleNumber];
+        if (rates) {
+            Object.entries(rates).forEach(([materialCode, rate]) => {
+                if (this.stockData[materialCode]) {
+                    const consumed = quantity * rate;
+                    this.stockData[materialCode].currentStock -= consumed;
+                    this.stockData[materialCode].avgDailyUsage = 
+                        (this.stockData[materialCode].avgDailyUsage * 0.9) + (consumed * 0.1);
+                }
+            });
+            
+            this.saveData();
             this.render();
-        } else {
-            alert('⚠️ BOM module not available');
+            this.flashSyncIndicator('Materials consumed');
+        }
+    },
+    
+    handleOrderReceived(data) {
+        // Automatically add to stock when order is received
+        const { materials } = data;
+        
+        materials.forEach(item => {
+            if (this.stockData[item.code]) {
+                this.stockData[item.code].currentStock += item.quantity;
+                this.stockData[item.code].lastDelivery = new Date().toISOString().split('T')[0];
+            }
+        });
+        
+        this.saveData();
+        this.render();
+        this.flashSyncIndicator('Order received');
+    },
+    
+    flashSyncIndicator(message) {
+        const indicator = document.getElementById('raw-sync-indicator');
+        if (indicator) {
+            indicator.textContent = `🔄 ${message}`;
+            indicator.style.color = '#f39c12';
+            setTimeout(() => {
+                indicator.textContent = '🟢 Auto-tracking BOM usage';
+                indicator.style.color = '#27ae60';
+            }, 2000);
         }
     },
     

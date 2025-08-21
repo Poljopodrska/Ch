@@ -843,9 +843,25 @@ const PlanningV4 = {
         const value = parseInt(newValue) || 0;
         const weekNum = this.getWeekNumber(new Date(year, month - 1, day));
         
+        let oldValue = 0;
         if (this.state.data[productId][year].months[month].weeks[weekNum] &&
             this.state.data[productId][year].months[month].weeks[weekNum].days[day]) {
+            oldValue = this.state.data[productId][year].months[month].weeks[weekNum].days[day].value;
             this.state.data[productId][year].months[month].weeks[weekNum].days[day].value = value;
+            
+            // Emit sale event for actual sales
+            const monthData = this.state.data[productId][year].months[month];
+            if (monthData.type === 'actual' && value !== oldValue && typeof ChEvents !== 'undefined') {
+                const difference = value - oldValue;
+                if (difference > 0) {
+                    ChEvents.emit(EVENTS.SALE_COMPLETED, {
+                        articleNumber: productId,
+                        quantity: difference,
+                        reference: `SO-${new Date().toISOString().split('T')[0]}-${Math.floor(Math.random() * 1000)}`
+                    });
+                }
+            }
+            
             this.recalculateTotals(productId, year, month);
         }
     },

@@ -1084,11 +1084,12 @@ const ProductionPlanningV3 = {
         
         // Update the data
         const rowData = this.state.data[productId][rowType];
+        let oldValue = 0;
         
         // Find the correct week for this day
         Object.keys(rowData.months[month].weeks).forEach(weekNum => {
             if (rowData.months[month].weeks[weekNum].days[day]) {
-                const oldValue = rowData.months[month].weeks[weekNum].days[day].value;
+                oldValue = rowData.months[month].weeks[weekNum].days[day].value;
                 rowData.months[month].weeks[weekNum].days[day].value = newValue;
                 
                 // Recalculate week total
@@ -1097,6 +1098,18 @@ const ProductionPlanningV3 = {
                 ).reduce((sum, d) => sum + d.value, 0);
             }
         });
+        
+        // Emit event for actual production changes
+        if (rowType === 'actualProduction' && newValue !== oldValue && typeof ChEvents !== 'undefined') {
+            const difference = newValue - oldValue;
+            if (difference > 0) {
+                ChEvents.emit(EVENTS.PRODUCTION_COMPLETED, {
+                    articleNumber: productId,
+                    quantity: difference,
+                    reference: `PROD-${new Date().toISOString().split('T')[0]}-${Math.floor(Math.random() * 1000)}`
+                });
+            }
+        }
         
         // Recalculate month and year totals
         this.recalculateTotals(productId, rowType);

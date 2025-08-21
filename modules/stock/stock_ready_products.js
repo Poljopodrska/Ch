@@ -13,6 +13,7 @@ const StockReadyProducts = {
         this.loadMovements();
         this.render();
         this.bindEvents();
+        this.setupAutoSync();
     },
     
     loadProducts() {
@@ -168,12 +169,9 @@ const StockReadyProducts = {
                             </button>
                         </div>
                         <div class="action-buttons">
-                            <button class="btn btn-sync" onclick="StockReadyProducts.syncWithProduction()">
-                                🔄 Sync with Production
-                            </button>
-                            <button class="btn btn-sync" onclick="StockReadyProducts.syncWithSales()">
-                                🔄 Sync with Sales
-                            </button>
+                            <div class="sync-status">
+                                <span class="sync-indicator" id="sync-indicator">🟢 Auto-sync active</span>
+                            </div>
                             <button class="btn btn-export" onclick="StockReadyProducts.exportData()">
                                 📥 Export
                             </button>
@@ -254,13 +252,16 @@ const StockReadyProducts = {
                     transition: all 0.3s;
                 }
                 
-                .btn-sync {
-                    background: #27ae60;
-                    color: white;
+                .sync-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                 }
                 
-                .btn-sync:hover {
-                    background: #229954;
+                .sync-indicator {
+                    font-size: 14px;
+                    color: #27ae60;
+                    font-weight: 500;
                 }
                 
                 .btn-export {
@@ -730,68 +731,75 @@ const StockReadyProducts = {
         });
     },
     
-    syncWithProduction() {
-        // Sync with Production Planning module
-        console.log('Syncing with Production Planning...');
-        
-        // Get production data from ProductionPlanningV3 if available
-        if (typeof ProductionPlanningV3 !== 'undefined' && ProductionPlanningV3.data) {
-            const productionData = ProductionPlanningV3.data;
-            
-            // Update stock based on actual production
-            Object.keys(productionData).forEach(articleNumber => {
-                if (this.stockData[articleNumber]) {
-                    const produced = productionData[articleNumber].actualProduction || 0;
-                    if (produced > 0) {
-                        this.stockData[articleNumber].currentStock += produced;
-                        this.recordMovement(articleNumber, 'production', produced);
-                    }
-                }
+    setupAutoSync() {
+        // Subscribe to production events
+        if (typeof ChEvents !== 'undefined') {
+            ChEvents.on(EVENTS.PRODUCTION_COMPLETED, (data) => {
+                this.handleProductionUpdate(data);
             });
             
-            this.saveData();
-            this.render();
-            alert('✅ Stock synchronized with Production data');
-        } else {
-            alert('⚠️ Production Planning module not available');
+            ChEvents.on(EVENTS.SALE_COMPLETED, (data) => {
+                this.handleSaleUpdate(data);
+            });
+            
+            console.log('Auto-sync enabled for Stock of Ready Products');
         }
     },
     
-    syncWithSales() {
-        // Sync with Sales Planning module
-        console.log('Syncing with Sales Planning...');
+    handleProductionUpdate(data) {
+        // Automatically update stock when production completes
+        const { articleNumber, quantity, reference } = data;
         
-        // Get sales data from PlanningV4 if available
-        if (typeof PlanningV4 !== 'undefined' && PlanningV4.data) {
-            const salesData = PlanningV4.data;
+        if (this.stockData[articleNumber] && quantity > 0) {
+            this.stockData[articleNumber].currentStock += quantity;
+            this.stockData[articleNumber].lastProduction = new Date().toISOString().split('T')[0];
             
-            // Update stock based on actual sales
-            Object.keys(salesData).forEach(articleNumber => {
-                if (this.stockData[articleNumber]) {
-                    const sold = salesData[articleNumber].actualSales || 0;
-                    if (sold > 0) {
-                        this.stockData[articleNumber].currentStock -= sold;
-                        this.recordMovement(articleNumber, 'sale', -sold);
-                    }
-                }
-            });
-            
+            this.recordMovement(articleNumber, 'production', quantity, reference);
             this.saveData();
             this.render();
-            alert('✅ Stock synchronized with Sales data');
-        } else {
-            alert('⚠️ Sales Planning module not available');
+            
+            // Flash indicator
+            this.flashSyncIndicator('Production updated');
         }
     },
     
-    recordMovement(articleNumber, type, quantity) {
+    handleSaleUpdate(data) {
+        // Automatically update stock when sale occurs
+        const { articleNumber, quantity, reference } = data;
+        
+        if (this.stockData[articleNumber] && quantity > 0) {
+            this.stockData[articleNumber].currentStock -= quantity;
+            this.stockData[articleNumber].lastSale = new Date().toISOString().split('T')[0];
+            
+            this.recordMovement(articleNumber, 'sale', -quantity, reference);
+            this.saveData();
+            this.render();
+            
+            // Flash indicator
+            this.flashSyncIndicator('Sale processed');
+        }
+    },
+    
+    flashSyncIndicator(message) {
+        const indicator = document.getElementById('sync-indicator');
+        if (indicator) {
+            indicator.textContent = `🔄 ${message}`;
+            indicator.style.color = '#f39c12';
+            setTimeout(() => {
+                indicator.textContent = '🟢 Auto-sync active';
+                indicator.style.color = '#27ae60';
+            }, 2000);
+        }
+    },
+    
+    recordMovement(articleNumber, type, quantity, reference = null) {
         const movement = {
             id: this.movements.length + 1,
             date: new Date().toISOString().split('T')[0],
             articleNumber: articleNumber,
             type: type,
             quantity: quantity,
-            reference: this.generateReference(type),
+            reference: reference || this.generateReference(type),
             balanceAfter: this.stockData[articleNumber].currentStock
         };
         
