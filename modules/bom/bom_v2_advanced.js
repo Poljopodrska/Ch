@@ -75,39 +75,134 @@ const BOMV2Advanced = {
         
         this.loadExampleData();
         this.renderBOM();
+        this.setupProductionListener();
         
         this.initialized = true;
         console.log('BOM V2 Advanced initialized');
+    },
+    
+    // Setup listener for production events
+    setupProductionListener() {
+        if (typeof ChEvents !== 'undefined') {
+            ChEvents.on(EVENTS.PRODUCTION_COMPLETED, (data) => {
+                this.calculateAndEmitConsumption(data);
+            });
+            console.log('BOM listening for production events');
+        }
+    },
+    
+    // Calculate material consumption based on BOM
+    calculateAndEmitConsumption(productionData) {
+        const { articleNumber, quantity } = productionData;
+        
+        // Get BOM for this product
+        const bom = this.getBOMForProduct(articleNumber);
+        if (!bom) return;
+        
+        // Calculate consumption for each material
+        const consumption = {
+            ingredients: {},
+            energy: {},
+            water: {},
+            packaging: {}
+        };
+        
+        // Main ingredients
+        if (bom.ingredients && bom.ingredients.main) {
+            bom.ingredients.main.forEach(item => {
+                consumption.ingredients[item.code] = item.quantity * quantity;
+            });
+        }
+        
+        // Supporting ingredients
+        if (bom.ingredients && bom.ingredients.supporting) {
+            bom.ingredients.supporting.forEach(item => {
+                consumption.ingredients[item.code] = item.quantity * quantity;
+            });
+        }
+        
+        // Energy consumption (if defined)
+        if (bom.energy) {
+            bom.energy.forEach(item => {
+                const energyType = item.type || item.id;
+                consumption.energy[energyType] = (item.consumption || item.quantity) * quantity;
+            });
+        }
+        
+        // Water consumption (if defined)
+        if (bom.water) {
+            if (bom.water.total) {
+                consumption.water['total'] = bom.water.total * quantity;
+            } else if (Array.isArray(bom.water)) {
+                bom.water.forEach(item => {
+                    consumption.water[item.type] = item.quantity * quantity;
+                });
+            }
+        }
+        
+        // Packaging materials
+        if (bom.packaging) {
+            bom.packaging.forEach(item => {
+                consumption.packaging[item.code] = item.quantity * quantity;
+            });
+        }
+        
+        // Emit consumption event for raw materials to handle
+        if (typeof ChEvents !== 'undefined') {
+            ChEvents.emit(EVENTS.BOM_CONSUMED, {
+                articleNumber: articleNumber,
+                quantity: quantity,
+                consumption: consumption,
+                reference: productionData.reference
+            });
+        }
+    },
+    
+    // Get BOM for a specific product
+    getBOMForProduct(articleNumber) {
+        // Map article numbers to product IDs
+        const productMap = {
+            '001': 'p001',
+            '002': 'p002',
+            '003': 'p003',
+            '004': 'p004',
+            '005': 'p005'
+        };
+        
+        const productId = productMap[articleNumber];
+        if (!productId) return null;
+        
+        return this.state.bomDatabase.products[productId];
     },
     
     initialized: false,
     
     // Load example data
     loadExampleData() {
-        // Sample products
+        // Sample products matching article numbers 001-005
         this.state.products = [
             {
                 id: 'p001',
-                code: 'SVP-100',
-                name: 'Svinjska plečka',
-                nameEn: 'Pork Shoulder',
-                unit: 'kg',
-                category: 'Fresh Meat'
+                code: '001',
+                name: 'Premium Salami',
+                nameEn: 'Premium Salami',
+                unit: 'pcs',
+                category: 'Meat Products'
             },
             {
                 id: 'p002',
-                code: 'GOV-200',
-                name: 'Goveji file',
-                nameEn: 'Beef Tenderloin',
-                unit: 'kg',
-                category: 'Premium Meat'
+                code: '002',
+                name: 'Classic Mortadella',
+                nameEn: 'Classic Mortadella',
+                unit: 'pcs',
+                category: 'Meat Products'
             },
             {
                 id: 'p003',
-                code: 'PIŠ-300',
-                name: 'Piščančje prsi',
-                nameEn: 'Chicken Breast',
-                unit: 'kg',
+                code: '003',
+                name: 'Smoked Ham',
+                nameEn: 'Smoked Ham',
+                unit: 'pcs',
                 category: 'Poultry'
             },
             {
@@ -130,50 +225,172 @@ const BOMV2Advanced = {
         }
     },
     
-    // Generate default BOM data
+    // Generate default BOM data with actual material codes
     generateDefaultBOMData() {
-        this.state.products.forEach(product => {
-            const productId = product.id;
-            
-            // Ingredients
-            this.state.bomDatabase.ingredients[productId] = {
-                main: [
-                    { 
-                        id: `${productId}_main_1`,
-                        name: 'Primary Raw Material',
-                        quantity: 0.95,
-                        unit: 'kg',
-                        cost: 5.50,
-                        supplier: 'Local Farm A'
-                    }
-                ],
-                supporting: [
+        // Define specific BOMs for each product
+        const productBOMs = {
+            'p001': { // Premium Salami
+                ingredients: {
+                    main: [
+                        { 
+                            code: 'MEAT-BEEF-001',
+                            name: 'Premium Beef',
+                            quantity: 0.6,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'MEAT-PORK-001',
+                            name: 'Pork Shoulder',
+                            quantity: 0.3,
+                            unit: 'kg'
+                        }
+                    ],
+                    supporting: [
+                        {
+                            code: 'SPICE-SALT-001',
+                            name: 'Sea Salt',
+                            quantity: 0.02,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'SPICE-PEPR-001',
+                            name: 'Black Pepper',
+                            quantity: 0.005,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'SPICE-PAPR-001',
+                            name: 'Paprika',
+                            quantity: 0.008,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'ADDTV-NITR-001',
+                            name: 'Sodium Nitrite',
+                            quantity: 0.001,
+                            unit: 'kg'
+                        }
+                    ]
+                },
+                packaging: [
                     {
-                        id: `${productId}_supp_1`,
-                        name: 'Salt',
+                        code: 'PACK-FILM-001',
+                        name: 'Vacuum Film',
                         quantity: 0.02,
-                        unit: 'kg',
-                        cost: 0.50,
-                        supplier: 'Spice Supplier'
+                        unit: 'rolls'
                     },
                     {
-                        id: `${productId}_supp_2`,
-                        name: 'Black Pepper',
-                        quantity: 0.005,
-                        unit: 'kg',
-                        cost: 12.00,
-                        supplier: 'Spice Supplier'
-                    },
-                    {
-                        id: `${productId}_supp_3`,
-                        name: 'Preservatives',
-                        quantity: 0.001,
-                        unit: 'kg',
-                        cost: 25.00,
-                        supplier: 'Chemical Supplier'
+                        code: 'PACK-LABL-001',
+                        name: 'Product Labels',
+                        quantity: 2,
+                        unit: 'pcs'
                     }
                 ]
-            };
+            },
+            'p002': { // Classic Mortadella
+                ingredients: {
+                    main: [
+                        {
+                            code: 'MEAT-PORK-001',
+                            name: 'Pork Shoulder',
+                            quantity: 0.8,
+                            unit: 'kg'
+                        }
+                    ],
+                    supporting: [
+                        {
+                            code: 'SPICE-SALT-001',
+                            name: 'Sea Salt',
+                            quantity: 0.025,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'SPICE-PEPR-001',
+                            name: 'Black Pepper',
+                            quantity: 0.003,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'ADDTV-NITR-001',
+                            name: 'Sodium Nitrite',
+                            quantity: 0.001,
+                            unit: 'kg'
+                        }
+                    ]
+                },
+                packaging: [
+                    {
+                        code: 'PACK-TRAY-001',
+                        name: 'Plastic Trays',
+                        quantity: 1,
+                        unit: 'pcs'
+                    },
+                    {
+                        code: 'PACK-FILM-001',
+                        name: 'Vacuum Film',
+                        quantity: 0.01,
+                        unit: 'rolls'
+                    },
+                    {
+                        code: 'PACK-LABL-001',
+                        name: 'Product Labels',
+                        quantity: 1,
+                        unit: 'pcs'
+                    }
+                ]
+            },
+            'p003': { // Smoked Ham
+                ingredients: {
+                    main: [
+                        {
+                            code: 'MEAT-PORK-001',
+                            name: 'Pork Shoulder',
+                            quantity: 1.0,
+                            unit: 'kg'
+                        }
+                    ],
+                    supporting: [
+                        {
+                            code: 'SPICE-SALT-001',
+                            name: 'Sea Salt',
+                            quantity: 0.03,
+                            unit: 'kg'
+                        },
+                        {
+                            code: 'SPICE-PAPR-001',
+                            name: 'Paprika',
+                            quantity: 0.01,
+                            unit: 'kg'
+                        }
+                    ]
+                },
+                packaging: [
+                    {
+                        code: 'PACK-BOX-001',
+                        name: 'Shipping Boxes',
+                        quantity: 0.5,
+                        unit: 'pcs'
+                    },
+                    {
+                        code: 'PACK-FILM-001',
+                        name: 'Vacuum Film',
+                        quantity: 0.02,
+                        unit: 'rolls'
+                    }
+                ]
+            }
+        };
+        
+        // Apply BOMs to products
+        this.state.products.forEach(product => {
+            const productId = product.id;
+            const bom = productBOMs[productId] || productBOMs['p001']; // Default to p001 if not defined
+            
+            // Store complete BOM
+            this.state.bomDatabase.products[productId] = bom;
+            
+            // Also store in separate sections for compatibility
+            this.state.bomDatabase.ingredients[productId] = bom.ingredients;
             
             // Energy consumption
             this.state.bomDatabase.energy[productId] = [

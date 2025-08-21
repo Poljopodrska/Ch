@@ -243,6 +243,8 @@ const StockRawMaterials = {
                     </div>
                 </div>
                 
+                <div id="reorder-alerts" class="reorder-alerts" style="display: none;"></div>
+                
                 <div class="stock-summary">
                     ${this.renderSummary()}
                 </div>
@@ -511,6 +513,36 @@ const StockRawMaterials = {
                     margin-top: 10px;
                     padding-top: 10px;
                     border-top: 1px solid #dee2e6;
+                }
+                
+                .reorder-alerts {
+                    background: #fff3cd;
+                    border: 1px solid #ffc107;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 20px;
+                    animation: slideDown 0.3s ease;
+                }
+                
+                .reorder-alerts .alert-item {
+                    padding: 8px 12px;
+                    margin: 5px 0;
+                    background: white;
+                    border-left: 4px solid #ff9800;
+                    border-radius: 4px;
+                    font-weight: 500;
+                    color: #856404;
+                }
+                
+                @keyframes slideDown {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
                 }
             </style>
         `;
@@ -791,46 +823,115 @@ const StockRawMaterials = {
     },
     
     setupAutoTracking() {
-        // Subscribe to production events to automatically consume raw materials
+        // Subscribe to BOM consumption events
         if (typeof ChEvents !== 'undefined') {
-            ChEvents.on(EVENTS.PRODUCTION_COMPLETED, (data) => {
-                this.handleProductionConsumption(data);
+            // Listen for BOM-calculated consumption
+            ChEvents.on(EVENTS.BOM_CONSUMED, (data) => {
+                this.handleBOMConsumption(data);
             });
             
             ChEvents.on(EVENTS.ORDER_RECEIVED, (data) => {
                 this.handleOrderReceived(data);
             });
             
-            console.log('Auto-tracking enabled for Raw Materials');
+            console.log('Auto-tracking enabled for Raw Materials (BOM-based)');
         }
     },
     
-    handleProductionConsumption(data) {
-        // Automatically consume raw materials when production happens
-        const { articleNumber, quantity } = data;
+    handleBOMConsumption(data) {
+        // Automatically consume raw materials based on BOM calculations
+        const { articleNumber, quantity, consumption, reference } = data;
         
-        // Get BOM for this product to know material requirements
-        // For now, use estimated consumption rates
-        const consumptionRates = {
-            '001': { 'MEAT-BEEF-001': 0.8, 'SPICE-SALT-001': 0.02, 'PACK-FILM-001': 0.1 },
-            '002': { 'MEAT-PORK-001': 0.7, 'SPICE-PEPR-001': 0.01, 'PACK-TRAY-001': 1 },
-            '003': { 'MEAT-CHKN-001': 0.9, 'SPICE-PAPR-001': 0.015, 'PACK-BOX-001': 0.5 }
-        };
+        let totalConsumed = 0;
+        let alerts = [];
         
-        const rates = consumptionRates[articleNumber];
-        if (rates) {
-            Object.entries(rates).forEach(([materialCode, rate]) => {
+        // Process ingredients consumption
+        if (consumption.ingredients) {
+            Object.entries(consumption.ingredients).forEach(([materialCode, amount]) => {
                 if (this.stockData[materialCode]) {
-                    const consumed = quantity * rate;
-                    this.stockData[materialCode].currentStock -= consumed;
+                    const before = this.stockData[materialCode].currentStock;
+                    this.stockData[materialCode].currentStock -= amount;
+                    
+                    // Check if we hit reorder point
+                    if (before > this.stockData[materialCode].reorderPoint && 
+                        this.stockData[materialCode].currentStock <= this.stockData[materialCode].reorderPoint) {
+                        alerts.push(`${materialCode} reached reorder point!`);
+                    }
+                    
+                    // Check if we're below minimum
+                    if (this.stockData[materialCode].currentStock < this.stockData[materialCode].minStock) {
+                        alerts.push(`⚠️ ${materialCode} below minimum stock!`);
+                    }
+                    
+                    // Update average usage
                     this.stockData[materialCode].avgDailyUsage = 
-                        (this.stockData[materialCode].avgDailyUsage * 0.9) + (consumed * 0.1);
+                        (this.stockData[materialCode].avgDailyUsage * 0.9) + (amount * 0.1);
+                    
+                    totalConsumed++;
                 }
             });
+        }
+        
+        // Process packaging consumption
+        if (consumption.packaging) {
+            Object.entries(consumption.packaging).forEach(([materialCode, amount]) => {
+                if (this.stockData[materialCode]) {
+                    const before = this.stockData[materialCode].currentStock;
+                    this.stockData[materialCode].currentStock -= amount;
+                    
+                    // Check alerts
+                    if (before > this.stockData[materialCode].reorderPoint && 
+                        this.stockData[materialCode].currentStock <= this.stockData[materialCode].reorderPoint) {
+                        alerts.push(`${materialCode} reached reorder point!`);
+                    }
+                    
+                    totalConsumed++;
+                }
+            });
+        }
+        
+        // Record the consumption movement
+        this.recordConsumptionMovement(articleNumber, quantity, consumption, reference);
+        
+        // Show alerts if any
+        if (alerts.length > 0) {
+            this.showReorderAlerts(alerts);
+        }
+        
+        this.saveData();
+        this.render();
+        this.flashSyncIndicator(`BOM consumed: ${totalConsumed} materials`);
+    },
+    
+    recordConsumptionMovement(articleNumber, quantity, consumption, reference) {
+        // Record detailed consumption in movements
+        const movement = {
+            date: new Date().toISOString(),
+            type: 'production_consumption',
+            productArticle: articleNumber,
+            productQuantity: quantity,
+            reference: reference,
+            materials: consumption
+        };
+        
+        if (!this.movements) this.movements = [];
+        this.movements.push(movement);
+        localStorage.setItem('rawMaterialMovements', JSON.stringify(this.movements));
+    },
+    
+    showReorderAlerts(alerts) {
+        // Create or update alerts display
+        const alertContainer = document.getElementById('reorder-alerts');
+        if (alertContainer) {
+            alertContainer.innerHTML = alerts.map(alert => 
+                `<div class="alert-item">${alert}</div>`
+            ).join('');
+            alertContainer.style.display = 'block';
             
-            this.saveData();
-            this.render();
-            this.flashSyncIndicator('Materials consumed');
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertContainer.style.display = 'none';
+            }, 5000);
         }
     },
     
