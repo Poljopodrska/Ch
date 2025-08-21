@@ -138,53 +138,53 @@ const ChApp = {
         }
     },
     
-    // Planning view - Now with V4 expandable hierarchy
+    // Planning view - Now with V5 Editable functionality
     async getPlanningView() {
-        console.log('Loading Planning V4 module...');
+        console.log('Loading Planning V5 Editable module...');
         
         // Create container for planning module
         const html = `
             <div id="planning-grid">
-                <!-- Planning V4 will be loaded here -->
+                <!-- Planning V5 Editable will be loaded here -->
             </div>
         `;
         
-        // Load the planning V4 module after DOM is ready
+        // Load the planning V5 editable module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if PlanningV4 is already loaded
-                if (typeof PlanningV4 !== 'undefined') {
-                    console.log('PlanningV4 already loaded, initializing...');
-                    PlanningV4.init();
-                    console.log('Planning V4 initialized');
+                // Check if PlanningV5Editable is already loaded
+                if (typeof PlanningV5Editable !== 'undefined') {
+                    console.log('PlanningV5Editable already loaded, initializing...');
+                    PlanningV5Editable.init();
+                    console.log('Planning V5 Editable initialized');
                     return;
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/planning/planning_v4.js"]');
+                const existingScript = document.querySelector('script[src="modules/planning/planning_v5_editable.js"]');
                 if (existingScript) {
-                    console.log('Planning V4 script already in DOM, waiting for load...');
+                    console.log('Planning V5 Editable script already in DOM, waiting for load...');
                     return;
                 }
                 
-                // Load planning_v4.js module
+                // Load planning_v5_editable.js module
                 const script = document.createElement('script');
-                script.src = 'modules/planning/planning_v4.js';
+                script.src = 'modules/planning/planning_v5_editable.js';
                 script.onload = () => {
-                    console.log('Planning V4 script loaded');
-                    if (typeof PlanningV4 !== 'undefined') {
-                        PlanningV4.init();
-                        console.log('Planning V4 initialized');
+                    console.log('Planning V5 Editable script loaded');
+                    if (typeof PlanningV5Editable !== 'undefined') {
+                        PlanningV5Editable.init();
+                        console.log('Planning V5 Editable initialized');
                     } else {
-                        console.error('PlanningV4 not found after loading script');
+                        console.error('PlanningV5Editable not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load planning_v4.js:', e);
+                    console.error('Failed to load planning_v5_editable.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {
-                console.error('Error loading Planning V4:', error);
+                console.error('Error loading Planning V5 Editable:', error);
             }
         }, 100);
         
@@ -299,51 +299,51 @@ const ChApp = {
     
     // BOM view
     async getBOMView() {
-        console.log('Loading BOM V1 module...');
+        console.log('Loading BOM V2 Advanced module...');
         
         // Create container for BOM module
         const html = `
             <div id="bom-container">
-                <!-- BOM V1 will be loaded here -->
+                <!-- BOM V2 Advanced will be loaded here -->
             </div>
         `;
         
         // Load the BOM module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if BOMV1 is already loaded
-                if (typeof BOMV1 !== 'undefined') {
-                    console.log('BOMV1 already loaded, initializing...');
-                    BOMV1.init();
-                    console.log('BOM V1 initialized');
+                // Check if BOMV2Advanced is already loaded
+                if (typeof BOMV2Advanced !== 'undefined') {
+                    console.log('BOMV2Advanced already loaded, initializing...');
+                    BOMV2Advanced.init();
+                    console.log('BOM V2 Advanced initialized');
                     return;
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/bom/bom_v1.js"]');
+                const existingScript = document.querySelector('script[src="modules/bom/bom_v2_advanced.js"]');
                 if (existingScript) {
-                    console.log('BOM V1 script already in DOM, waiting for load...');
+                    console.log('BOM V2 Advanced script already in DOM, waiting for load...');
                     return;
                 }
                 
-                // Load bom_v1.js module
+                // Load bom_v2_advanced.js module
                 const script = document.createElement('script');
-                script.src = 'modules/bom/bom_v1.js';
+                script.src = 'modules/bom/bom_v2_advanced.js';
                 script.onload = () => {
-                    console.log('BOM V1 script loaded');
-                    if (typeof BOMV1 !== 'undefined') {
-                        BOMV1.init();
-                        console.log('BOM V1 initialized');
+                    console.log('BOM V2 Advanced script loaded');
+                    if (typeof BOMV2Advanced !== 'undefined') {
+                        BOMV2Advanced.init();
+                        console.log('BOM V2 Advanced initialized');
                     } else {
-                        console.error('BOMV1 not found after loading script');
+                        console.error('BOMV2Advanced not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load bom_v1.js:', e);
+                    console.error('Failed to load bom_v2_advanced.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {
-                console.error('Error loading BOM V1:', error);
+                console.error('Error loading BOM V2 Advanced:', error);
             }
         }, 100);
         

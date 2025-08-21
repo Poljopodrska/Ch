@@ -1,9 +1,10 @@
-v0.5.5 - STREAMLINED & DESIGN LOCKED
+v0.5.6 - EDITABLE SALES PLANNING
 Deployed: 2025-08-18
 Changes:
-- Removed Dashboard, Modules, Settings, and About tabs
-- Kept only essential tabs: Pricing, Sales Planning, Production, Stock Report, BOM & Capacity
-- Created DESIGN_LOCK.json to preserve approved design
-- Created design-locked.css with fixed styles
-- Set Pricing as default landing page
-- Version 0.5.5 - Clean, focused interface
+- Upgraded Sales Planning module to V5 with full editing capabilities
+- Added click-to-edit functionality for all future planning values
+- Visual indicators for edited cells (green background + asterisk)
+- Save/Export/Reset functionality with localStorage persistence
+- Enhanced user experience with hover effects and edit states
+- Maintained design lock compliance while adding functionality
+- Version 0.5.6 - Fully editable sales planning
