@@ -138,53 +138,53 @@ const ChApp = {
         }
     },
     
-    // Planning view - Now with V5 Editable functionality
+    // Planning view - V4 with expandable hierarchy (months → weeks → days)
     async getPlanningView() {
-        console.log('Loading Planning V5 Editable module...');
+        console.log('Loading Planning V4 module with expandable hierarchy...');
         
         // Create container for planning module
         const html = `
             <div id="planning-grid">
-                <!-- Planning V5 Editable will be loaded here -->
+                <!-- Planning V4 will be loaded here -->
             </div>
         `;
         
-        // Load the planning V5 editable module after DOM is ready
+        // Load the planning V4 module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if PlanningV5Editable is already loaded
-                if (typeof PlanningV5Editable !== 'undefined') {
-                    console.log('PlanningV5Editable already loaded, initializing...');
-                    PlanningV5Editable.init();
-                    console.log('Planning V5 Editable initialized');
+                // Check if PlanningV4 is already loaded
+                if (typeof PlanningV4 !== 'undefined') {
+                    console.log('PlanningV4 already loaded, initializing...');
+                    PlanningV4.init();
+                    console.log('Planning V4 initialized');
                     return;
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/planning/planning_v5_editable.js"]');
+                const existingScript = document.querySelector('script[src="modules/planning/planning_v4.js"]');
                 if (existingScript) {
-                    console.log('Planning V5 Editable script already in DOM, waiting for load...');
+                    console.log('Planning V4 script already in DOM, waiting for load...');
                     return;
                 }
                 
-                // Load planning_v5_editable.js module
+                // Load planning_v4.js module
                 const script = document.createElement('script');
-                script.src = 'modules/planning/planning_v5_editable.js';
+                script.src = 'modules/planning/planning_v4.js';
                 script.onload = () => {
-                    console.log('Planning V5 Editable script loaded');
-                    if (typeof PlanningV5Editable !== 'undefined') {
-                        PlanningV5Editable.init();
-                        console.log('Planning V5 Editable initialized');
+                    console.log('Planning V4 script loaded');
+                    if (typeof PlanningV4 !== 'undefined') {
+                        PlanningV4.init();
+                        console.log('Planning V4 initialized');
                     } else {
-                        console.error('PlanningV5Editable not found after loading script');
+                        console.error('PlanningV4 not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load planning_v5_editable.js:', e);
+                    console.error('Failed to load planning_v4.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {
-                console.error('Error loading Planning V5 Editable:', error);
+                console.error('Error loading Planning V4:', error);
             }
         }, 100);
         
