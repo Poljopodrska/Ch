@@ -3,7 +3,7 @@
 
 const ChVersion = {
     // Current version - should match package.json
-    current: '0.5.7',
+    current: '0.5.8',
     
     // Build and deployment info
     buildId: null,

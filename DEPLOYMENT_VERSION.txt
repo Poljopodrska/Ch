@@ -1,12 +1,12 @@
-v0.5.7 - ADVANCED BOM SYSTEM
+v0.5.8 - ADVANCED PRODUCTION PLANNING
 Deployed: 2025-08-21
 Changes:
-- Replaced old BOM v1 with comprehensive BOM v2 Advanced system
-- Database-ready structure for RDS migration
-- Complete resource tracking: Ingredients (Main/Supporting), Energy, Water, Packaging, Workforce
-- Click-to-edit functionality throughout all BOM fields
-- SQL export capability for database preparation
-- Cost summary with real-time calculations
-- Removed old capacity features to focus on BOM
-- Simplified navigation: "BOM & Capacity" → "BOM"
-- Version 0.5.7 - Advanced BOM management system
+- Created Production Planning V2 with expandable hierarchy (months → weeks → days)
+- Same brilliant system as Sales Planning - click to expand/collapse levels
+- Production-specific features: capacity planning, efficiency tracking, shift management
+- Inline editing for all future production values
+- Real-time efficiency calculations and OEE tracking
+- Production line assignment and batch size calculations
+- Optimize function to level production across days
+- Integration ready for BOM resource calculations
+- Version 0.5.8 - Advanced production planning system

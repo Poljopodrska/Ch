@@ -193,51 +193,51 @@ const ChApp = {
     
     // Production Planning view
     async getProductionPlanningView() {
-        console.log('Loading Production Planning V1 module...');
+        console.log('Loading Production Planning V2 module...');
         
         // Create container for production planning module
         const html = `
             <div id="production-planning-grid">
-                <!-- Production Planning V1 will be loaded here -->
+                <!-- Production Planning V2 will be loaded here -->
             </div>
         `;
         
         // Load the production planning module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if ProductionPlanningV1 is already loaded
-                if (typeof ProductionPlanningV1 !== 'undefined') {
-                    console.log('ProductionPlanningV1 already loaded, initializing...');
-                    ProductionPlanningV1.init();
-                    console.log('Production Planning V1 initialized');
+                // Check if ProductionPlanningV2 is already loaded
+                if (typeof ProductionPlanningV2 !== 'undefined') {
+                    console.log('ProductionPlanningV2 already loaded, initializing...');
+                    ProductionPlanningV2.init();
+                    console.log('Production Planning V2 initialized');
                     return;
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/production/production_planning_v1.js"]');
+                const existingScript = document.querySelector('script[src="modules/production/production_planning_v2.js"]');
                 if (existingScript) {
-                    console.log('Production Planning V1 script already in DOM, waiting for load...');
+                    console.log('Production Planning V2 script already in DOM, waiting for load...');
                     return;
                 }
                 
-                // Load production_planning_v1.js module
+                // Load production_planning_v2.js module
                 const script = document.createElement('script');
-                script.src = 'modules/production/production_planning_v1.js';
+                script.src = 'modules/production/production_planning_v2.js';
                 script.onload = () => {
-                    console.log('Production Planning V1 script loaded');
-                    if (typeof ProductionPlanningV1 !== 'undefined') {
-                        ProductionPlanningV1.init();
-                        console.log('Production Planning V1 initialized');
+                    console.log('Production Planning V2 script loaded');
+                    if (typeof ProductionPlanningV2 !== 'undefined') {
+                        ProductionPlanningV2.init();
+                        console.log('Production Planning V2 initialized');
                     } else {
-                        console.error('ProductionPlanningV1 not found after loading script');
+                        console.error('ProductionPlanningV2 not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load production_planning_v1.js:', e);
+                    console.error('Failed to load production_planning_v2.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {
-                console.error('Error loading Production Planning V1:', error);
+                console.error('Error loading Production Planning V2:', error);
             }
         }, 100);
         
