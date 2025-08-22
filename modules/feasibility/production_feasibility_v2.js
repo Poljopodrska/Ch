@@ -582,11 +582,11 @@ const ProductionFeasibility = {
     getStatusIcon(status) {
         switch(status) {
             case 'ok': return '✅';
-            case 'warning': return '⚠️';
-            case 'critical': return '❌';
-            case 'excess': return '📈';
-            case 'none': return '➖';
-            default: return '❓';
+            case 'warning': return '❌';  // Under capacity - show red cross
+            case 'critical': return '❌'; // Under capacity - show red cross
+            case 'excess': return '✅';   // Over capacity is OK - show checkmark
+            case 'none': return '➖';     // No production - keep dash
+            default: return '❌';         // Default to red cross for any issues
         }
     },
     
