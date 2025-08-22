@@ -473,7 +473,7 @@ const ChApp = {
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/feasibility/production_feasibility.js"]');
+                const existingScript = document.querySelector('script[src="modules/feasibility/production_feasibility_v2.js"]');
                 if (existingScript) {
                     console.log('Production Feasibility script already in DOM, waiting for load...');
                     // Try to init after a small delay
@@ -486,9 +486,9 @@ const ChApp = {
                     return;
                 }
                 
-                // Load production_feasibility.js module
+                // Load production_feasibility_v2.js module (new version with expandable grid)
                 const script = document.createElement('script');
-                script.src = 'modules/feasibility/production_feasibility.js';
+                script.src = 'modules/feasibility/production_feasibility_v2.js';
                 script.onload = () => {
                     console.log('Production Feasibility script loaded');
                     if (typeof ProductionFeasibility !== 'undefined') {
