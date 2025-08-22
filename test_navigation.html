@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Two-Row Navigation</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .header { background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .nav-row { display: flex; gap: 10px; margin: 10px 0; justify-content: center; }
+        .nav-row.sub-tabs { border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+        .nav-link { padding: 10px 20px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; cursor: pointer; }
+        .nav-link.main-tab { font-size: 16px; font-weight: 600; padding: 12px 25px; background: rgba(255,255,255,0.15); }
+        .nav-link.active { background: white; color: #1976d2; font-weight: 600; }
+        .content { background: white; padding: 20px; border-radius: 10px; margin-top: 20px; }
+        #status { background: #333; color: lime; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏭 Navigation Test - Two Row Structure</h1>
+        <div id="main-nav">
+            <div class="nav-row main-tabs">
+                <button class="nav-link main-tab" data-main="sales">💰 Sales</button>
+                <button class="nav-link main-tab active" data-main="production">🏭 Production</button>
+                <button class="nav-link main-tab" data-main="management">📊 Management</button>
+            </div>
+            <div class="nav-row sub-tabs" id="sub-tabs">
+                <button class="nav-link active" data-view="production-planning">🏭 Production Planning</button>
+                <button class="nav-link" data-view="stock-report">📦 Stock Report</button>
+                <button class="nav-link" data-view="bom">📋 BOM</button>
+                <button class="nav-link" data-view="workforce">👥 Workforce</button>
+                <button class="nav-link" data-view="feasibility">🎯 Feasibility</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="status">Current: Production → Production Planning</div>
+    <div class="content" id="content">
+        <h2>Navigation Test</h2>
+        <p>Click on the main tabs (Sales, Production, Management) to see sub-tabs change.</p>
+        <p>Current configuration shows Production sub-tabs by default.</p>
+    </div>
+    
+    <script>
+        const subTabConfigs = {
+            sales: [
+                { view: 'pricing', icon: '💰', text: 'Pricing' },
+                { view: 'planning', icon: '📈', text: 'Sales Planning' }
+            ],
+            production: [
+                { view: 'production-planning', icon: '🏭', text: 'Production Planning' },
+                { view: 'stock-report', icon: '📦', text: 'Stock Report' },
+                { view: 'bom', icon: '📋', text: 'BOM' },
+                { view: 'workforce', icon: '👥', text: 'Workforce' },
+                { view: 'feasibility', icon: '🎯', text: 'Feasibility' }
+            ],
+            management: [
+                { view: 'management-production', icon: '🏭', text: 'Production Analytics' },
+                { view: 'management-sales', icon: '💰', text: 'Sales & Margin' }
+            ]
+        };
+        
+        let currentMain = 'production';
+        let currentSub = 'production-planning';
+        
+        // Handle main tab clicks
+        document.querySelectorAll('.main-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const mainCategory = tab.getAttribute('data-main');
+                switchMainTab(mainCategory);
+            });
+        });
+        
+        function switchMainTab(mainCategory) {
+            currentMain = mainCategory;
+            
+            // Update main tab active state
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-main') === mainCategory) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // Update sub-tabs
+            renderSubTabs(mainCategory);
+            updateStatus();
+        }
+        
+        function renderSubTabs(mainCategory) {
+            const subTabsContainer = document.getElementById('sub-tabs');
+            const config = subTabConfigs[mainCategory];
+            
+            subTabsContainer.innerHTML = config.map((item, index) => 
+                `<button class="nav-link ${index === 0 ? 'active' : ''}" data-view="${item.view}">
+                    ${item.icon} ${item.text}
+                </button>`
+            ).join('');
+            
+            currentSub = config[0].view;
+            
+            // Add event handlers
+            subTabsContainer.querySelectorAll('.nav-link').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const view = tab.getAttribute('data-view');
+                    
+                    // Update active state
+                    subTabsContainer.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    currentSub = view;
+                    updateStatus();
+                });
+            });
+        }
+        
+        function updateStatus() {
+            document.getElementById('status').textContent = `Current: ${currentMain.charAt(0).toUpperCase() + currentMain.slice(1)} → ${currentSub.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+        }
+        
+        updateStatus();
+    </script>
+</body>
+</html>

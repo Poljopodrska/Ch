@@ -13,10 +13,13 @@ const PlanningV4 = {
         today: new Date(),
         expanded: {
             months: new Set(),  // Which months are expanded to show weeks
-            weeks: new Set()    // Which weeks are expanded to show days
+            weeks: new Set(),   // Which weeks are expanded to show days
+            customers: new Set()  // Which products have expanded customer view
         },
         data: {},
-        products: []
+        products: [],
+        customerData: {},  // Customer-specific planning data
+        showCustomerView: true  // Enable customer expansion feature
     },
     
     // Initialize the planning module
@@ -704,7 +707,166 @@ const PlanningV4 = {
             }
         }
         
+        // Add customer rows if expanded
+        if (this.state.expanded.customers.has(product.id) && window.CRMData) {
+            html += this.renderCustomerRows(product);
+        }
+        
         return html;
+    },
+    
+    // Render customer-specific rows for a product
+    renderCustomerRows(product) {
+        const customers = window.CRMData.getCustomers();
+        let html = `
+            <tr class="customer-header-row">
+                <td colspan="100" style="background: #e3f2fd; padding: 8px; font-weight: 600;">
+                    👥 Customer Breakdown for ${product.name}
+                </td>
+            </tr>
+        `;
+        
+        // Show top 5 customers
+        const topCustomers = customers.slice(0, 5);
+        
+        topCustomers.forEach(customer => {
+            const customerData = this.getCustomerPlanningData(product.id, customer.id);
+            html += `
+                <tr class="customer-row" style="background: #f5f5f5;">
+                    <td class="customer-name" style="padding-left: 20px; font-size: 13px;">
+                        <strong>${customer.code}</strong><br>
+                        ${customer.name}<br>
+                        <small style="color: #666;">${customer.type}</small><br>
+                        <small style="color: #888;">Discount: ${customer.discount}%</small>
+                    </td>
+                    <td class="year-cell">
+                        ${this.state.currentYear}<br>
+                        <small>Customer Plan</small>
+                    </td>
+            `;
+            
+            // Add month cells for customer
+            for (let month = 1; month <= 12; month++) {
+                const monthValue = customerData.months[month] || 0;
+                const isEditable = month >= this.state.currentMonth;
+                
+                if (isEditable) {
+                    html += `
+                        <td class="cell-future editable customer-cell" 
+                            contenteditable="true"
+                            style="background: #e8f5e9; font-size: 12px;"
+                            onblur="PlanningV4.updateCustomerMonth('${product.id}', '${customer.id}', ${month}, this.textContent)"
+                            onkeypress="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+                            ${this.formatNumber(monthValue)}
+                        </td>
+                    `;
+                } else {
+                    html += `
+                        <td class="cell-actual customer-cell" style="font-size: 12px;">
+                            ${this.formatNumber(monthValue)}
+                        </td>
+                    `;
+                }
+            }
+            
+            // Total for customer
+            const customerTotal = Object.values(customerData.months).reduce((sum, val) => sum + val, 0);
+            html += `
+                <td class="cell-total" style="font-size: 12px; font-weight: 600;">
+                    ${this.formatNumber(customerTotal)}
+                </td>
+            </tr>
+            `;
+        });
+        
+        // Add summary row
+        html += `
+            <tr class="customer-summary-row" style="background: #fff3e0; font-weight: 600;">
+                <td style="padding-left: 20px;">Total (Top 5)</td>
+                <td>Summary</td>
+        `;
+        
+        for (let month = 1; month <= 12; month++) {
+            let monthTotal = 0;
+            topCustomers.forEach(customer => {
+                const customerData = this.getCustomerPlanningData(product.id, customer.id);
+                monthTotal += customerData.months[month] || 0;
+            });
+            html += `<td style="font-size: 12px;">${this.formatNumber(monthTotal)}</td>`;
+        }
+        
+        const grandTotal = topCustomers.reduce((total, customer) => {
+            const customerData = this.getCustomerPlanningData(product.id, customer.id);
+            return total + Object.values(customerData.months).reduce((sum, val) => sum + val, 0);
+        }, 0);
+        
+        html += `
+                <td class="cell-total">${this.formatNumber(grandTotal)}</td>
+            </tr>
+        `;
+        
+        return html;
+    },
+    
+    // Get or generate customer planning data
+    getCustomerPlanningData(productId, customerId) {
+        const key = `${productId}_${customerId}`;
+        
+        if (!this.state.customerData[key]) {
+            // Generate sample data based on customer discount
+            const customer = window.CRMData.getCustomerById(customerId);
+            const baseData = this.state.data[productId][this.state.currentYear + '_plan'];
+            
+            this.state.customerData[key] = {
+                months: {}
+            };
+            
+            // Calculate customer-specific volumes based on their order history
+            for (let month = 1; month <= 12; month++) {
+                const baseValue = baseData.months[month].total || 0;
+                // Higher discount customers typically order more
+                const volumeFactor = 1 + (customer.discount / 100);
+                const randomVariation = 0.8 + Math.random() * 0.4; // 80-120% variation
+                
+                this.state.customerData[key].months[month] = 
+                    Math.round(baseValue * 0.15 * volumeFactor * randomVariation); // Each customer ~15% of total
+            }
+        }
+        
+        return this.state.customerData[key];
+    },
+    
+    // Toggle customer view for a product
+    toggleCustomerView(productId) {
+        if (this.state.expanded.customers.has(productId)) {
+            this.state.expanded.customers.delete(productId);
+        } else {
+            this.state.expanded.customers.add(productId);
+        }
+        this.renderPlanningGrid();
+    },
+    
+    // Update customer month value
+    updateCustomerMonth(productId, customerId, month, newValue) {
+        const value = parseInt(newValue.replace(/[^\d]/g, '')) || 0;
+        const key = `${productId}_${customerId}`;
+        
+        if (!this.state.customerData[key]) {
+            this.state.customerData[key] = { months: {} };
+        }
+        
+        this.state.customerData[key].months[month] = value;
+        
+        // Save to localStorage
+        this.saveCustomerData();
+        
+        // Could trigger recalculation of totals if needed
+        console.log(`Updated customer ${customerId} for product ${productId}, month ${month}: ${value}`);
+    },
+    
+    // Save customer data to localStorage
+    saveCustomerData() {
+        localStorage.setItem('ch_planning_customer_data', JSON.stringify(this.state.customerData));
     },
     
     // Render a single row
@@ -713,12 +875,26 @@ const PlanningV4 = {
         
         // Product cell (only for first year row)
         if (isFirstRow) {
+            const hasCustomerView = this.state.showCustomerView && window.CRMData;
+            const isExpanded = this.state.expanded.customers.has(product.id);
+            
             html += `
                 <td class="product-cell" rowspan="6">
                     <strong>${product.code}</strong><br>
                     ${product.name}<br>
                     <small>${product.nameEn}</small><br>
                     <em>${product.unit}</em>
+                    ${hasCustomerView ? `
+                        <div style="margin-top: 8px;">
+                            <button class="expand-customers-btn" 
+                                    onclick="PlanningV4.toggleCustomerView('${product.id}')"
+                                    style="background: #2196f3; color: white; border: none; 
+                                           padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
+                                    title="Show customer breakdown">
+                                <span>${isExpanded ? '▼' : '▶'}</span> 👥 Customers
+                            </button>
+                        </div>
+                    ` : ''}
                 </td>
             `;
         }

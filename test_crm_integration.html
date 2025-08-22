@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CRM Integration</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .test-section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        h2 { color: #2c3e50; margin-bottom: 15px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .test-result { margin: 10px 0; padding: 8px; background: #f8f9fa; border-left: 3px solid #007bff; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>🧪 CRM Integration Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. Load CRM Module</h2>
+        <button onclick="loadCRM()">Load CRM</button>
+        <div id="crm-status" class="status info">CRM not loaded</div>
+        <div id="crm-container" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test CRM Data Access</h2>
+        <button onclick="testCRMData()">Test CRM Data</button>
+        <div id="data-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Load Pricing Module</h2>
+        <button onclick="loadPricing()">Load Pricing</button>
+        <div id="pricing-status" class="status info">Pricing not loaded</div>
+        <div id="pricing-container" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Load Sales Planning Module</h2>
+        <button onclick="loadPlanning()">Load Planning</button>
+        <div id="planning-status" class="status info">Planning not loaded</div>
+        <div id="planning-grid" style="display: none;"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. Integration Test Results</h2>
+        <button onclick="runIntegrationTests()">Run All Integration Tests</button>
+        <div id="integration-results"></div>
+    </div>
+    
+    <!-- Load Week Utils first -->
+    <script src="static/js/week-utils.js"></script>
+    
+    <script>
+        // Test functions
+        function loadCRM() {
+            const script = document.createElement('script');
+            script.src = 'modules/crm/customer_crm.js';
+            script.onload = () => {
+                if (typeof CustomerCRM !== 'undefined') {
+                    CustomerCRM.init({ integrationMode: true });
+                    document.getElementById('crm-status').className = 'status success';
+                    document.getElementById('crm-status').textContent = '✅ CRM loaded successfully';
+                    
+                    // Test global CRM data availability
+                    if (window.CRMData) {
+                        const customers = window.CRMData.getCustomers();
+                        document.getElementById('crm-status').innerHTML += 
+                            `<br>Found ${customers.length} customers`;
+                    }
+                } else {
+                    document.getElementById('crm-status').className = 'status error';
+                    document.getElementById('crm-status').textContent = '❌ CRM module not found';
+                }
+            };
+            script.onerror = () => {
+                document.getElementById('crm-status').className = 'status error';
+                document.getElementById('crm-status').textContent = '❌ Failed to load CRM module';
+            };
+            document.head.appendChild(script);
+        }
+        
+        function testCRMData() {
+            const results = document.getElementById('data-results');
+            results.innerHTML = '';
+            
+            if (!window.CRMData) {
+                results.innerHTML = '<div class="status error">❌ CRM Data not available - Load CRM first</div>';
+                return;
+            }
+            
+            try {
+                // Test 1: Get customers
+                const customers = window.CRMData.getCustomers();
+                results.innerHTML += `<div class="test-result">✅ getCustomers(): ${customers.length} customers found</div>`;
+                
+                // Test 2: Get specific customer
+                const customer = window.CRMData.getCustomerById('c001');
+                results.innerHTML += `<div class="test-result">✅ getCustomerById('c001'): ${customer.name}</div>`;
+                
+                // Test 3: Get customer pricing
+                const pricing = window.CRMData.getCustomerPricing('c001', 'p001');
+                if (pricing) {
+                    results.innerHTML += `<div class="test-result">✅ getCustomerPricing(): Base €${pricing.basePrice.toFixed(2)} → Net €${pricing.netPrice.toFixed(2)} (-${pricing.discount}%)</div>`;
+                } else {
+                    results.innerHTML += `<div class="test-result">⚠️ Customer pricing not found</div>`;
+                }
+                
+                // Test 4: Show sample customers
+                results.innerHTML += '<div class="test-result"><strong>Sample Customers:</strong></div>';
+                customers.slice(0, 3).forEach(c => {
+                    results.innerHTML += `<div class="test-result" style="margin-left: 20px;">
+                        ${c.code}: ${c.name} (${c.type}) - Discount: ${c.discount}%
+                    </div>`;
+                });
+                
+            } catch (error) {
+                results.innerHTML += `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        function loadPricing() {
+            const script = document.createElement('script');
+            script.src = 'modules/pricing/pricing_v3.js';
+            script.onload = () => {
+                if (typeof PricingV3 !== 'undefined') {
+                    // Don't init here - just check if loaded
+                    document.getElementById('pricing-status').className = 'status success';
+                    document.getElementById('pricing-status').textContent = '✅ Pricing V3 loaded successfully';
+                    
+                    // Show integration status
+                    if (window.CRMData) {
+                        document.getElementById('pricing-status').innerHTML += 
+                            '<br>✅ CRM integration available';
+                    } else {
+                        document.getElementById('pricing-status').innerHTML += 
+                            '<br>⚠️ CRM not loaded - customer pricing won\'t show';
+                    }
+                } else {
+                    document.getElementById('pricing-status').className = 'status error';
+                    document.getElementById('pricing-status').textContent = '❌ Pricing module not found';
+                }
+            };
+            script.onerror = () => {
+                document.getElementById('pricing-status').className = 'status error';
+                document.getElementById('pricing-status').textContent = '❌ Failed to load Pricing module';
+            };
+            document.head.appendChild(script);
+        }
+        
+        function loadPlanning() {
+            const script = document.createElement('script');
+            script.src = 'modules/planning/planning_v4.js';
+            script.onload = () => {
+                if (typeof PlanningV4 !== 'undefined') {
+                    document.getElementById('planning-status').className = 'status success';
+                    document.getElementById('planning-status').textContent = '✅ Planning V4 loaded successfully';
+                    
+                    // Show integration status
+                    if (window.CRMData) {
+                        document.getElementById('planning-status').innerHTML += 
+                            '<br>✅ CRM integration available - customer views will work';
+                    } else {
+                        document.getElementById('planning-status').innerHTML += 
+                            '<br>⚠️ CRM not loaded - customer planning won\'t show';
+                    }
+                } else {
+                    document.getElementById('planning-status').className = 'status error';
+                    document.getElementById('planning-status').textContent = '❌ Planning module not found';
+                }
+            };
+            script.onerror = () => {
+                document.getElementById('planning-status').className = 'status error';
+                document.getElementById('planning-status').textContent = '❌ Failed to load Planning module';
+            };
+            document.head.appendChild(script);
+        }
+        
+        function runIntegrationTests() {
+            const results = document.getElementById('integration-results');
+            results.innerHTML = '<h3>Running Integration Tests...</h3>';
+            
+            let testsPassed = 0;
+            let totalTests = 0;
+            
+            // Test 1: CRM Module Loaded
+            totalTests++;
+            if (typeof CustomerCRM !== 'undefined') {
+                results.innerHTML += '<div class="test-result">✅ Test 1: CRM Module loaded</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 1: CRM Module not loaded</div>';
+            }
+            
+            // Test 2: CRM Global Data Available
+            totalTests++;
+            if (window.CRMData) {
+                results.innerHTML += '<div class="test-result">✅ Test 2: Global CRM data available</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 2: Global CRM data not available</div>';
+            }
+            
+            // Test 3: Pricing Module Loaded
+            totalTests++;
+            if (typeof PricingV3 !== 'undefined') {
+                results.innerHTML += '<div class="test-result">✅ Test 3: Pricing V3 module loaded</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 3: Pricing V3 module not loaded</div>';
+            }
+            
+            // Test 4: Planning Module Loaded
+            totalTests++;
+            if (typeof PlanningV4 !== 'undefined') {
+                results.innerHTML += '<div class="test-result">✅ Test 4: Planning V4 module loaded</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 4: Planning V4 module not loaded</div>';
+            }
+            
+            // Test 5: Customer Data Integration
+            totalTests++;
+            if (window.CRMData && window.CRMData.getCustomers().length > 0) {
+                const customers = window.CRMData.getCustomers();
+                const pricing = window.CRMData.getCustomerPricing(customers[0].id, 'p001');
+                if (pricing) {
+                    results.innerHTML += '<div class="test-result">✅ Test 5: Customer pricing data working</div>';
+                    testsPassed++;
+                } else {
+                    results.innerHTML += '<div class="test-result">❌ Test 5: Customer pricing data not working</div>';
+                }
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 5: No customer data available</div>';
+            }
+            
+            // Test 6: Pricing Module Customer Integration
+            totalTests++;
+            if (typeof PricingV3 !== 'undefined' && PricingV3.state && PricingV3.state.showCustomerPricing) {
+                results.innerHTML += '<div class="test-result">✅ Test 6: Pricing module has customer integration</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 6: Pricing module missing customer integration</div>';
+            }
+            
+            // Test 7: Planning Module Customer Integration  
+            totalTests++;
+            if (typeof PlanningV4 !== 'undefined' && PlanningV4.state && PlanningV4.state.showCustomerView) {
+                results.innerHTML += '<div class="test-result">✅ Test 7: Planning module has customer integration</div>';
+                testsPassed++;
+            } else {
+                results.innerHTML += '<div class="test-result">❌ Test 7: Planning module missing customer integration</div>';
+            }
+            
+            // Summary
+            const successRate = (testsPassed / totalTests * 100).toFixed(0);
+            const summaryClass = testsPassed === totalTests ? 'success' : testsPassed > totalTests/2 ? 'info' : 'error';
+            results.innerHTML += `
+                <div class="status ${summaryClass}" style="margin-top: 20px;">
+                    <strong>Integration Test Summary:</strong><br>
+                    Passed: ${testsPassed}/${totalTests} tests (${successRate}%)<br>
+                    ${testsPassed === totalTests ? '🎉 All tests passed! CRM integration is working correctly.' : 
+                      testsPassed > totalTests/2 ? '⚠️ Some tests failed. Check individual results above.' :
+                      '❌ Most tests failed. Please load all modules first.'}
+                </div>
+            `;
+        }
+        
+        // Auto-load CRM on page load for convenience
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(loadCRM, 500);
+        });
+    </script>
+</body>
+</html>

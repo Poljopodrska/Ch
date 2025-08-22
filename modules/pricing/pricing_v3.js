@@ -5,12 +5,14 @@ const PricingV3 = {
     state: {
         expanded: {
             groups: new Set(['fresh', 'processed']),
-            subgroups: new Set()
+            subgroups: new Set(),
+            customerPricing: new Set() // Track which products have expanded customer view
         },
         products: [],
         productGroups: [],
         pricingData: {},
-        editMode: false
+        editMode: false,
+        showCustomerPricing: true
     },
     
     init() {
@@ -373,7 +375,20 @@ const PricingV3 = {
             
             html += `
                 <tr class="product-row">
-                    <td class="code">${product.code}</td>
+                    <td class="code">
+                        ${product.code}
+                        ${this.state.showCustomerPricing ? `
+                            <br>
+                            <button class="expand-customers-btn" 
+                                    onclick="PricingV3.toggleCustomerPricing('${product.id}')"
+                                    title="Show customer pricing">
+                                <span class="expand-icon">
+                                    ${this.state.expanded.customerPricing.has(product.id) ? '▼' : '▶'}
+                                </span>
+                                👥
+                            </button>
+                        ` : ''}
+                    </td>
                     <td class="name">
                         <strong>${product.name}</strong>
                         <br><small>${product.nameEn}</small>
@@ -421,6 +436,8 @@ const PricingV3 = {
                         ${this.renderCoverageChart(pricing)}
                     </td>
                 </tr>
+                ${this.state.expanded.customerPricing.has(product.id) ? 
+                    this.renderCustomerPricingRows(product.id) : ''}
             `;
         });
         
@@ -515,6 +532,76 @@ const PricingV3 = {
             this.state.expanded.subgroups.add(subgroupId);
         }
         this.render();
+    },
+    
+    toggleCustomerPricing(productId) {
+        if (this.state.expanded.customerPricing.has(productId)) {
+            this.state.expanded.customerPricing.delete(productId);
+        } else {
+            this.state.expanded.customerPricing.add(productId);
+        }
+        this.render();
+    },
+    
+    renderCustomerPricingRows(productId) {
+        // Check if CRM data is available
+        if (!window.CRMData) {
+            return `
+                <tr class="customer-pricing-row">
+                    <td colspan="10" style="padding: 20px; text-align: center; background: #f8f9fa;">
+                        <em>CRM module not loaded. Go to Sales → CRM to load customer data.</em>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        const customers = window.CRMData.getCustomers();
+        const basePricing = this.state.pricingData[productId];
+        
+        let html = `
+            <tr class="customer-pricing-header">
+                <td colspan="10" style="background: #e3f2fd; padding: 10px;">
+                    <strong>👥 Customer-Specific Pricing</strong>
+                </td>
+            </tr>
+        `;
+        
+        customers.forEach(customer => {
+            const customerPricing = window.CRMData.getCustomerPricing(customer.id, productId);
+            if (!customerPricing) return;
+            
+            const coverageClass = customerPricing.coverage >= 100 ? 'full' : 
+                                 customerPricing.coverage >= 80 ? 'good' : 
+                                 customerPricing.coverage >= 60 ? 'medium' : 'low';
+            
+            html += `
+                <tr class="customer-pricing-row">
+                    <td colspan="2" class="customer-name">
+                        <strong>${customer.name}</strong>
+                        <br><small>${customer.type} | ${customer.responsiblePerson}</small>
+                    </td>
+                    <td class="cost">${basePricing.productionCost.toFixed(2)}</td>
+                    <td class="cost">${basePricing.goh.toFixed(2)}</td>
+                    <td class="cost">${basePricing.moh.toFixed(2)}</td>
+                    <td class="cost">${basePricing.loh.toFixed(2)}</td>
+                    <td class="cost">${customerPricing.profit.toFixed(2)}</td>
+                    <td class="selling">
+                        <span style="text-decoration: line-through; color: #999;">€${customerPricing.basePrice.toFixed(2)}</span>
+                        <br>
+                        <strong style="color: #27ae60;">€${customerPricing.netPrice.toFixed(2)}</strong>
+                        <span class="discount-badge">-${customerPricing.discount}%</span>
+                    </td>
+                    <td class="coverage ${coverageClass}">
+                        ${customerPricing.coverage.toFixed(0)}%
+                    </td>
+                    <td class="visualization">
+                        ${this.renderCoverageChart(customerPricing)}
+                    </td>
+                </tr>
+            `;
+        });
+        
+        return html;
     },
     
     expandAll() {

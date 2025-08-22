@@ -85,7 +85,11 @@ const ChApp = {
         switch (mainCategory) {
             case 'sales':
                 subTabsHTML = `
-                    <button class="nav-link active" data-view="pricing">
+                    <button class="nav-link active" data-view="crm">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">CRM</span>
+                    </button>
+                    <button class="nav-link" data-view="pricing">
                         <span class="nav-icon">💰</span>
                         <span class="nav-text">Pricing</span>
                     </button>
@@ -94,7 +98,7 @@ const ChApp = {
                         <span class="nav-text">Sales Planning</span>
                     </button>
                 `;
-                this.currentSubTab = 'pricing';
+                this.currentSubTab = 'crm';
                 break;
                 
             case 'production':
@@ -193,6 +197,8 @@ const ChApp = {
     // Get view content
     async getViewContent(viewName) {
         switch (viewName) {
+            case 'crm':
+                return this.getCRMView();
             case 'pricing':
                 return this.getPricingView();
             case 'planning':
@@ -270,6 +276,61 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading Pricing V2:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // CRM view
+    async getCRMView() {
+        console.log('Loading CRM module...');
+        
+        const html = `
+            <div id="crm-container">
+                <!-- CRM will be loaded here -->
+            </div>
+        `;
+        
+        // Load the CRM module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if CustomerCRM is already loaded
+                if (typeof CustomerCRM !== 'undefined') {
+                    console.log('CustomerCRM already loaded, initializing...');
+                    CustomerCRM.init();
+                    console.log('CRM initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/crm/customer_crm.js"]');
+                if (existingScript) {
+                    console.log('CRM script already in DOM, waiting for load...');
+                    return;
+                }
+                
+                // Load customer_crm.js module
+                const script = document.createElement('script');
+                script.src = 'modules/crm/customer_crm.js';
+                script.onload = () => {
+                    console.log('CRM script loaded');
+                    if (typeof CustomerCRM !== 'undefined') {
+                        CustomerCRM.init();
+                        console.log('CRM initialized');
+                        
+                        // Also initialize CRM for integration mode
+                        CustomerCRM.init({ integrationMode: true });
+                    } else {
+                        console.error('CustomerCRM not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load customer_crm.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading CRM:', error);
             }
         }, 100);
         

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ch Project v0.5.12</title>
+    <title>Ch Project v0.5.13</title>
     
     <!-- Core CSS -->
     <link rel="stylesheet" href="static/css/main.css">
@@ -224,7 +224,7 @@
 </head>
 <body>
     <!-- Version Display -->
-    <div class="version-display">v0.5.12 - PRODUCTION</div>
+    <div class="version-display">v0.5.13 - CRM INTEGRATED</div>
     
     <!-- Main Application -->
     <div id="app">
@@ -278,7 +278,7 @@
             <!-- Dynamic content loads here -->
             <div class="loading">
                 <h2>Loading Ch Project...</h2>
-                <p>Initializing production planning system v0.5.12</p>
+                <p>Initializing production planning system v0.5.13 with CRM</p>
             </div>
         </main>
         
@@ -288,7 +288,7 @@
                 <span class="separator">|</span>
                 <span class="status">Ready</span>
                 <span class="separator">|</span>
-                <span class="version">Version 0.5.12</span>
+                <span class="version">Version 0.5.13</span>
             </div>
         </footer>
     </div>
@@ -302,7 +302,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Update config version
             if (window.ChConfig) {
-                window.ChConfig.version = '0.5.12';
+                window.ChConfig.version = '0.5.13';
             }
             
             // Initialize app
@@ -313,7 +313,7 @@
             // Update version display
             const versionDisplay = document.querySelector('.version-display');
             if (versionDisplay) {
-                versionDisplay.textContent = 'v0.5.12 - PRODUCTION';
+                versionDisplay.textContent = 'v0.5.13 - CRM INTEGRATED';
             }
         });
     </script>
