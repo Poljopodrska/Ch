@@ -14,10 +14,19 @@ const PricingV2 = {
     },
     
     init() {
-        console.log(`Pricing Module V${this.VERSION} initializing...`);
-        this.loadProductStructure();
-        this.loadPricingData();
-        this.render();
+        try {
+            console.log(`Pricing Module V${this.VERSION} initializing...`);
+            this.loadProductStructure();
+            console.log('Product structure loaded:', this.state.productGroups.length, 'groups');
+            this.loadPricingData();
+            console.log('Pricing data loaded:', Object.keys(this.state.pricingData).length, 'products');
+            this.loadSavedPricingData(); // Load any saved pricing overrides
+            this.render();
+            console.log('Pricing V2 render complete');
+        } catch (error) {
+            console.error('Error in PricingV2.init:', error);
+            console.error('Stack:', error.stack);
+        }
     },
     
     loadProductStructure() {
@@ -136,13 +145,15 @@ const PricingV2 = {
     },
     
     render() {
-        const container = document.getElementById('pricing-container');
-        if (!container) {
-            console.error('Pricing container not found');
-            return;
-        }
-        
-        container.innerHTML = `
+        try {
+            const container = document.getElementById('pricing-container');
+            if (!container) {
+                console.error('Pricing container not found');
+                return;
+            }
+            
+            console.log('Rendering pricing module to container');
+            container.innerHTML = `
             <div class="pricing-v2-container">
                 <div class="pricing-header">
                     <h1>💰 Cenik izdelkov / Product Pricing</h1>
@@ -187,6 +198,11 @@ const PricingV2 = {
             
             ${this.getStyles()}
         `;
+            console.log('Container HTML set successfully');
+        } catch (error) {
+            console.error('Error in PricingV2.render:', error);
+            console.error('Stack:', error.stack);
+        }
     },
     
     renderPricingHierarchy() {

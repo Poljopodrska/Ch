@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Pricing V2 Simple</title>
+    <meta charset="UTF-8">
+    <style>
+        body { padding: 20px; background: #f5f5f5; }
+        #status { background: #333; color: lime; padding: 10px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div id="status">Loading...</div>
+    <div id="pricing-container"></div>
+    
+    <script>
+        // Inline the entire module for testing
+        const PricingV2 = {
+            VERSION: '2.0.0',
+            
+            state: {
+                expanded: {
+                    groups: new Set(['fresh']),
+                    subgroups: new Set(['meat'])
+                },
+                products: [],
+                productGroups: [],
+                pricingData: {},
+                editMode: false
+            },
+            
+            init() {
+                document.getElementById('status').innerHTML = 'Initializing...';
+                console.log('Pricing V2 initializing...');
+                
+                // Simple test data
+                this.state.productGroups = [
+                    {
+                        id: 'fresh',
+                        name: 'Fresh Products',
+                        icon: '🥩',
+                        subgroups: [
+                            {
+                                id: 'meat',
+                                name: 'Fresh Meat',
+                                icon: '🥩',
+                                products: [
+                                    { id: 'p001', code: 'SVP-100', name: 'Pork Shoulder', nameEn: 'Pork Shoulder', unit: 'kg' },
+                                    { id: 'p002', code: 'GOV-200', name: 'Beef Tenderloin', nameEn: 'Beef Tenderloin', unit: 'kg' }
+                                ]
+                            }
+                        ]
+                    }
+                ];
+                
+                // Simple pricing data
+                this.state.pricingData = {
+                    'p001': { costPrice: 4.5, sellingPrice: 7.2, margin: 2.7, marginPercent: 60, vat: 22, priceWithVat: 8.78 },
+                    'p002': { costPrice: 18.0, sellingPrice: 28.5, margin: 10.5, marginPercent: 58.3, vat: 22, priceWithVat: 34.77 }
+                };
+                
+                this.render();
+                document.getElementById('status').innerHTML = '✓ Initialized successfully';
+            },
+            
+            render() {
+                const container = document.getElementById('pricing-container');
+                if (!container) {
+                    console.error('Container not found!');
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="background: white; padding: 20px; border-radius: 10px;">
+                        <h1>💰 Product Pricing</h1>
+                        
+                        <div style="margin: 20px 0;">
+                            <button onclick="PricingV2.toggleGroup('fresh')">Toggle Fresh Products</button>
+                        </div>
+                        
+                        ${this.renderSimpleList()}
+                    </div>
+                `;
+            },
+            
+            renderSimpleList() {
+                let html = '<div style="border: 1px solid #ddd; padding: 10px;">';
+                
+                this.state.productGroups.forEach(group => {
+                    const expanded = this.state.expanded.groups.has(group.id);
+                    html += `
+                        <div>
+                            <h2>${group.icon} ${group.name}</h2>
+                            <div style="display: ${expanded ? 'block' : 'none'};">
+                                ${this.renderSubgroups(group)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                return html;
+            },
+            
+            renderSubgroups(group) {
+                let html = '';
+                group.subgroups.forEach(sg => {
+                    const expanded = this.state.expanded.subgroups.has(sg.id);
+                    html += `
+                        <div style="margin-left: 20px;">
+                            <h3>${sg.icon} ${sg.name}</h3>
+                            <div style="display: ${expanded ? 'block' : 'none'};">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr style="background: #f0f0f0;">
+                                        <th style="padding: 8px; border: 1px solid #ddd;">Code</th>
+                                        <th style="padding: 8px; border: 1px solid #ddd;">Product</th>
+                                        <th style="padding: 8px; border: 1px solid #ddd;">Cost</th>
+                                        <th style="padding: 8px; border: 1px solid #ddd;">Selling</th>
+                                        <th style="padding: 8px; border: 1px solid #ddd;">Margin %</th>
+                                    </tr>
+                                    ${sg.products.map(p => {
+                                        const pricing = this.state.pricingData[p.id];
+                                        return `
+                                            <tr>
+                                                <td style="padding: 8px; border: 1px solid #ddd;">${p.code}</td>
+                                                <td style="padding: 8px; border: 1px solid #ddd;">${p.name}</td>
+                                                <td style="padding: 8px; border: 1px solid #ddd;">€${pricing.costPrice}</td>
+                                                <td style="padding: 8px; border: 1px solid #ddd;">€${pricing.sellingPrice}</td>
+                                                <td style="padding: 8px; border: 1px solid #ddd;">${pricing.marginPercent}%</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                });
+                return html;
+            },
+            
+            toggleGroup(id) {
+                if (this.state.expanded.groups.has(id)) {
+                    this.state.expanded.groups.delete(id);
+                } else {
+                    this.state.expanded.groups.add(id);
+                }
+                this.render();
+            }
+        };
+        
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            PricingV2.init();
+        });
+    </script>
+</body>
+</html>

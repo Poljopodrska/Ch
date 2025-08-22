@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Pricing V2</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div id="pricing-container"></div>
+    
+    <script src="modules/pricing/pricing_v2.js"></script>
+    <script>
+        // Initialize after page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof PricingV2 !== 'undefined') {
+                PricingV2.init();
+                console.log('Pricing V2 initialized');
+            } else {
+                console.error('PricingV2 not found');
+            }
+        });
+    </script>
+</body>
+</html>

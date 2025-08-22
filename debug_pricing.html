@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Pricing V2</title>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        #debug { 
+            background: #333; 
+            color: #0f0; 
+            padding: 20px; 
+            margin: 20px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pricing V2 Debug Test</h1>
+    
+    <div id="debug">Debug output will appear here...</div>
+    
+    <div id="pricing-container">
+        <p style="color: red;">If you see this text, the module didn't initialize</p>
+    </div>
+    
+    <script>
+        const debug = (msg) => {
+            const debugEl = document.getElementById('debug');
+            debugEl.innerHTML += msg + '\n';
+            console.log(msg);
+        };
+        
+        debug('Starting debug test...');
+    </script>
+    
+    <script src="modules/pricing/pricing_v2.js"></script>
+    
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            debug('DOM loaded');
+            
+            // Check if module loaded
+            if (typeof PricingV2 !== 'undefined') {
+                debug('✓ PricingV2 module found');
+                debug('Module version: ' + PricingV2.VERSION);
+                
+                // Check container
+                const container = document.getElementById('pricing-container');
+                if (container) {
+                    debug('✓ Container element found');
+                } else {
+                    debug('✗ Container element NOT found!');
+                }
+                
+                // Try to initialize
+                try {
+                    debug('Calling PricingV2.init()...');
+                    PricingV2.init();
+                    debug('✓ PricingV2.init() completed');
+                    
+                    // Check if content was rendered
+                    setTimeout(() => {
+                        const content = container.innerHTML;
+                        if (content.includes('pricing-v2-container')) {
+                            debug('✓ Module rendered successfully');
+                        } else {
+                            debug('✗ Module did not render properly');
+                            debug('Container HTML length: ' + content.length);
+                        }
+                    }, 100);
+                    
+                } catch (error) {
+                    debug('✗ Error during init: ' + error.message);
+                    debug('Stack: ' + error.stack);
+                }
+                
+            } else {
+                debug('✗ PricingV2 module NOT found!');
+            }
+        });
+        
+        // Also check for any script errors
+        window.addEventListener('error', (e) => {
+            debug('✗ Script error: ' + e.message + ' at line ' + e.lineno);
+        });
+    </script>
+</body>
+</html>
