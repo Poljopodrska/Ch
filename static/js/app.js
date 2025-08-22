@@ -99,6 +99,8 @@ const ChApp = {
                 return this.getStockReportView();
             case 'bom':
                 return this.getBOMView();
+            case 'workforce':
+                return this.getWorkforceView();
             default:
                 // Default to pricing if unknown view
                 return this.getPricingView();
@@ -440,6 +442,66 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading BOM V2 Advanced:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Workforce view
+    async getWorkforceView() {
+        console.log('Loading Workforce Availability module...');
+        
+        // Create container for workforce module
+        const html = `
+            <div id="workforce-container">
+                <!-- Workforce Availability will be loaded here -->
+            </div>
+        `;
+        
+        // Load the workforce module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if WorkforceAvailability is already loaded
+                if (typeof WorkforceAvailability !== 'undefined') {
+                    console.log('WorkforceAvailability already loaded, initializing...');
+                    WorkforceAvailability.init();
+                    console.log('Workforce Availability initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/workforce/workforce_availability.js"]');
+                if (existingScript) {
+                    console.log('Workforce Availability script already in DOM, waiting for load...');
+                    // Try to init after a small delay
+                    setTimeout(() => {
+                        if (typeof WorkforceAvailability !== 'undefined') {
+                            WorkforceAvailability.init();
+                            console.log('Workforce Availability initialized from existing script');
+                        }
+                    }, 100);
+                    return;
+                }
+                
+                // Load workforce_availability.js module
+                const script = document.createElement('script');
+                script.src = 'modules/workforce/workforce_availability.js';
+                script.onload = () => {
+                    console.log('Workforce Availability script loaded');
+                    if (typeof WorkforceAvailability !== 'undefined') {
+                        WorkforceAvailability.init();
+                        console.log('Workforce Availability initialized');
+                    } else {
+                        console.error('WorkforceAvailability not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load workforce_availability.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Workforce Availability:', error);
             }
         }, 100);
         
