@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ch Project v0.5.11</title>
+    <title>Ch Project v0.5.12</title>
     
     <!-- Core CSS -->
     <link rel="stylesheet" href="static/css/main.css">
@@ -188,12 +188,12 @@
 </head>
 <body>
     <!-- Version Display -->
-    <div class="version-display">v0.5.11 - PRODUCTION</div>
+    <div class="version-display">v0.5.12 - PRODUCTION</div>
     
     <!-- Main Application -->
     <div id="app">
         <header>
-            <h1>🏭 Ch Project - Production Planning System (v0.5.11)</h1>
+            <h1>🏭 Ch Project - Production Planning System</h1>
             <nav id="main-nav">
                 <a href="#pricing" class="nav-link active">
                     <span class="nav-icon">💰</span>
@@ -234,7 +234,7 @@
             <!-- Dynamic content loads here -->
             <div class="loading">
                 <h2>Loading Ch Project...</h2>
-                <p>Initializing production planning system v0.5.11</p>
+                <p>Initializing production planning system v0.5.12</p>
             </div>
         </main>
         
@@ -244,7 +244,7 @@
                 <span class="separator">|</span>
                 <span class="status">Ready</span>
                 <span class="separator">|</span>
-                <span class="version">Version 0.5.11</span>
+                <span class="version">Version 0.5.12</span>
             </div>
         </footer>
     </div>
@@ -258,7 +258,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Update config version
             if (window.ChConfig) {
-                window.ChConfig.version = '0.5.11';
+                window.ChConfig.version = '0.5.12';
             }
             
             // Initialize app
@@ -269,7 +269,7 @@
             // Update version display
             const versionDisplay = document.querySelector('.version-display');
             if (versionDisplay) {
-                versionDisplay.textContent = 'v0.5.11 - PRODUCTION';
+                versionDisplay.textContent = 'v0.5.12 - PRODUCTION';
             }
         });
     </script>
