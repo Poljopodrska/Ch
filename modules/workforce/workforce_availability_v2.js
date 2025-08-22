@@ -563,14 +563,18 @@ const WorkforceAvailability = {
                             `;
                         });
                     } else {
-                        // Week not expanded - show week average
-                        const weekValue = this.getWeekAverage(worker.id, this.state.currentYear, month, w);
+                        // Week not expanded - show week sum
+                        const weekValue = this.getWeekSum(worker.id, this.state.currentYear, month, w);
                         totalAvailable += weekValue;
+                        
+                        // For coloring, calculate the average for visual representation
+                        const daysInWeek = this.getDaysInWeek(this.state.currentYear, month, w).length;
+                        const avgValue = weekValue / daysInWeek;
                         
                         html += `
                             <td class="availability-cell week-cell" 
-                                style="background: ${this.getColorForValue(weekValue, '#3498db')}; 
-                                       color: ${weekValue > 0.5 ? 'white' : '#2c3e50'};"
+                                style="background: ${this.getColorForValue(avgValue, '#3498db')}; 
+                                       color: ${avgValue > 0.5 ? 'white' : '#2c3e50'};"
                                 onclick="WorkforceAvailability.editWeek('${worker.id}', ${this.state.currentYear}, ${month}, ${w}, event)">
                                 ${weekValue.toFixed(1)}
                             </td>
@@ -578,14 +582,18 @@ const WorkforceAvailability = {
                     }
                 }
             } else {
-                // Month not expanded - show month average
-                const monthValue = this.getMonthAverage(worker.id, this.state.currentYear, month);
+                // Month not expanded - show month sum
+                const monthValue = this.getMonthSum(worker.id, this.state.currentYear, month);
                 totalAvailable += monthValue;
+                
+                // For coloring, calculate the average for visual representation
+                const daysInMonth = new Date(this.state.currentYear, month + 1, 0).getDate();
+                const avgValue = monthValue / daysInMonth;
                 
                 html += `
                     <td class="availability-cell month-cell" 
-                        style="background: ${this.getColorForValue(monthValue, '#2980b9')}; 
-                               color: ${monthValue > 0.5 ? 'white' : '#2c3e50'};"
+                        style="background: ${this.getColorForValue(avgValue, '#2980b9')}; 
+                               color: ${avgValue > 0.5 ? 'white' : '#2c3e50'};"
                         onclick="WorkforceAvailability.editMonth('${worker.id}', ${this.state.currentYear}, ${month}, event)">
                         ${monthValue.toFixed(1)}
                     </td>
@@ -711,10 +719,18 @@ const WorkforceAvailability = {
         return baseColor + Math.floor(opacity * 255).toString(16).padStart(2, '0');
     },
     
+    // Compatibility aliases (keep old names for any existing references)
     getMonthAverage(workerId, year, month) {
+        return this.getMonthSum(workerId, year, month);
+    },
+    
+    getWeekAverage(workerId, year, month, week) {
+        return this.getWeekSum(workerId, year, month, week);
+    },
+    
+    getMonthSum(workerId, year, month) {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let total = 0;
-        let count = 0;
         
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(year, month, day);
@@ -723,17 +739,15 @@ const WorkforceAvailability = {
                         this.state.availabilityData[workerId][dateKey] : null;
             if (data) {
                 total += data.value;
-                count++;
             }
         }
         
-        return count > 0 ? total / count : 0;
+        return total;
     },
     
-    getWeekAverage(workerId, year, month, week) {
+    getWeekSum(workerId, year, month, week) {
         const days = this.getDaysInWeek(year, month, week);
         let total = 0;
-        let count = 0;
         
         days.forEach(day => {
             const date = new Date(year, month, day);
@@ -742,11 +756,10 @@ const WorkforceAvailability = {
                         this.state.availabilityData[workerId][dateKey] : null;
             if (data) {
                 total += data.value;
-                count++;
             }
         });
         
-        return count > 0 ? total / count : 0;
+        return total;
     },
     
     getDayTotal(year, month, day) {
@@ -781,13 +794,12 @@ const WorkforceAvailability = {
             });
         });
         
-        return total / days.length; // Average for the week
+        return total; // Return sum, not average
     },
     
     getMonthTotal(year, month) {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         let total = 0;
-        let count = 0;
         
         this.state.workers.forEach(worker => {
             for (let day = 1; day <= daysInMonth; day++) {
@@ -797,12 +809,11 @@ const WorkforceAvailability = {
                             this.state.availabilityData[worker.id][dateKey] : null;
                 if (data) {
                     total += data.value;
-                    count++;
                 }
             }
         });
         
-        return count > 0 ? total / (daysInMonth / count) : 0; // Weighted average
+        return total; // Return sum, not average
     },
     
     editWeek(workerId, year, month, week, event) {
