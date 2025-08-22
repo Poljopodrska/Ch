@@ -11,9 +11,6 @@ const ChApp = {
         // Set up navigation
         this.setupNavigation();
         
-        // Load initial view - Pricing is now default
-        this.loadView('pricing');
-        
         // Update status
         this.updateStatus('Ready');
         
@@ -22,18 +19,21 @@ const ChApp = {
     
     // Set up navigation handlers
     setupNavigation() {
-        const navLinks = document.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
+        this.currentMainTab = 'production';
+        this.currentSubTab = 'production-planning';
+        
+        // Handle main tab clicks
+        const mainTabs = document.querySelectorAll('.main-tab');
+        mainTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
                 e.preventDefault();
-                const view = link.getAttribute('href').substring(1);
-                this.loadView(view);
-                
-                // Update active state
-                navLinks.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
+                const mainCategory = tab.getAttribute('data-main');
+                this.switchMainTab(mainCategory);
             });
         });
+        
+        // Handle sub-tab clicks
+        this.setupSubTabHandlers();
         
         // Handle browser back/forward
         window.addEventListener('popstate', (e) => {
@@ -41,6 +41,110 @@ const ChApp = {
                 this.loadView(e.state.view, false);
             }
         });
+        
+        // Initialize with default view
+        this.loadView('production-planning');
+    },
+    
+    setupSubTabHandlers() {
+        const subTabs = document.querySelectorAll('.sub-tabs .nav-link');
+        subTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                const view = tab.getAttribute('data-view');
+                this.loadView(view);
+                
+                // Update active state for sub-tabs
+                subTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                this.currentSubTab = view;
+            });
+        });
+    },
+    
+    switchMainTab(mainCategory) {
+        this.currentMainTab = mainCategory;
+        
+        // Update main tab active state
+        const mainTabs = document.querySelectorAll('.main-tab');
+        mainTabs.forEach(tab => {
+            tab.classList.remove('active');
+            if (tab.getAttribute('data-main') === mainCategory) {
+                tab.classList.add('active');
+            }
+        });
+        
+        // Update sub-tabs based on main category
+        this.renderSubTabs(mainCategory);
+    },
+    
+    renderSubTabs(mainCategory) {
+        const subTabsContainer = document.getElementById('sub-tabs');
+        let subTabsHTML = '';
+        
+        switch (mainCategory) {
+            case 'sales':
+                subTabsHTML = `
+                    <button class="nav-link active" data-view="pricing">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Pricing</span>
+                    </button>
+                    <button class="nav-link" data-view="planning">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Sales Planning</span>
+                    </button>
+                `;
+                this.currentSubTab = 'pricing';
+                break;
+                
+            case 'production':
+                subTabsHTML = `
+                    <button class="nav-link active" data-view="production-planning">
+                        <span class="nav-icon">🏭</span>
+                        <span class="nav-text">Production Planning</span>
+                    </button>
+                    <button class="nav-link" data-view="stock-report">
+                        <span class="nav-icon">📦</span>
+                        <span class="nav-text">Stock Report</span>
+                    </button>
+                    <button class="nav-link" data-view="bom">
+                        <span class="nav-icon">📋</span>
+                        <span class="nav-text">BOM</span>
+                    </button>
+                    <button class="nav-link" data-view="workforce">
+                        <span class="nav-icon">👥</span>
+                        <span class="nav-text">Workforce</span>
+                    </button>
+                    <button class="nav-link" data-view="feasibility">
+                        <span class="nav-icon">🎯</span>
+                        <span class="nav-text">Feasibility</span>
+                    </button>
+                `;
+                this.currentSubTab = 'production-planning';
+                break;
+                
+            case 'management':
+                subTabsHTML = `
+                    <button class="nav-link active" data-view="management-production">
+                        <span class="nav-icon">🏭</span>
+                        <span class="nav-text">Production Analytics</span>
+                    </button>
+                    <button class="nav-link" data-view="management-sales">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Sales & Margin</span>
+                    </button>
+                `;
+                this.currentSubTab = 'management-production';
+                break;
+        }
+        
+        subTabsContainer.innerHTML = subTabsHTML;
+        
+        // Set up event handlers for new sub-tabs
+        this.setupSubTabHandlers();
+        
+        // Load the default view for this category
+        this.loadView(this.currentSubTab);
     },
     
     // Load a view
@@ -105,9 +209,13 @@ const ChApp = {
                 return this.getFeasibilityView();
             case 'management':
                 return this.getManagementView();
+            case 'management-production':
+                return this.getManagementProductionView();
+            case 'management-sales':
+                return this.getManagementSalesView();
             default:
-                // Default to pricing if unknown view
-                return this.getPricingView();
+                // Default to production planning if unknown view
+                return this.getProductionPlanningView();
         }
     },
     
@@ -651,6 +759,173 @@ const ChApp = {
                 console.error('Error loading Management Summary:', error);
             }
         }, 100);
+        
+        return html;
+    },
+    
+    // Management Production Analytics view (direct to Production Analytics)
+    async getManagementProductionView() {
+        console.log('Loading Management Production Analytics...');
+        
+        const html = `
+            <div id="management-container">
+                <!-- Production Analytics will be loaded here -->
+            </div>
+        `;
+        
+        // Load ProductionAnalytics directly
+        setTimeout(async () => {
+            try {
+                if (typeof ProductionAnalytics !== 'undefined') {
+                    ProductionAnalytics.init();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = 'modules/management/production_analytics.js';
+                script.onload = () => {
+                    if (typeof ProductionAnalytics !== 'undefined') {
+                        ProductionAnalytics.init();
+                    }
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Production Analytics:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Management Sales & Margin view (placeholder)
+    async getManagementSalesView() {
+        console.log('Loading Management Sales & Margin...');
+        
+        const html = `
+            <div id="management-container">
+                <div class="coming-soon-container">
+                    <div class="coming-soon-header">
+                        <h1>💰 Sales & Margin Analytics</h1>
+                        <p class="header-subtitle">Comprehensive sales performance and margin analysis</p>
+                    </div>
+                    
+                    <div class="coming-soon-content">
+                        <div class="coming-soon-icon">🚧</div>
+                        <h2>Coming Soon</h2>
+                        <p>Sales & Margin analytics module is under development</p>
+                        
+                        <div class="planned-features">
+                            <h3>Planned Features:</h3>
+                            <ul>
+                                <li>📊 Revenue tracking and analysis</li>
+                                <li>💹 Margin analysis by product and category</li>
+                                <li>👥 Customer insights and segmentation</li>
+                                <li>📈 Sales trend analysis</li>
+                                <li>🎯 Performance vs targets</li>
+                                <li>💼 Profitability reports</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="navigation-hint">
+                            <p>Use the <strong>Sales</strong> tab above to access Pricing and Sales Planning modules.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <style>
+                    .coming-soon-container {
+                        padding: 30px;
+                        max-width: 800px;
+                        margin: 0 auto;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    }
+                    
+                    .coming-soon-header {
+                        text-align: center;
+                        margin-bottom: 40px;
+                        padding: 25px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-radius: 10px;
+                    }
+                    
+                    .coming-soon-header h1 {
+                        margin: 0 0 10px 0;
+                        font-size: 32px;
+                    }
+                    
+                    .header-subtitle {
+                        margin: 0;
+                        opacity: 0.9;
+                        font-size: 18px;
+                    }
+                    
+                    .coming-soon-content {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 10px;
+                        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                        text-align: center;
+                    }
+                    
+                    .coming-soon-icon {
+                        font-size: 80px;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .coming-soon-content h2 {
+                        color: #2c3e50;
+                        margin-bottom: 10px;
+                        font-size: 28px;
+                    }
+                    
+                    .coming-soon-content > p {
+                        color: #7f8c8d;
+                        margin-bottom: 30px;
+                        font-size: 16px;
+                    }
+                    
+                    .planned-features {
+                        background: #f8f9fa;
+                        padding: 25px;
+                        border-radius: 8px;
+                        margin: 30px 0;
+                        text-align: left;
+                    }
+                    
+                    .planned-features h3 {
+                        color: #2c3e50;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    
+                    .planned-features ul {
+                        list-style: none;
+                        padding: 0;
+                    }
+                    
+                    .planned-features li {
+                        padding: 8px 0;
+                        color: #546e7a;
+                        font-size: 15px;
+                    }
+                    
+                    .navigation-hint {
+                        background: #e3f2fd;
+                        padding: 15px;
+                        border-radius: 8px;
+                        border-left: 4px solid #2196f3;
+                        margin-top: 20px;
+                    }
+                    
+                    .navigation-hint p {
+                        margin: 0;
+                        color: #1976d2;
+                        font-size: 14px;
+                    }
+                </style>
+            </div>
+        `;
         
         return html;
     },
