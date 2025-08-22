@@ -103,6 +103,8 @@ const ChApp = {
                 return this.getWorkforceView();
             case 'feasibility':
                 return this.getFeasibilityView();
+            case 'management':
+                return this.getManagementView();
             default:
                 // Default to pricing if unknown view
                 return this.getPricingView();
@@ -564,6 +566,65 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading Workforce Availability:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Management Summary view
+    async getManagementView() {
+        console.log('Loading Management Summary module...');
+        
+        // Create container for management module
+        const html = `
+            <div id="management-container">
+                <!-- Management Summary will be loaded here -->
+            </div>
+        `;
+        
+        // Load the management module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if ManagementSummary is already loaded
+                if (typeof ManagementSummary !== 'undefined') {
+                    console.log('ManagementSummary already loaded, initializing...');
+                    ManagementSummary.init();
+                    console.log('Management Summary initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/management/management_summary.js"]');
+                if (existingScript) {
+                    console.log('Management Summary script already in DOM, waiting for load...');
+                    setTimeout(() => {
+                        if (typeof ManagementSummary !== 'undefined') {
+                            ManagementSummary.init();
+                            console.log('Management Summary initialized from existing script');
+                        }
+                    }, 100);
+                    return;
+                }
+                
+                // Load management_summary.js module
+                const script = document.createElement('script');
+                script.src = 'modules/management/management_summary.js';
+                script.onload = () => {
+                    console.log('Management Summary script loaded');
+                    if (typeof ManagementSummary !== 'undefined') {
+                        ManagementSummary.init();
+                        console.log('Management Summary initialized');
+                    } else {
+                        console.error('ManagementSummary not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load management_summary.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Management Summary:', error);
             }
         }, 100);
         
