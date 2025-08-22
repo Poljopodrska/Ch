@@ -405,19 +405,51 @@ const WorkforceAvailability = {
                     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                 }
                 
-                .expandable {
+                .month-header {
+                    background: #546e7a !important;
+                    color: white !important;
+                    cursor: pointer;
+                    user-select: none;
+                    position: relative;
+                    font-weight: 600;
+                }
+                
+                .month-header:hover {
+                    background: #455a64 !important;
+                }
+                
+                .week-header {
+                    background: #607d8b !important;
+                    color: white !important;
+                    font-size: 11px;
                     cursor: pointer;
                     user-select: none;
                 }
                 
-                .expandable:hover {
-                    background: #f0f0f0;
+                .week-header:hover {
+                    background: #546e7a !important;
+                }
+                
+                .day-header {
+                    background: #78909c !important;
+                    color: white !important;
+                    font-size: 10px;
+                }
+                
+                .month-collapsed, .week-collapsed {
+                    background: #90a4ae !important;
+                }
+                
+                .expandable {
+                    cursor: pointer;
+                    user-select: none;
                 }
                 
                 .expand-icon {
                     display: inline-block;
                     margin-right: 5px;
                     transition: transform 0.2s;
+                    font-size: 12px;
                 }
                 
                 .expanded .expand-icon {
@@ -583,39 +615,101 @@ const WorkforceAvailability = {
         const year = this.state.currentYear;
         const month = this.state.currentMonth;
         
-        // Generate headers based on view
-        const headers = this.generateHeaders();
-        
         return `
             <table class="workforce-table">
-                <thead>
-                    <tr>
-                        <th>Worker</th>
-                        ${headers.map(header => `
-                            <th class="${header.expandable ? 'expandable' : ''}" 
-                                ${header.expandable ? `onclick="WorkforceAvailability.toggleExpand('${header.key}')"` : ''}>
-                                ${header.expandable ? '<span class="expand-icon">▶</span>' : ''}
-                                ${header.label}
-                            </th>
-                        `).join('')}
-                        <th>Total Available</th>
-                    </tr>
-                </thead>
+                ${this.renderHeaders()}
                 <tbody>
-                    ${this.state.workers.map(worker => this.renderWorkerRow(worker, headers)).join('')}
-                    <tr class="summary-row">
-                        <td><strong>Total Workforce</strong></td>
-                        ${headers.map(header => {
-                            const total = this.calculateColumnTotal(header);
-                            return `<td style="text-align: center;"><strong>${total.toFixed(1)}</strong></td>`;
-                        }).join('')}
-                        <td style="text-align: center;">
-                            <strong>${this.calculateOverallTotal().toFixed(1)}</strong>
-                        </td>
-                    </tr>
+                    ${this.state.workers.map(worker => this.renderWorkerRow(worker)).join('')}
+                    ${this.renderSummaryRow()}
                 </tbody>
             </table>
         `;
+    },
+    
+    renderHeaders() {
+        let mainHeaders = '<tr><th rowspan="3">Worker</th>';
+        let weekHeaders = '<tr>';
+        let dayHeaders = '<tr>';
+        
+        // Build month headers with expansion like Sales Planning
+        for (let month = 0; month < 12; month++) {
+            const monthKey = `month-${this.state.currentYear}-${month}`;
+            const isMonthExpanded = this.state.expandedMonths.has(monthKey);
+            const monthName = new Date(this.state.currentYear, month, 1).toLocaleString('default', { month: 'short' });
+            
+            if (isMonthExpanded) {
+                // Month is expanded - show weeks
+                const weeksInMonth = this.getWeeksInMonth(this.state.currentYear, month);
+                let totalColspan = 0;
+                
+                // Calculate colspan for month
+                for (let w = 0; w < weeksInMonth; w++) {
+                    const weekKey = `week-${this.state.currentYear}-${month}-${w}`;
+                    const isWeekExpanded = this.state.expandedWeeks.has(weekKey);
+                    
+                    if (isWeekExpanded) {
+                        const days = this.getDaysInWeek(this.state.currentYear, month, w);
+                        totalColspan += days.length;
+                    } else {
+                        totalColspan += 1;
+                    }
+                }
+                
+                mainHeaders += `
+                    <th class="month-header expandable expanded" colspan="${totalColspan}"
+                        onclick="WorkforceAvailability.toggleExpand('${monthKey}')">
+                        <span class="expand-icon">▼</span> ${monthName}
+                    </th>
+                `;
+                
+                // Add week headers
+                for (let w = 0; w < weeksInMonth; w++) {
+                    const weekKey = `week-${this.state.currentYear}-${month}-${w}`;
+                    const isWeekExpanded = this.state.expandedWeeks.has(weekKey);
+                    const days = this.getDaysInWeek(this.state.currentYear, month, w);
+                    
+                    if (isWeekExpanded) {
+                        weekHeaders += `
+                            <th class="week-header expandable expanded" colspan="${days.length}"
+                                onclick="WorkforceAvailability.toggleExpand('${weekKey}')">
+                                <span class="expand-icon">▼</span> W${w + 1}
+                            </th>
+                        `;
+                        
+                        // Add day headers
+                        days.forEach(day => {
+                            const date = new Date(this.state.currentYear, month, day);
+                            const dayName = date.toLocaleString('default', { weekday: 'short' });
+                            dayHeaders += `<th class="day-header">${dayName.substring(0,2)}<br>${day}</th>`;
+                        });
+                    } else {
+                        weekHeaders += `
+                            <th class="week-header expandable" 
+                                onclick="WorkforceAvailability.toggleExpand('${weekKey}')">
+                                <span class="expand-icon">▶</span> W${w + 1}
+                            </th>
+                        `;
+                        dayHeaders += `<th class="week-collapsed"></th>`;
+                    }
+                }
+            } else {
+                // Month not expanded
+                mainHeaders += `
+                    <th class="month-header expandable" 
+                        onclick="WorkforceAvailability.toggleExpand('${monthKey}')">
+                        <span class="expand-icon">▶</span> ${monthName}
+                    </th>
+                `;
+                weekHeaders += `<th class="month-collapsed"></th>`;
+                dayHeaders += `<th class="month-collapsed"></th>`;
+            }
+        }
+        
+        mainHeaders += '<th rowspan="3">Total</th></tr>';
+        weekHeaders += '</tr>';
+        dayHeaders += '</tr>';
+        
+        return `<thead>${mainHeaders}${weekHeaders}${dayHeaders}</thead>`;
     },
     
     generateHeaders() {
@@ -724,46 +818,142 @@ const WorkforceAvailability = {
         return headers;
     },
     
-    renderWorkerRow(worker, headers) {
+    renderWorkerRow(worker) {
+        let html = '<tr>';
         let totalAvailable = 0;
         
-        const cells = headers.map(header => {
-            const value = this.getAvailabilityForPeriod(worker.id, header);
-            totalAvailable += value;
-            
-            const reason = this.getReasonForPeriod(worker.id, header);
-            const reasonData = this.state.reasons[reason] || this.state.reasons.available;
-            
-            return `
-                <td class="availability-cell" 
-                    style="background: ${this.getColorForValue(value, reasonData.color)}; color: ${value > 0.5 ? 'white' : '#2c3e50'};"
-                    onclick="WorkforceAvailability.editAvailability('${worker.id}', '${header.key}', event)"
-                    data-worker="${worker.id}"
-                    data-period="${header.key}">
-                    ${value.toFixed(1)}
-                </td>
-            `;
-        }).join('');
-        
-        return `
-            <tr>
-                <td>
-                    <div class="worker-info">
-                        <div class="worker-details">
-                            <div class="worker-name">${worker.name}</div>
-                            <div class="worker-role">${worker.department} - ${worker.role}</div>
-                        </div>
-                        <button class="btn-remove" onclick="WorkforceAvailability.removeWorker('${worker.id}')">
-                            Remove
-                        </button>
+        // Worker info cell
+        html += `
+            <td>
+                <div class="worker-info">
+                    <div class="worker-details">
+                        <div class="worker-name">${worker.name}</div>
+                        <div class="worker-role">${worker.department} - ${worker.role}</div>
                     </div>
-                </td>
-                ${cells}
-                <td style="text-align: center; font-weight: 600;">
-                    ${totalAvailable.toFixed(1)}
-                </td>
-            </tr>
+                    <button class="btn-remove" onclick="WorkforceAvailability.removeWorker('${worker.id}')">
+                        Remove
+                    </button>
+                </div>
+            </td>
         `;
+        
+        // Render cells for each month
+        for (let month = 0; month < 12; month++) {
+            const monthKey = `month-${this.state.currentYear}-${month}`;
+            const isMonthExpanded = this.state.expandedMonths.has(monthKey);
+            
+            if (isMonthExpanded) {
+                // Month is expanded - show weeks
+                const weeksInMonth = this.getWeeksInMonth(this.state.currentYear, month);
+                
+                for (let w = 0; w < weeksInMonth; w++) {
+                    const weekKey = `week-${this.state.currentYear}-${month}-${w}`;
+                    const isWeekExpanded = this.state.expandedWeeks.has(weekKey);
+                    
+                    if (isWeekExpanded) {
+                        // Week is expanded - show days
+                        const days = this.getDaysInWeek(this.state.currentYear, month, w);
+                        days.forEach(day => {
+                            const date = new Date(this.state.currentYear, month, day);
+                            const dateKey = this.getDateKey(date);
+                            const data = this.state.availabilityData[worker.id] ? 
+                                        this.state.availabilityData[worker.id][dateKey] : null;
+                            const value = data ? data.value : 0;
+                            const reason = data ? data.reason : 'available';
+                            const reasonData = this.state.reasons[reason] || this.state.reasons.available;
+                            
+                            totalAvailable += value;
+                            
+                            html += `
+                                <td class="availability-cell day-cell" 
+                                    style="background: ${this.getColorForValue(value, reasonData.color)}; 
+                                           color: ${value > 0.5 ? 'white' : '#2c3e50'};"
+                                    onclick="WorkforceAvailability.editAvailability('${worker.id}', '${dateKey}', event)"
+                                    title="${reasonData.label}">
+                                    ${value.toFixed(1)}
+                                </td>
+                            `;
+                        });
+                    } else {
+                        // Week not expanded - show week average
+                        const weekValue = this.getWeekAverage(worker.id, this.state.currentYear, month, w);
+                        totalAvailable += weekValue;
+                        
+                        html += `
+                            <td class="availability-cell week-cell" 
+                                style="background: ${this.getColorForValue(weekValue, '#3498db')}; 
+                                       color: ${weekValue > 0.5 ? 'white' : '#2c3e50'};"
+                                onclick="WorkforceAvailability.editWeek('${worker.id}', ${this.state.currentYear}, ${month}, ${w}, event)">
+                                ${weekValue.toFixed(1)}
+                            </td>
+                        `;
+                    }
+                }
+            } else {
+                // Month not expanded - show month average
+                const monthValue = this.getMonthAverage(worker.id, this.state.currentYear, month);
+                totalAvailable += monthValue;
+                
+                html += `
+                    <td class="availability-cell month-cell" 
+                        style="background: ${this.getColorForValue(monthValue, '#2980b9')}; 
+                               color: ${monthValue > 0.5 ? 'white' : '#2c3e50'};"
+                        onclick="WorkforceAvailability.editMonth('${worker.id}', ${this.state.currentYear}, ${month}, event)">
+                        ${monthValue.toFixed(1)}
+                    </td>
+                `;
+            }
+        }
+        
+        // Total cell
+        html += `
+            <td style="text-align: center; font-weight: 600;">
+                ${totalAvailable.toFixed(1)}
+            </td>
+        `;
+        
+        html += '</tr>';
+        return html;
+    },
+    
+    renderSummaryRow() {
+        let html = '<tr class="summary-row"><td><strong>Total Workforce</strong></td>';
+        let grandTotal = 0;
+        
+        // Calculate totals for each column
+        for (let month = 0; month < 12; month++) {
+            const monthKey = `month-${this.state.currentYear}-${month}`;
+            const isMonthExpanded = this.state.expandedMonths.has(monthKey);
+            
+            if (isMonthExpanded) {
+                const weeksInMonth = this.getWeeksInMonth(this.state.currentYear, month);
+                
+                for (let w = 0; w < weeksInMonth; w++) {
+                    const weekKey = `week-${this.state.currentYear}-${month}-${w}`;
+                    const isWeekExpanded = this.state.expandedWeeks.has(weekKey);
+                    
+                    if (isWeekExpanded) {
+                        const days = this.getDaysInWeek(this.state.currentYear, month, w);
+                        days.forEach(day => {
+                            const dayTotal = this.getDayTotal(this.state.currentYear, month, day);
+                            grandTotal += dayTotal;
+                            html += `<td style="text-align: center;"><strong>${dayTotal.toFixed(1)}</strong></td>`;
+                        });
+                    } else {
+                        const weekTotal = this.getWeekTotal(this.state.currentYear, month, w);
+                        grandTotal += weekTotal;
+                        html += `<td style="text-align: center;"><strong>${weekTotal.toFixed(1)}</strong></td>`;
+                    }
+                }
+            } else {
+                const monthTotal = this.getMonthTotal(this.state.currentYear, month);
+                grandTotal += monthTotal;
+                html += `<td style="text-align: center;"><strong>${monthTotal.toFixed(1)}</strong></td>`;
+            }
+        }
+        
+        html += `<td style="text-align: center;"><strong>${grandTotal.toFixed(1)}</strong></td></tr>`;
+        return html;
     },
     
     getAvailabilityForPeriod(workerId, header) {
@@ -910,22 +1100,137 @@ const WorkforceAvailability = {
     },
     
     toggleExpand(key) {
-        if (key.includes('-w')) {
+        if (key.startsWith('week-')) {
             // Week expansion
             if (this.state.expandedWeeks.has(key)) {
                 this.state.expandedWeeks.delete(key);
             } else {
                 this.state.expandedWeeks.add(key);
             }
-        } else {
+        } else if (key.startsWith('month-')) {
             // Month expansion
             if (this.state.expandedMonths.has(key)) {
                 this.state.expandedMonths.delete(key);
+                // Also collapse all weeks in this month
+                const parts = key.split('-');
+                const year = parts[1];
+                const month = parts[2];
+                [...this.state.expandedWeeks].forEach(weekKey => {
+                    if (weekKey.startsWith(`week-${year}-${month}-`)) {
+                        this.state.expandedWeeks.delete(weekKey);
+                    }
+                });
             } else {
                 this.state.expandedMonths.add(key);
             }
         }
         this.render();
+    },
+    
+    getMonthAverage(workerId, year, month) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let total = 0;
+        let count = 0;
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateKey = this.getDateKey(date);
+            const data = this.state.availabilityData[workerId] ? 
+                        this.state.availabilityData[workerId][dateKey] : null;
+            if (data) {
+                total += data.value;
+                count++;
+            }
+        }
+        
+        return count > 0 ? total / count : 0;
+    },
+    
+    getWeekAverage(workerId, year, month, week) {
+        const days = this.getDaysInWeek(year, month, week);
+        let total = 0;
+        let count = 0;
+        
+        days.forEach(day => {
+            const date = new Date(year, month, day);
+            const dateKey = this.getDateKey(date);
+            const data = this.state.availabilityData[workerId] ? 
+                        this.state.availabilityData[workerId][dateKey] : null;
+            if (data) {
+                total += data.value;
+                count++;
+            }
+        });
+        
+        return count > 0 ? total / count : 0;
+    },
+    
+    getDayTotal(year, month, day) {
+        let total = 0;
+        const date = new Date(year, month, day);
+        const dateKey = this.getDateKey(date);
+        
+        this.state.workers.forEach(worker => {
+            const data = this.state.availabilityData[worker.id] ? 
+                        this.state.availabilityData[worker.id][dateKey] : null;
+            if (data) {
+                total += data.value;
+            }
+        });
+        
+        return total;
+    },
+    
+    getWeekTotal(year, month, week) {
+        const days = this.getDaysInWeek(year, month, week);
+        let total = 0;
+        
+        this.state.workers.forEach(worker => {
+            days.forEach(day => {
+                const date = new Date(year, month, day);
+                const dateKey = this.getDateKey(date);
+                const data = this.state.availabilityData[worker.id] ? 
+                            this.state.availabilityData[worker.id][dateKey] : null;
+                if (data) {
+                    total += data.value;
+                }
+            });
+        });
+        
+        return total / days.length; // Average for the week
+    },
+    
+    getMonthTotal(year, month) {
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        let total = 0;
+        let count = 0;
+        
+        this.state.workers.forEach(worker => {
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateKey = this.getDateKey(date);
+                const data = this.state.availabilityData[worker.id] ? 
+                            this.state.availabilityData[worker.id][dateKey] : null;
+                if (data) {
+                    total += data.value;
+                    count++;
+                }
+            }
+        });
+        
+        return count > 0 ? total / (daysInMonth / count) : 0; // Weighted average
+    },
+    
+    editWeek(workerId, year, month, week, event) {
+        // Create a composite key for week editing
+        const weekKey = `week-${year}-${month}-${week}`;
+        this.editAvailability(workerId, weekKey, event);
+    },
+    
+    editMonth(workerId, year, month, event) {
+        // Create a composite key for month editing
+        const monthKey = `month-${year}-${month}`;
+        this.editAvailability(workerId, monthKey, event);
     },
     
     editAvailability(workerId, periodKey, event) {
@@ -996,21 +1301,19 @@ const WorkforceAvailability = {
     
     applyAvailabilityToPeriod(workerId, periodKey, value, reason) {
         // Parse the period key to determine what to update
-        const parts = periodKey.split('-');
-        
-        if (parts.length === 3 && !parts[2].startsWith('w')) {
-            // Single day
-            const date = new Date(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
-            const dateKey = this.getDateKey(date);
+        if (periodKey.includes('-') && periodKey.split('-').length === 3 && 
+            !isNaN(periodKey.split('-')[0]) && periodKey.split('-')[0].length === 4) {
+            // Date key format: YYYY-MM-DD
             if (!this.state.availabilityData[workerId]) {
                 this.state.availabilityData[workerId] = {};
             }
-            this.state.availabilityData[workerId][dateKey] = { value, reason };
-        } else if (parts[2] && parts[2].startsWith('w')) {
-            // Week
-            const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]);
-            const week = parseInt(parts[2].substring(1));
+            this.state.availabilityData[workerId][periodKey] = { value, reason };
+        } else if (periodKey.startsWith('week-')) {
+            // Week format: week-YYYY-M-W
+            const parts = periodKey.split('-');
+            const year = parseInt(parts[1]);
+            const month = parseInt(parts[2]);
+            const week = parseInt(parts[3]);
             const days = this.getDaysInWeek(year, month, week);
             
             days.forEach(day => {
@@ -1021,10 +1324,11 @@ const WorkforceAvailability = {
                 }
                 this.state.availabilityData[workerId][dateKey] = { value, reason };
             });
-        } else if (parts.length === 2) {
-            // Month
-            const year = parseInt(parts[0]);
-            const month = parseInt(parts[1]);
+        } else if (periodKey.startsWith('month-')) {
+            // Month format: month-YYYY-M
+            const parts = periodKey.split('-');
+            const year = parseInt(parts[1]);
+            const month = parseInt(parts[2]);
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
             for (let day = 1; day <= daysInMonth; day++) {
@@ -1033,10 +1337,10 @@ const WorkforceAvailability = {
                 if (!this.state.availabilityData[workerId]) {
                     this.state.availabilityData[workerId] = {};
                 }
-                // Only apply to weekdays for month-level changes
+                // Only apply to weekdays for month-level changes if setting available
                 const dayOfWeek = date.getDay();
                 if (reason === 'available' && (dayOfWeek === 0 || dayOfWeek === 6)) {
-                    // Keep weekends as unavailable
+                    // Keep weekends as unavailable when bulk setting to available
                     this.state.availabilityData[workerId][dateKey] = { value: 0, reason: 'weekend' };
                 } else {
                     this.state.availabilityData[workerId][dateKey] = { value, reason };
