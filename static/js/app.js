@@ -471,9 +471,9 @@ const ChApp = {
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/workforce/workforce_availability.js"]');
+                const existingScript = document.querySelector('script[src="modules/workforce/workforce_availability_v2.js"]');
                 if (existingScript) {
-                    console.log('Workforce Availability script already in DOM, waiting for load...');
+                    console.log('Workforce Availability V2 script already in DOM, waiting for load...');
                     // Try to init after a small delay
                     setTimeout(() => {
                         if (typeof WorkforceAvailability !== 'undefined') {
@@ -484,20 +484,20 @@ const ChApp = {
                     return;
                 }
                 
-                // Load workforce_availability.js module
+                // Load workforce_availability_v2.js module (new version matching Production Planning)
                 const script = document.createElement('script');
-                script.src = 'modules/workforce/workforce_availability.js';
+                script.src = 'modules/workforce/workforce_availability_v2.js';
                 script.onload = () => {
-                    console.log('Workforce Availability script loaded');
+                    console.log('Workforce Availability V2 script loaded');
                     if (typeof WorkforceAvailability !== 'undefined') {
                         WorkforceAvailability.init();
-                        console.log('Workforce Availability initialized');
+                        console.log('Workforce Availability V2 initialized');
                     } else {
                         console.error('WorkforceAvailability not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load workforce_availability.js:', e);
+                    console.error('Failed to load workforce_availability_v2.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {
