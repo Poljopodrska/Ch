@@ -111,37 +111,57 @@ const ChApp = {
         }
     },
     
-    // Pricing view
+    // Pricing view - V2 with 2-level product hierarchy
     async getPricingView() {
-        // Use ModuleLoader for better file:// support
-        try {
-            let html;
-            
-            if (window.ModuleLoader) {
-                // Use the module loader for file:// compatibility
-                html = await ModuleLoader.load('pricing');
-            } else {
-                // Fallback to fetch for production
-                const response = await fetch('modules/pricing/pricing.html');
-                html = await response.text();
+        console.log('Loading Pricing V2 module with product hierarchy...');
+        
+        // Create container for pricing module
+        const html = `
+            <div id="pricing-container">
+                <!-- Pricing V2 will be loaded here -->
+            </div>
+        `;
+        
+        // Load the pricing V2 module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if PricingV2 is already loaded
+                if (typeof PricingV2 !== 'undefined') {
+                    console.log('PricingV2 already loaded, initializing...');
+                    PricingV2.init();
+                    console.log('Pricing V2 initialized');
+                    return;
+                }
                 
-                // Initialize after loading
-                setTimeout(() => {
-                    Pricing.init();
-                }, 100);
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/pricing/pricing_v2.js"]');
+                if (existingScript) {
+                    console.log('Pricing V2 script already in DOM, waiting for load...');
+                    return;
+                }
+                
+                // Load pricing_v2.js module
+                const script = document.createElement('script');
+                script.src = 'modules/pricing/pricing_v2.js';
+                script.onload = () => {
+                    console.log('Pricing V2 script loaded');
+                    if (typeof PricingV2 !== 'undefined') {
+                        PricingV2.init();
+                        console.log('Pricing V2 initialized');
+                    } else {
+                        console.error('PricingV2 not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load pricing_v2.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Pricing V2:', error);
             }
-            
-            return html;
-        } catch (error) {
-            console.error('Error loading pricing module:', error);
-            return `
-                <div class="alert alert-error">
-                    <h3>Error Loading Pricing Module</h3>
-                    <p>Could not load the pricing module. Please refresh the page.</p>
-                    <p style="font-size: 0.9em; color: #666;">Error: ${error.message}</p>
-                </div>
-            `;
-        }
+        }, 100);
+        
+        return html;
     },
     
     // Planning view - V4 with expandable hierarchy (months → weeks → days)
