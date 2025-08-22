@@ -101,6 +101,8 @@ const ChApp = {
                 return this.getBOMView();
             case 'workforce':
                 return this.getWorkforceView();
+            case 'feasibility':
+                return this.getFeasibilityView();
             default:
                 // Default to pricing if unknown view
                 return this.getPricingView();
@@ -442,6 +444,66 @@ const ChApp = {
                 document.head.appendChild(script);
             } catch (error) {
                 console.error('Error loading BOM V2 Advanced:', error);
+            }
+        }, 100);
+        
+        return html;
+    },
+    
+    // Feasibility view
+    async getFeasibilityView() {
+        console.log('Loading Production Feasibility module...');
+        
+        // Create container for feasibility module
+        const html = `
+            <div id="feasibility-container">
+                <!-- Production Feasibility will be loaded here -->
+            </div>
+        `;
+        
+        // Load the feasibility module after DOM is ready
+        setTimeout(async () => {
+            try {
+                // Check if ProductionFeasibility is already loaded
+                if (typeof ProductionFeasibility !== 'undefined') {
+                    console.log('ProductionFeasibility already loaded, initializing...');
+                    ProductionFeasibility.init();
+                    console.log('Production Feasibility initialized');
+                    return;
+                }
+                
+                // Check if script is already loading
+                const existingScript = document.querySelector('script[src="modules/feasibility/production_feasibility.js"]');
+                if (existingScript) {
+                    console.log('Production Feasibility script already in DOM, waiting for load...');
+                    // Try to init after a small delay
+                    setTimeout(() => {
+                        if (typeof ProductionFeasibility !== 'undefined') {
+                            ProductionFeasibility.init();
+                            console.log('Production Feasibility initialized from existing script');
+                        }
+                    }, 100);
+                    return;
+                }
+                
+                // Load production_feasibility.js module
+                const script = document.createElement('script');
+                script.src = 'modules/feasibility/production_feasibility.js';
+                script.onload = () => {
+                    console.log('Production Feasibility script loaded');
+                    if (typeof ProductionFeasibility !== 'undefined') {
+                        ProductionFeasibility.init();
+                        console.log('Production Feasibility initialized');
+                    } else {
+                        console.error('ProductionFeasibility not found after loading script');
+                    }
+                };
+                script.onerror = (e) => {
+                    console.error('Failed to load production_feasibility.js:', e);
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                console.error('Error loading Production Feasibility:', error);
             }
         }, 100);
         
