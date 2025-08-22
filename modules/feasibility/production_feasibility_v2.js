@@ -453,8 +453,10 @@ const ProductionFeasibility = {
                         if (this.state.expandedWeeks.has(weekKey)) {
                             const daysInWeek = this.getDaysInWeek(this.state.currentYear, month, week);
                             daysInWeek.forEach(day => {
-                                const dayName = this.getDayShort(new Date(this.state.currentYear, month - 1, day).getDay());
-                                dayHeaders += `<th class="day-header">${day}<br>${dayName}</th>`;
+                                const date = new Date(this.state.currentYear, month - 1, day);
+                                const dayName = this.getDayShort(date.getDay());
+                                const weekendClass = WeekUtils.isWeekend(date) ? 'weekend' : '';
+                                dayHeaders += `<th class="day-header ${weekendClass}">${day}<br>${dayName}</th>`;
                             });
                         } else {
                             dayHeaders += '<th>-</th>';
@@ -539,11 +541,13 @@ const ProductionFeasibility = {
                         const daysInWeek = this.getDaysInWeek(this.state.currentYear, month, week);
                         daysInWeek.forEach(day => {
                             const dayData = weekData.days[day];
+                            const date = new Date(this.state.currentYear, month - 1, day);
+                            const weekendClass = WeekUtils.isWeekend(date) ? 'weekend-cell' : '';
                             const status = type === 'workforce' ? dayData.status : dayData.overallStatus;
                             const cellClass = `cell-${status}`;
                             
                             html += `
-                                <td class="${cellClass} clickable" 
+                                <td class="${cellClass} clickable ${weekendClass}" 
                                     onclick="ProductionFeasibility.showDetail('${productId}', '${type}', ${month}, ${week}, ${day})">
                                     ${this.getStatusIcon(status)}
                                 </td>

@@ -787,8 +787,10 @@ const ProductionPlanningV3 = {
                         if (this.state.expanded.weeks.has(weekKey)) {
                             const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
                             daysInWeek.forEach(day => {
-                                const dayName = this.getDayShort(new Date(this.state.currentYear, month - 1, day).getDay());
-                                dayHeaders += `<th class="day-header">${day}<br>${dayName}</th>`;
+                                const date = new Date(this.state.currentYear, month - 1, day);
+                                const dayName = this.getDayShort(date.getDay());
+                                const weekendClass = WeekUtils.isWeekend(date) ? 'weekend' : '';
+                                dayHeaders += `<th class="day-header ${weekendClass}">${day}<br>${dayName}</th>`;
                             });
                         } else {
                             dayHeaders += '<th>-</th>';
@@ -906,6 +908,8 @@ const ProductionPlanningV3 = {
                         // Week is expanded - show days
                         Object.keys(weekData.days).forEach(day => {
                             const dayData = weekData.days[day];
+                            const date = new Date(this.state.currentYear, month - 1, day);
+                            const weekendClass = WeekUtils.isWeekend(date) ? 'weekend-cell' : '';
                             const cellClass = this.getCellClass(rowType, dayData.value, product, month, day);
                             const cellId = `cell-${productId}-${rowType}-${month}-${day}`;
                             const isEdited = this.state.editedCells.has(cellId);
@@ -914,7 +918,7 @@ const ProductionPlanningV3 = {
                             
                             if (dayData.editable) {
                                 html += `
-                                    <td class="${cellClass} ${editableClass} ${editedClass}"
+                                    <td class="${cellClass} ${editableClass} ${editedClass} ${weekendClass}"
                                         data-cell-id="${cellId}"
                                         data-product="${productId}"
                                         data-row-type="${rowType}"
@@ -926,7 +930,7 @@ const ProductionPlanningV3 = {
                                     </td>
                                 `;
                             } else {
-                                html += `<td class="${cellClass}">${dayData.value}</td>`;
+                                html += `<td class="${cellClass} ${weekendClass}">${dayData.value}</td>`;
                             }
                         });
                     } else {

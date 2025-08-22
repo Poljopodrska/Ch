@@ -494,7 +494,8 @@ const WorkforceAvailability = {
                             daysInWeek.forEach(day => {
                                 const date = new Date(this.state.currentYear, month, day);
                                 const dayName = date.toLocaleString('default', { weekday: 'short' });
-                                dayHeaders += `<th class="day-header">${day}<br>${dayName.substr(0, 2)}</th>`;
+                                const weekendClass = WeekUtils.isWeekend(date) ? 'weekend' : '';
+                                dayHeaders += `<th class="day-header ${weekendClass}">${day}<br>${dayName.substr(0, 2)}</th>`;
                             });
                         } else {
                             dayHeaders += '<th>-</th>';
@@ -552,8 +553,10 @@ const WorkforceAvailability = {
                             
                             totalAvailable += value;
                             
+                            const weekendClass = WeekUtils.isWeekend(date) ? 'weekend-cell' : '';
+                            
                             html += `
-                                <td class="availability-cell day-cell" 
+                                <td class="availability-cell day-cell ${weekendClass}" 
                                     style="background: ${this.getColorForValue(value, reasonData.color)}; 
                                            color: ${value > 0.5 ? 'white' : '#2c3e50'};"
                                     onclick="WorkforceAvailability.editAvailability('${worker.id}', '${dateKey}', event)"

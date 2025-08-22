@@ -636,8 +636,10 @@ const PlanningV4 = {
                         if (this.state.expanded.weeks.has(weekKey)) {
                             const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
                             daysInWeek.forEach(day => {
-                                const dayName = this.getDayShort(new Date(this.state.currentYear, month - 1, day).getDay());
-                                dayHeaders += `<th class="day-header">${day}<br>${dayName}</th>`;
+                                const date = new Date(this.state.currentYear, month - 1, day);
+                                const dayName = this.getDayShort(date.getDay());
+                                const weekendClass = WeekUtils.isWeekend(date) ? 'weekend' : '';
+                                dayHeaders += `<th class="day-header ${weekendClass}">${day}<br>${dayName}</th>`;
                             });
                         } else {
                             dayHeaders += '<th>-</th>';
@@ -766,12 +768,14 @@ const PlanningV4 = {
                         // Week is expanded - show days
                         Object.keys(weekData.days).forEach(day => {
                             const dayData = weekData.days[day];
+                            const date = new Date(this.state.currentYear, month - 1, day);
+                            const weekendClass = WeekUtils.isWeekend(date) ? 'weekend-cell' : '';
                             const cellClass = `cell-${dayData.type}`;
                             const isEditable = dayData.type === 'plan' || dayData.type === 'future';
                             
                             if (isEditable) {
                                 html += `
-                                    <td class="${cellClass} editable" 
+                                    <td class="${cellClass} editable ${weekendClass}" 
                                         contenteditable="true"
                                         onblur="PlanningV4.updateDayValue('${productId}', ${year}, ${month}, ${day}, this.textContent)"
                                         onkeypress="if(event.key==='Enter'){event.preventDefault();this.blur();}">
@@ -779,7 +783,7 @@ const PlanningV4 = {
                                     </td>
                                 `;
                             } else {
-                                html += `<td class="${cellClass}">${dayData.value}</td>`;
+                                html += `<td class="${cellClass} ${weekendClass}">${dayData.value}</td>`;
                             }
                         });
                     } else {
