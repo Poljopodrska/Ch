@@ -125,31 +125,35 @@ const ChApp = {
         // Load the pricing V2 module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if PricingV2 is already loaded
-                if (typeof PricingV2 !== 'undefined') {
-                    console.log('PricingV2 already loaded, initializing...');
-                    PricingV2.init();
-                    console.log('Pricing V2 initialized');
+                // Check if PricingV3 is already loaded
+                if (typeof PricingV3 !== 'undefined') {
+                    console.log('PricingV3 already loaded, initializing...');
+                    PricingV3.init();
+                    console.log('Pricing V3 initialized');
                     return;
                 }
                 
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/pricing/pricing_v2.js"]');
+                const existingScript = document.querySelector('script[src="modules/pricing/pricing_v3.js"]');
                 if (existingScript) {
-                    console.log('Pricing V2 script already in DOM, waiting for load...');
+                    console.log('Pricing V3 script already in DOM, waiting for load...');
                     return;
                 }
                 
-                // Load pricing_v2.js module
+                // Load pricing_v3.js module (with cost breakdown)
                 const script = document.createElement('script');
-                script.src = 'modules/pricing/pricing_v2.js';
+                script.src = 'modules/pricing/pricing_v3.js';
                 script.onload = () => {
-                    console.log('Pricing V2 script loaded');
-                    if (typeof PricingV2 !== 'undefined') {
+                    console.log('Pricing V3 script loaded');
+                    if (typeof PricingV3 !== 'undefined') {
+                        PricingV3.init();
+                        console.log('Pricing V3 initialized');
+                    } else if (typeof PricingV2 !== 'undefined') {
+                        // Fallback to V2
                         PricingV2.init();
-                        console.log('Pricing V2 initialized');
+                        console.log('Pricing V2 initialized (fallback)');
                     } else {
-                        console.error('PricingV2 not found after loading script');
+                        console.error('PricingV3 not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
