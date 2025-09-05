@@ -556,7 +556,8 @@ const FinanceMatching = {
                     deliveryNotes: [],
                     supplierName: '',
                     amount: '',
-                    date: ''
+                    date: '',
+                    xmlContent: content // Store full content for later matching
                 };
                 
                 // Extract invoice number from XML
@@ -567,21 +568,15 @@ const FinanceMatching = {
                 const supplierMatch = content.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
                 if (supplierMatch) invoice.supplierName = supplierMatch[1];
                 
-                // Extract amount
+                // Extract amount - try multiple patterns
                 const amountMatch = content.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
-                if (amountMatch) invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
+                if (amountMatch) {
+                    invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
+                }
                 
                 // Extract date
                 const dateMatch = content.match(/<DatumRacuna>([^<]+)<\/DatumRacuna>/);
                 if (dateMatch) invoice.date = dateMatch[1].substring(0, 10);
-                
-                // Search for delivery notes from ININ
-                for (let gr in this.ininDocuments) {
-                    const deliveryNote = this.ininDocuments[gr].deliveryNote;
-                    if (content.includes(deliveryNote)) {
-                        invoice.deliveryNotes.push(deliveryNote);
-                    }
-                }
                 
                 this.csbInvoices[invoiceNum] = invoice;
                 
@@ -630,6 +625,17 @@ const FinanceMatching = {
         
         for (let invNum in this.csbInvoices) {
             const invoice = this.csbInvoices[invNum];
+            
+            // Search for delivery notes in the invoice XML content
+            invoice.deliveryNotes = [];
+            if (invoice.xmlContent) {
+                for (let gr in this.ininDocuments) {
+                    const deliveryNote = this.ininDocuments[gr].deliveryNote;
+                    if (invoice.xmlContent.includes(deliveryNote)) {
+                        invoice.deliveryNotes.push(deliveryNote);
+                    }
+                }
+            }
             
             if (invoice.deliveryNotes.length > 0) {
                 // Invoice has matching delivery notes
