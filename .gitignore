@@ -97,3 +97,6 @@ essentials/reports/*/*
 # Docker
 .docker/
 docker-compose.override.yml
+
+# Work Files (for collaboration with Claude)
+work_files/
