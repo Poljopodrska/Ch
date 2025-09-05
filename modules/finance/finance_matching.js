@@ -564,9 +564,20 @@ const FinanceMatching = {
                 const invNumMatch = content.match(/<StevilkaRacuna>([^<]+)<\/StevilkaRacuna>/);
                 if (invNumMatch) invoice.invoiceNumberXML = invNumMatch[1];
                 
-                // Extract supplier
-                const supplierMatch = content.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
-                if (supplierMatch) invoice.supplierName = supplierMatch[1];
+                // Extract supplier - try both formats
+                let supplierMatch = content.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
+                if (supplierMatch) {
+                    invoice.supplierName = supplierMatch[1];
+                } else {
+                    // Try eSLOG format - look for supplier in NAD segment
+                    // First try to find seller (SE qualifier)
+                    supplierMatch = content.match(/<G_SG2>\s*<S_NAD>\s*<D_3035>SE<\/D_3035>.*?<D_3036>([^<]+)<\/D_3036>/s);
+                    if (!supplierMatch) {
+                        // Fallback to any D_3036 (company name field)
+                        supplierMatch = content.match(/<D_3036>([^<]+)<\/D_3036>/);
+                    }
+                    if (supplierMatch) invoice.supplierName = supplierMatch[1];
+                }
                 
                 // Extract amount - try multiple patterns for different XML formats
                 // Format 1: IzdaniRacunEnostavni (38xxx series)
@@ -588,9 +599,19 @@ const FinanceMatching = {
                     }
                 }
                 
-                // Extract date
-                const dateMatch = content.match(/<DatumRacuna>([^<]+)<\/DatumRacuna>/);
-                if (dateMatch) invoice.date = dateMatch[1].substring(0, 10);
+                // Extract date - try both formats
+                let dateMatch = content.match(/<DatumRacuna>([^<]+)<\/DatumRacuna>/);
+                if (dateMatch) {
+                    invoice.date = dateMatch[1].substring(0, 10);
+                } else {
+                    // Try eSLOG format - look for invoice date in DTM segment with qualifier 137
+                    dateMatch = content.match(/<S_DTM>\s*<C_C507>\s*<D_2005>137<\/D_2005>\s*<D_2380>([^<]+)<\/D_2380>/s);
+                    if (!dateMatch) {
+                        // Fallback to any D_2380 (date field)
+                        dateMatch = content.match(/<D_2380>([^<]+)<\/D_2380>/);
+                    }
+                    if (dateMatch) invoice.date = dateMatch[1].substring(0, 10);
+                }
                 
                 this.csbInvoices[invoiceNum] = invoice;
                 
