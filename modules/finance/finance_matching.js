@@ -569,13 +569,9 @@ const FinanceMatching = {
                 if (supplierMatch) {
                     invoice.supplierName = supplierMatch[1];
                 } else {
-                    // Try eSLOG format - look for supplier in NAD segment
-                    // First try to find seller (SE qualifier)
-                    supplierMatch = content.match(/<G_SG2>\s*<S_NAD>\s*<D_3035>SE<\/D_3035>.*?<D_3036>([^<]+)<\/D_3036>/s);
-                    if (!supplierMatch) {
-                        // Fallback to any D_3036 (company name field)
-                        supplierMatch = content.match(/<D_3036>([^<]+)<\/D_3036>/);
-                    }
+                    // Try eSLOG format - look for supplier
+                    // For P-series files, just extract the first D_3036 which contains the supplier name
+                    supplierMatch = content.match(/<D_3036>([^<]+)<\/D_3036>/);
                     if (supplierMatch) invoice.supplierName = supplierMatch[1];
                 }
                 
@@ -585,16 +581,15 @@ const FinanceMatching = {
                 if (amountMatch) {
                     invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
                 } else {
-                    // Format 2: eSLOG 2.00 format (P-series) - look in MOA segments
-                    // Try to find monetary amount in MOA segment with qualifier 9 (total amount)
-                    const moaMatch = content.match(/<S_MOA>\s*<C_C516>\s*<D_5025>9<\/D_5025>\s*<D_5004>([^<]+)<\/D_5004>/);
-                    if (moaMatch) {
-                        invoice.amount = parseFloat(moaMatch[1].replace(',', '.'));
-                    } else {
-                        // Try simpler MOA pattern
-                        const simpleMoaMatch = content.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/);
-                        if (simpleMoaMatch) {
-                            invoice.amount = parseFloat(simpleMoaMatch[1].replace(',', '.'));
+                    // Format 2: eSLOG 2.00 format (P-series)
+                    // Extract all D_5004 values and find the one that looks like a total
+                    const allAmounts = content.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/g);
+                    if (allAmounts && allAmounts.length > 0) {
+                        // Extract the numeric value from the last match (usually the total)
+                        const lastAmount = allAmounts[allAmounts.length - 1];
+                        const amountMatch = lastAmount.match(/>([0-9]+\.?[0-9]*)</);
+                        if (amountMatch) {
+                            invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
                         }
                     }
                 }
@@ -604,13 +599,19 @@ const FinanceMatching = {
                 if (dateMatch) {
                     invoice.date = dateMatch[1].substring(0, 10);
                 } else {
-                    // Try eSLOG format - look for invoice date in DTM segment with qualifier 137
-                    dateMatch = content.match(/<S_DTM>\s*<C_C507>\s*<D_2005>137<\/D_2005>\s*<D_2380>([^<]+)<\/D_2380>/s);
-                    if (!dateMatch) {
-                        // Fallback to any D_2380 (date field)
-                        dateMatch = content.match(/<D_2380>([^<]+)<\/D_2380>/);
+                    // Try eSLOG format - look for dates
+                    // Find all D_2380 fields and look for one with date format
+                    const allDates = content.match(/<D_2380>([^<]+)<\/D_2380>/g);
+                    if (allDates && allDates.length > 0) {
+                        // Look for first date that matches date format (YYYY-MM-DD or YYYYMMDD)
+                        for (let dateStr of allDates) {
+                            const match = dateStr.match(/>([0-9]{4}[-]?[0-9]{2}[-]?[0-9]{2})</);
+                            if (match) {
+                                invoice.date = match[1].substring(0, 10);
+                                break;
+                            }
+                        }
                     }
-                    if (dateMatch) invoice.date = dateMatch[1].substring(0, 10);
                 }
                 
                 this.csbInvoices[invoiceNum] = invoice;
