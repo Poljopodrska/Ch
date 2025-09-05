@@ -63,6 +63,23 @@ const ChApp = {
     },
     
     switchMainTab(mainCategory) {
+        // Special handling for Finance module
+        if (mainCategory === 'finance') {
+            // Check if user is authenticated for Finance module
+            if (!this.checkFinanceAuth()) {
+                // Show password prompt
+                const password = prompt('Please enter the password to access Finance module:');
+                if (password !== 'Marina') {
+                    alert('Incorrect password. Access denied.');
+                    // Don't change tab
+                    return;
+                }
+                // Store authentication time
+                sessionStorage.setItem('financeAuthTime', Date.now().toString());
+            }
+        }
+        
+        // Now update the current tab
         this.currentMainTab = mainCategory;
         
         // Update main tab active state
@@ -142,31 +159,7 @@ const ChApp = {
                 break;
                 
             case 'finance':
-                // Check if user is authenticated for Finance module
-                if (!this.checkFinanceAuth()) {
-                    // Show password prompt
-                    const password = prompt('Please enter the password to access Finance module:');
-                    if (password === 'Marina') {
-                        // Store authentication time
-                        sessionStorage.setItem('financeAuthTime', Date.now().toString());
-                        // Continue to show finance tabs
-                    } else {
-                        alert('Incorrect password. Access denied.');
-                        // Switch back to previous tab
-                        const prevTab = this.currentMainTab || 'production';
-                        // Reset tab visual state
-                        const mainTabs = document.querySelectorAll('.main-tab');
-                        mainTabs.forEach(tab => {
-                            tab.classList.remove('active');
-                            if (tab.getAttribute('data-main') === prevTab) {
-                                tab.classList.add('active');
-                            }
-                        });
-                        // Re-render previous tab
-                        this.renderSubTabs(prevTab);
-                        return;
-                    }
-                }
+                // Finance is already authenticated in switchMainTab
                 subTabsHTML = `
                     <button class="nav-link active" data-view="finance-overview">
                         <span class="nav-icon">💰</span>
