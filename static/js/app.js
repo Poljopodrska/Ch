@@ -140,6 +140,29 @@ const ChApp = {
                 `;
                 this.currentSubTab = 'management-production';
                 break;
+                
+            case 'finance':
+                // Check if user is authenticated for Finance module
+                if (!this.checkFinanceAuth()) {
+                    this.promptFinancePassword();
+                    return;
+                }
+                subTabsHTML = `
+                    <button class="nav-link active" data-view="finance-overview">
+                        <span class="nav-icon">💰</span>
+                        <span class="nav-text">Overview</span>
+                    </button>
+                    <button class="nav-link" data-view="finance-reports">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Reports</span>
+                    </button>
+                    <button class="nav-link" data-view="finance-budgets">
+                        <span class="nav-icon">📈</span>
+                        <span class="nav-text">Budgets</span>
+                    </button>
+                `;
+                this.currentSubTab = 'finance-overview';
+                break;
         }
         
         subTabsContainer.innerHTML = subTabsHTML;
@@ -219,6 +242,12 @@ const ChApp = {
                 return this.getManagementProductionView();
             case 'management-sales':
                 return this.getManagementSalesView();
+            case 'finance-overview':
+                return this.getFinanceOverviewView();
+            case 'finance-reports':
+                return this.getFinanceReportsView();
+            case 'finance-budgets':
+                return this.getFinanceBudgetsView();
             default:
                 // Default to production planning if unknown view
                 return this.getProductionPlanningView();
@@ -1002,5 +1031,153 @@ const ChApp = {
     // Utility: delay function
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    },
+    
+    // Finance authentication methods
+    checkFinanceAuth() {
+        // Check if user is authenticated (session storage for current session only)
+        const authTime = sessionStorage.getItem('financeAuthTime');
+        if (authTime) {
+            const elapsed = Date.now() - parseInt(authTime);
+            // Session valid for 30 minutes
+            if (elapsed < 30 * 60 * 1000) {
+                return true;
+            }
+        }
+        return false;
+    },
+    
+    promptFinancePassword() {
+        const password = prompt('Please enter the password to access Finance module:');
+        if (password === 'marina') {
+            // Store authentication time
+            sessionStorage.setItem('financeAuthTime', Date.now().toString());
+            // Switch to finance tab
+            this.switchMainTab('finance');
+        } else {
+            alert('Incorrect password. Access denied.');
+            // Switch back to production tab
+            const productionTab = document.querySelector('.main-tab[data-main="production"]');
+            if (productionTab) {
+                productionTab.click();
+            }
+        }
+    },
+    
+    // Finance view methods
+    async getFinanceOverviewView() {
+        const html = `
+            <div class="finance-container">
+                <div class="finance-header">
+                    <h1>💳 Finance Overview</h1>
+                    <p>Welcome to the Finance Module</p>
+                </div>
+                
+                <div class="finance-content">
+                    <div class="coming-soon">
+                        <h2>Finance Module - Protected Area</h2>
+                        <p>This module is under development. Content will be added soon.</p>
+                        
+                        <div class="planned-features">
+                            <h3>Planned Features:</h3>
+                            <ul>
+                                <li>📊 Financial dashboards</li>
+                                <li>💰 Cash flow management</li>
+                                <li>📈 Financial reporting</li>
+                                <li>🎯 Budget tracking</li>
+                                <li>💳 Transaction management</li>
+                                <li>📉 Cost analysis</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .finance-container {
+                    padding: 30px;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                
+                .finance-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    margin-bottom: 30px;
+                }
+                
+                .finance-header h1 {
+                    margin: 0;
+                    font-size: 32px;
+                }
+                
+                .finance-content {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+                
+                .coming-soon {
+                    text-align: center;
+                    padding: 40px;
+                }
+                
+                .planned-features {
+                    margin-top: 30px;
+                    text-align: left;
+                    max-width: 500px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .planned-features ul {
+                    list-style: none;
+                    padding: 0;
+                }
+                
+                .planned-features li {
+                    padding: 10px;
+                    margin: 10px 0;
+                    background: #f5f5f5;
+                    border-radius: 5px;
+                }
+            </style>
+        `;
+        return html;
+    },
+    
+    async getFinanceReportsView() {
+        return `
+            <div class="finance-container">
+                <div class="finance-header">
+                    <h1>📊 Financial Reports</h1>
+                </div>
+                <div class="finance-content">
+                    <div class="coming-soon">
+                        <h2>Reports Module</h2>
+                        <p>Financial reports will be available here.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+    
+    async getFinanceBudgetsView() {
+        return `
+            <div class="finance-container">
+                <div class="finance-header">
+                    <h1>📈 Budget Management</h1>
+                </div>
+                <div class="finance-content">
+                    <div class="coming-soon">
+                        <h2>Budget Module</h2>
+                        <p>Budget planning and tracking will be available here.</p>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 };

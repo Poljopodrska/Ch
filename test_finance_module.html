@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Module Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .test-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0ff;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+        .test-steps {
+            margin: 20px 0;
+        }
+        .test-steps li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 4px;
+        }
+        .password-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fffaf0;
+            border: 1px solid #ff9800;
+            border-radius: 4px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #764ba2;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔐 Finance Module Test Page</h1>
+        
+        <div class="test-info">
+            <h2>✅ Finance Module Successfully Created!</h2>
+            <p>The Finance module has been added to your Ch Project with password protection.</p>
+        </div>
+
+        <div class="password-info">
+            <h3>🔑 Password Information</h3>
+            <p><strong>Password:</strong> marina</p>
+            <p>This password protects access to the Finance module.</p>
+        </div>
+
+        <div class="test-steps">
+            <h3>📝 How to Test:</h3>
+            <ol>
+                <li>Open the main Ch Project application (index.html)</li>
+                <li>Click on the <strong>Finance</strong> tab in the navigation</li>
+                <li>You will be prompted for a password</li>
+                <li>Enter: <strong>marina</strong></li>
+                <li>If correct, you'll see the Finance sub-tabs: Overview, Reports, Budgets</li>
+                <li>If incorrect, access will be denied and you'll return to the Production tab</li>
+            </ol>
+        </div>
+
+        <div class="test-info">
+            <h3>🔒 Security Features:</h3>
+            <ul>
+                <li>Password protection on Finance module access</li>
+                <li>Session-based authentication (30 minutes validity)</li>
+                <li>Auto-redirect to Production tab on failed authentication</li>
+                <li>Password stored in session storage (cleared when browser closes)</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="index.html" class="btn">Open Ch Project</a>
+        </div>
+    </div>
+</body>
+</html>

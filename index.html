@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ch Project v0.5.13</title>
+    <title>Ch Project v0.6.0</title>
     
     <!-- Core CSS -->
     <link rel="stylesheet" href="static/css/main.css">
@@ -245,6 +245,10 @@
                         <span class="nav-icon">📊</span>
                         <span class="nav-text">Management</span>
                     </button>
+                    <button class="nav-link main-tab" data-main="finance">
+                        <span class="nav-icon">💳</span>
+                        <span class="nav-text">Finance</span>
+                    </button>
                 </div>
                 
                 <!-- Sub-category Tabs -->
@@ -278,7 +282,7 @@
             <!-- Dynamic content loads here -->
             <div class="loading">
                 <h2>Loading Ch Project...</h2>
-                <p>Initializing production planning system v0.5.13 with CRM</p>
+                <p>Initializing production planning system v0.6.0 with Finance Module</p>
             </div>
         </main>
         
@@ -288,10 +292,13 @@
                 <span class="separator">|</span>
                 <span class="status">Ready</span>
                 <span class="separator">|</span>
-                <span class="version">Version 0.5.13</span>
+                <span class="version">Version 0.6.0</span>
             </div>
         </footer>
     </div>
+    
+    <!-- Backend Storage Adapter (loads first to intercept localStorage) -->
+    <script src="js/storage_adapter.js"></script>
     
     <!-- Core Scripts -->
     <script src="static/js/config.js"></script>
@@ -302,7 +309,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Update config version
             if (window.ChConfig) {
-                window.ChConfig.version = '0.5.13';
+                window.ChConfig.version = '0.6.0';
             }
             
             // Initialize app
@@ -313,7 +320,7 @@
             // Update version display
             const versionDisplay = document.querySelector('.version-display');
             if (versionDisplay) {
-                versionDisplay.textContent = 'v0.5.13 - CRM INTEGRATED';
+                versionDisplay.textContent = 'v0.6.0 - FINANCE MODULE';
             }
         });
     </script>
