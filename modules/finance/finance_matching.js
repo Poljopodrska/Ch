@@ -103,10 +103,15 @@ const FinanceMatching = {
                                     <th>Goods Receipt</th>
                                     <th>ININ Date</th>
                                     <th>Supplier Code</th>
+                                    <th>ININ Amount (€)</th>
                                     <th>Invoice #</th>
                                     <th>Invoice Date</th>
                                     <th>Supplier Name</th>
-                                    <th>Amount (€)</th>
+                                    <th>Amount inc. VAT (€)</th>
+                                    <th>VAT (€)</th>
+                                    <th>Amount w/o VAT (€)</th>
+                                    <th>Invoice Approval 1</th>
+                                    <th>Invoice Approval 2</th>
                                     <th>Category</th>
                                 </tr>
                             </thead>
@@ -905,15 +910,24 @@ const FinanceMatching = {
         
         this.matchedDocuments.forEach(match => {
             const row = document.createElement('tr');
+            const amountIncVAT = match.amount || 0;
+            const vatAmount = amountIncVAT * 0.22; // Assuming 22% VAT rate
+            const amountExclVAT = amountIncVAT - vatAmount;
+            
             row.innerHTML = `
                 <td><strong>${match.deliveryNote}</strong></td>
                 <td>${match.goodsReceipt}</td>
                 <td>${match.ininDate}</td>
                 <td>${match.supplierCode}</td>
+                <td>-</td>
                 <td><strong>${match.invoiceNumber}</strong></td>
                 <td>${match.invoiceDate}</td>
                 <td>${match.supplierName}</td>
-                <td>€${match.amount ? match.amount.toFixed(2) : 'N/A'}</td>
+                <td>€${amountIncVAT ? amountIncVAT.toFixed(2) : 'N/A'}</td>
+                <td>€${amountIncVAT ? vatAmount.toFixed(2) : 'N/A'}</td>
+                <td>€${amountIncVAT ? amountExclVAT.toFixed(2) : 'N/A'}</td>
+                <td>Irena</td>
+                <td>Janez</td>
                 <td><span class="status-badge status-matched">${match.category || 'RETAIL'}</span></td>
             `;
             matchedTbody.appendChild(row);
@@ -1050,12 +1064,16 @@ const FinanceMatching = {
     },
     
     exportToCSV() {
-        let csv = 'Delivery Note,Goods Receipt,ININ Date,Supplier Code,Invoice Number,Invoice Date,Supplier Name,Amount,Status\n';
+        let csv = 'Delivery Note,Goods Receipt,ININ Date,Supplier Code,ININ Amount,Invoice Number,Invoice Date,Supplier Name,Amount inc. VAT,VAT,Amount w/o VAT,Invoice Approval 1,Invoice Approval 2,Status\n';
         
         this.matchedDocuments.forEach(match => {
-            csv += `"${match.deliveryNote}","${match.goodsReceipt}","${match.ininDate}","${match.supplierCode}",`;
+            const amountIncVAT = match.amount || 0;
+            const vatAmount = amountIncVAT * 0.22;
+            const amountExclVAT = amountIncVAT - vatAmount;
+            
+            csv += `"${match.deliveryNote}","${match.goodsReceipt}","${match.ininDate}","${match.supplierCode}","-",`;
             csv += `"${match.invoiceNumber}","${match.invoiceDate}","${match.supplierName}",`;
-            csv += `"${match.amount || ''}","Matched"\n`;
+            csv += `"${amountIncVAT}","${vatAmount.toFixed(2)}","${amountExclVAT.toFixed(2)}","Irena","Janez","Matched"\n`;
         });
         
         this.downloadFile(csv, 'matched_documents.csv', 'text/csv');
