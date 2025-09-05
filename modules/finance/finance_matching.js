@@ -82,6 +82,8 @@ const FinanceMatching = {
                         <button class="tab-btn active" data-tab="matched">✅ Matched Documents</button>
                         <button class="tab-btn" data-tab="unmatched-inin">⚠️ Unmatched ININ</button>
                         <button class="tab-btn" data-tab="unmatched-invoices">❌ Unmatched Invoices</button>
+                        <button class="tab-btn" data-tab="all-inin">📦 All ININ Data</button>
+                        <button class="tab-btn" data-tab="all-csb">💳 All CSB Data</button>
                     </div>
                     
                     <div id="matched-tab" class="tab-content active">
@@ -135,6 +137,46 @@ const FinanceMatching = {
                             </thead>
                             <tbody id="unmatched-inv-tbody">
                                 <!-- Unmatched invoice rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="all-inin-tab" class="tab-content">
+                        <h3>📦 All ININ Goods Receipts</h3>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Goods Receipt</th>
+                                    <th>Delivery Note</th>
+                                    <th>Date</th>
+                                    <th>Supplier Code</th>
+                                    <th>Items Count</th>
+                                    <th>First Items</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-inin-tbody">
+                                <!-- All ININ rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div id="all-csb-tab" class="tab-content">
+                        <h3>💳 All CSB Invoices</h3>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>File Name</th>
+                                    <th>Invoice #</th>
+                                    <th>Date</th>
+                                    <th>Supplier</th>
+                                    <th>Amount (€)</th>
+                                    <th>Found Delivery Notes</th>
+                                    <th>XML Preview</th>
+                                </tr>
+                            </thead>
+                            <tbody id="all-csb-tbody">
+                                <!-- All CSB rows -->
                             </tbody>
                         </table>
                     </div>
@@ -769,6 +811,60 @@ const FinanceMatching = {
             `;
             invTbody.appendChild(row);
         });
+        
+        // Display ALL ININ data
+        const allIninTbody = document.getElementById('all-inin-tbody');
+        allIninTbody.innerHTML = '';
+        
+        for (let gr in this.ininDocuments) {
+            const doc = this.ininDocuments[gr];
+            const row = document.createElement('tr');
+            const firstItems = doc.items.slice(0, 3).map(item => 
+                `${item.itemCode}(${item.quantity})`
+            ).join(', ');
+            const moreItems = doc.items.length > 3 ? ` ... +${doc.items.length - 3} more` : '';
+            
+            row.innerHTML = `
+                <td>${doc.fileName}</td>
+                <td><strong>${doc.goodsReceipt}</strong></td>
+                <td><strong style="color: #007bff;">${doc.deliveryNote}</strong></td>
+                <td>${doc.date}</td>
+                <td>${doc.supplierCode}</td>
+                <td>${doc.items.length}</td>
+                <td>${firstItems}${moreItems}</td>
+            `;
+            allIninTbody.appendChild(row);
+        }
+        
+        // Display ALL CSB data
+        const allCsbTbody = document.getElementById('all-csb-tbody');
+        allCsbTbody.innerHTML = '';
+        
+        for (let invNum in this.csbInvoices) {
+            const inv = this.csbInvoices[invNum];
+            const row = document.createElement('tr');
+            
+            // Show first 100 chars of XML content for preview
+            const xmlPreview = inv.xmlContent ? 
+                inv.xmlContent.substring(0, 100).replace(/</g, '&lt;').replace(/>/g, '&gt;') + '...' : 
+                'No content';
+            
+            // Highlight delivery notes if found
+            const deliveryNotes = inv.deliveryNotes && inv.deliveryNotes.length > 0 ? 
+                `<strong style="color: green;">${inv.deliveryNotes.join(', ')}</strong>` : 
+                '<span style="color: #999;">None found</span>';
+            
+            row.innerHTML = `
+                <td>${inv.fileName}</td>
+                <td><strong>${inv.invoiceNumberXML || inv.invoiceNumber}</strong></td>
+                <td>${inv.date || 'N/A'}</td>
+                <td>${inv.supplierName || 'N/A'}</td>
+                <td>€${inv.amount ? inv.amount.toFixed(2) : 'N/A'}</td>
+                <td>${deliveryNotes}</td>
+                <td style="font-size: 10px; color: #666;">${xmlPreview}</td>
+            `;
+            allCsbTbody.appendChild(row);
+        }
         
         // Scroll to results
         document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
