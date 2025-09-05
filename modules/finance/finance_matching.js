@@ -637,13 +637,29 @@ const FinanceMatching = {
                     if (supplierMatch) invoice.supplierName = supplierMatch[1];
                 }
                 
-                // Extract amount - try multiple patterns for different XML formats
+                // Extract amounts - try multiple patterns for different XML formats
                 // Format 1: IzdaniRacunEnostavni (38xxx series)
-                let amountMatch = content.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
-                if (amountMatch) {
-                    invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
-                } else {
-                    // Format 2: eSLOG 2.00 format (P-series)
+                
+                // Extract total amount (with VAT) - VrstaZneska=9 or 86
+                let totalMatch = content.match(/<VrstaZneska>(?:9|86)<\/VrstaZneska>\s*<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
+                if (totalMatch) {
+                    invoice.amount = parseFloat(totalMatch[1].replace(',', '.'));
+                }
+                
+                // Extract base amount (without VAT) - VrstaZneska=79 or 125
+                let baseMatch = content.match(/<VrstaZneska>(?:79|125)<\/VrstaZneska>\s*<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
+                if (baseMatch) {
+                    invoice.amountBase = parseFloat(baseMatch[1].replace(',', '.'));
+                }
+                
+                // Extract VAT amount - ZnesekDavka with VrstaZneskaDavka=124
+                let vatMatch = content.match(/<VrstaZneskaDavka>124<\/VrstaZneskaDavka>\s*<ZnesekDavka>([^<]+)<\/ZnesekDavka>/);
+                if (vatMatch) {
+                    invoice.vatAmount = parseFloat(vatMatch[1].replace(',', '.'));
+                }
+                
+                // If not found, try the eSLOG 2.00 format (P-series)
+                if (!invoice.amount) {
                     // Extract all D_5004 values and find the one that looks like a total
                     const allAmounts = content.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/g);
                     if (allAmounts && allAmounts.length > 0) {
@@ -793,6 +809,8 @@ const FinanceMatching = {
                             invoiceDate: invoice.date,
                             supplierName: invoice.supplierName,
                             amount: invoice.amount,
+                            amountBase: invoice.amountBase,
+                            vatAmount: invoice.vatAmount,
                             category: 'RETAIL SHOP' // Mark as retail
                         });
                     }
@@ -910,9 +928,10 @@ const FinanceMatching = {
         
         this.matchedDocuments.forEach(match => {
             const row = document.createElement('tr');
+            // Use actual VAT values from invoice, or calculate if not available
             const amountIncVAT = match.amount || 0;
-            const vatAmount = amountIncVAT * 0.22; // Assuming 22% VAT rate
-            const amountExclVAT = amountIncVAT - vatAmount;
+            const vatAmount = match.vatAmount !== undefined ? match.vatAmount : (amountIncVAT * 0.22);
+            const amountExclVAT = match.amountBase !== undefined ? match.amountBase : (amountIncVAT - vatAmount);
             
             row.innerHTML = `
                 <td><strong>${match.deliveryNote}</strong></td>
@@ -924,8 +943,8 @@ const FinanceMatching = {
                 <td>${match.invoiceDate}</td>
                 <td>${match.supplierName}</td>
                 <td>€${amountIncVAT ? amountIncVAT.toFixed(2) : 'N/A'}</td>
-                <td>€${amountIncVAT ? vatAmount.toFixed(2) : 'N/A'}</td>
-                <td>€${amountIncVAT ? amountExclVAT.toFixed(2) : 'N/A'}</td>
+                <td>€${vatAmount ? vatAmount.toFixed(2) : 'N/A'}</td>
+                <td>€${amountExclVAT ? amountExclVAT.toFixed(2) : 'N/A'}</td>
                 <td>Irena</td>
                 <td>Janez</td>
                 <td><span class="status-badge status-matched">${match.category || 'RETAIL'}</span></td>
@@ -1068,8 +1087,8 @@ const FinanceMatching = {
         
         this.matchedDocuments.forEach(match => {
             const amountIncVAT = match.amount || 0;
-            const vatAmount = amountIncVAT * 0.22;
-            const amountExclVAT = amountIncVAT - vatAmount;
+            const vatAmount = match.vatAmount !== undefined ? match.vatAmount : (amountIncVAT * 0.22);
+            const amountExclVAT = match.amountBase !== undefined ? match.amountBase : (amountIncVAT - vatAmount);
             
             csv += `"${match.deliveryNote}","${match.goodsReceipt}","${match.ininDate}","${match.supplierCode}","-",`;
             csv += `"${match.invoiceNumber}","${match.invoiceDate}","${match.supplierName}",`;
