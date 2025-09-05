@@ -882,6 +882,21 @@ const FinanceMatching = {
             }
         }
         
+        // Validate VAT data in matched documents
+        let vatErrors = 0;
+        let vatMismatches = 0;
+        this.matchedDocuments.forEach(match => {
+            if (match.vatAmount === undefined || match.amountBase === undefined) {
+                vatErrors++;
+            } else if (match.amount > 0) {
+                const calculated = match.amountBase + match.vatAmount;
+                const diff = Math.abs(calculated - match.amount);
+                if (diff > 0.02) {
+                    vatMismatches++;
+                }
+            }
+        });
+        
         console.log(`\nMatching complete:`);
         console.log(`- Checked ${checkedInvoices} invoices`);
         console.log(`- Found ${retailInvoiceCount} retail invoices (have ININ delivery notes)`);
@@ -889,6 +904,8 @@ const FinanceMatching = {
         console.log(`- VALID matches: ${this.matchedDocuments.length} (after filtering suspicious)`);
         console.log(`- Suspicious matches removed: ${this.suspiciousMatches ? this.suspiciousMatches.length : 0}`);
         console.log(`- ${this.unmatchedININ.length} unmatched ININ receipts`);
+        if (vatErrors > 0) console.log(`- ⚠️ VAT ERRORS: ${vatErrors} documents missing VAT data`);
+        if (vatMismatches > 0) console.log(`- ⚠️ VAT MISMATCHES: ${vatMismatches} documents where VAT + base ≠ total`);
         
         this.displayResults();
     },
@@ -896,6 +913,21 @@ const FinanceMatching = {
     displayResults() {
         // Show results section
         document.getElementById('results-section').style.display = 'block';
+        
+        // Check for VAT issues
+        let vatErrors = 0;
+        let vatMismatches = 0;
+        this.matchedDocuments.forEach(match => {
+            if (match.vatAmount === undefined || match.amountBase === undefined) {
+                vatErrors++;
+            } else if (match.amount > 0) {
+                const calculated = match.amountBase + match.vatAmount;
+                const diff = Math.abs(calculated - match.amount);
+                if (diff > 0.02) {
+                    vatMismatches++;
+                }
+            }
+        });
         
         // Show suspicious matches warning if any
         if (this.suspiciousMatches && this.suspiciousMatches.length > 0) {
@@ -912,7 +944,40 @@ const FinanceMatching = {
                 warningHTML += `<li>... and ${this.suspiciousMatches.length - 5} more suspicious matches</li>`;
             }
             warningHTML += '</ul>';
+            
+            // Add VAT warnings
+            if (vatErrors > 0 || vatMismatches > 0) {
+                warningHTML += '<hr style="margin: 15px 0;">';
+                warningHTML += '<p style="color: red; font-weight: bold;">⚠️ VAT Data Issues:</p>';
+                warningHTML += '<ul style="margin-top: 10px;">';
+                if (vatErrors > 0) {
+                    warningHTML += `<li><strong>${vatErrors} documents</strong> are missing VAT data in the XML</li>`;
+                }
+                if (vatMismatches > 0) {
+                    warningHTML += `<li><strong>${vatMismatches} documents</strong> have VAT calculation errors (base + VAT ≠ total)</li>`;
+                }
+                warningHTML += '</ul>';
+            }
+            
             warningHTML += '<p style="margin-top: 10px; font-size: 14px;">These have been filtered out. A delivery note should typically appear in only ONE invoice.</p>';
+            
+            detailsDiv.innerHTML = warningHTML;
+        } else if (vatErrors > 0 || vatMismatches > 0) {
+            // Show VAT warnings even if no suspicious matches
+            const warningDiv = document.getElementById('suspicious-warning');
+            const detailsDiv = document.getElementById('suspicious-details');
+            
+            warningDiv.style.display = 'block';
+            
+            let warningHTML = '<p style="color: red; font-weight: bold;">⚠️ VAT Data Issues:</p>';
+            warningHTML += '<ul style="margin-top: 10px;">';
+            if (vatErrors > 0) {
+                warningHTML += `<li><strong>${vatErrors} documents</strong> are missing VAT data in the XML</li>`;
+            }
+            if (vatMismatches > 0) {
+                warningHTML += `<li><strong>${vatMismatches} documents</strong> have VAT calculation errors (base + VAT ≠ total)</li>`;
+            }
+            warningHTML += '</ul>';
             
             detailsDiv.innerHTML = warningHTML;
         }
@@ -928,10 +993,22 @@ const FinanceMatching = {
         
         this.matchedDocuments.forEach(match => {
             const row = document.createElement('tr');
-            // Use actual VAT values from invoice, or calculate if not available
+            // Use actual VAT values from invoice - no fallback calculations
             const amountIncVAT = match.amount || 0;
-            const vatAmount = match.vatAmount !== undefined ? match.vatAmount : (amountIncVAT * 0.22);
-            const amountExclVAT = match.amountBase !== undefined ? match.amountBase : (amountIncVAT - vatAmount);
+            const vatAmount = match.vatAmount;
+            const amountExclVAT = match.amountBase;
+            
+            // Validate that the numbers add up correctly
+            let validationError = '';
+            if (vatAmount === undefined || amountExclVAT === undefined) {
+                validationError = '⚠️ Missing VAT data';
+            } else if (amountIncVAT > 0) {
+                const calculated = amountExclVAT + vatAmount;
+                const diff = Math.abs(calculated - amountIncVAT);
+                if (diff > 0.02) { // Allow 2 cents tolerance for rounding
+                    validationError = `⚠️ VAT mismatch: ${amountExclVAT.toFixed(2)} + ${vatAmount.toFixed(2)} ≠ ${amountIncVAT.toFixed(2)}`;
+                }
+            }
             
             row.innerHTML = `
                 <td><strong>${match.deliveryNote}</strong></td>
@@ -942,12 +1019,12 @@ const FinanceMatching = {
                 <td><strong>${match.invoiceNumber}</strong></td>
                 <td>${match.invoiceDate}</td>
                 <td>${match.supplierName}</td>
-                <td>€${amountIncVAT ? amountIncVAT.toFixed(2) : 'N/A'}</td>
-                <td>€${vatAmount ? vatAmount.toFixed(2) : 'N/A'}</td>
-                <td>€${amountExclVAT ? amountExclVAT.toFixed(2) : 'N/A'}</td>
+                <td>${amountIncVAT ? '€' + amountIncVAT.toFixed(2) : 'N/A'}</td>
+                <td>${vatAmount !== undefined ? '€' + vatAmount.toFixed(2) : '<span style="color:red">ERROR</span>'}</td>
+                <td>${amountExclVAT !== undefined ? '€' + amountExclVAT.toFixed(2) : '<span style="color:red">ERROR</span>'}</td>
                 <td>Irena</td>
                 <td>Janez</td>
-                <td><span class="status-badge status-matched">${match.category || 'RETAIL'}</span></td>
+                <td><span class="status-badge status-matched">${match.category || 'RETAIL'}</span>${validationError ? '<br><span style="color:red; font-size:11px">' + validationError + '</span>' : ''}</td>
             `;
             matchedTbody.appendChild(row);
         });
@@ -1087,12 +1164,24 @@ const FinanceMatching = {
         
         this.matchedDocuments.forEach(match => {
             const amountIncVAT = match.amount || 0;
-            const vatAmount = match.vatAmount !== undefined ? match.vatAmount : (amountIncVAT * 0.22);
-            const amountExclVAT = match.amountBase !== undefined ? match.amountBase : (amountIncVAT - vatAmount);
+            const vatAmount = match.vatAmount;
+            const amountExclVAT = match.amountBase;
+            
+            // Check for errors
+            let status = 'Matched';
+            if (vatAmount === undefined || amountExclVAT === undefined) {
+                status = 'ERROR: Missing VAT data';
+            } else if (amountIncVAT > 0) {
+                const calculated = amountExclVAT + vatAmount;
+                const diff = Math.abs(calculated - amountIncVAT);
+                if (diff > 0.02) {
+                    status = 'ERROR: VAT mismatch';
+                }
+            }
             
             csv += `"${match.deliveryNote}","${match.goodsReceipt}","${match.ininDate}","${match.supplierCode}","-",`;
             csv += `"${match.invoiceNumber}","${match.invoiceDate}","${match.supplierName}",`;
-            csv += `"${amountIncVAT}","${vatAmount.toFixed(2)}","${amountExclVAT.toFixed(2)}","Irena","Janez","Matched"\n`;
+            csv += `"${amountIncVAT}","${vatAmount !== undefined ? vatAmount.toFixed(2) : 'ERROR'}","${amountExclVAT !== undefined ? amountExclVAT.toFixed(2) : 'ERROR'}","Irena","Janez","${status}"\n`;
         });
         
         this.downloadFile(csv, 'matched_documents.csv', 'text/csv');
