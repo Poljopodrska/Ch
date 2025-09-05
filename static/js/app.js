@@ -1049,7 +1049,7 @@ const ChApp = {
     
     promptFinancePassword() {
         const password = prompt('Please enter the password to access Finance module:');
-        if (password === 'marina') {
+        if (password === 'Marina') {
             // Store authentication time
             sessionStorage.setItem('financeAuthTime', Date.now().toString());
             // Switch to finance tab
@@ -1064,74 +1064,16 @@ const ChApp = {
         }
     },
     
-    // Finance view methods
+    // Finance view methods - completely blank pages
     async getFinanceOverviewView() {
-        const html = `
-            <div class="finance-container">
-                <div class="finance-header">
-                    <h1>💳 Finance Overview</h1>
-                </div>
-                
-                <div class="finance-content">
-                    <!-- Empty content area - ready for future implementation -->
-                </div>
-            </div>
-            
-            <style>
-                .finance-container {
-                    padding: 30px;
-                    max-width: 1200px;
-                    margin: 0 auto;
-                }
-                
-                .finance-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
-                    padding: 30px;
-                    border-radius: 10px;
-                    margin-bottom: 30px;
-                }
-                
-                .finance-header h1 {
-                    margin: 0;
-                    font-size: 32px;
-                }
-                
-                .finance-content {
-                    background: white;
-                    padding: 30px;
-                    border-radius: 10px;
-                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                    min-height: 400px;
-                }
-            </style>
-        `;
-        return html;
+        return `<div style="min-height: 600px;"></div>`;
     },
     
     async getFinanceReportsView() {
-        return `
-            <div class="finance-container">
-                <div class="finance-header">
-                    <h1>📊 Financial Reports</h1>
-                </div>
-                <div class="finance-content">
-                    <!-- Empty content area - ready for reports -->
-                </div>
-            </div>
-        `;
+        return `<div style="min-height: 600px;"></div>`;
     },
     
     async getFinanceBudgetsView() {
-        return `
-            <div class="finance-container">
-                <div class="finance-header">
-                    <h1>📈 Budget Management</h1>
-                </div>
-                <div class="finance-content">
-                    <!-- Empty content area - ready for budgets -->
-                </div>
-            </div>
-        `;
+        return `<div style="min-height: 600px;"></div>`;
     }
 };
