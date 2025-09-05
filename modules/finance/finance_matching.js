@@ -568,10 +568,24 @@ const FinanceMatching = {
                 const supplierMatch = content.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
                 if (supplierMatch) invoice.supplierName = supplierMatch[1];
                 
-                // Extract amount - try multiple patterns
-                const amountMatch = content.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
+                // Extract amount - try multiple patterns for different XML formats
+                // Format 1: IzdaniRacunEnostavni (38xxx series)
+                let amountMatch = content.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
                 if (amountMatch) {
                     invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
+                } else {
+                    // Format 2: eSLOG 2.00 format (P-series) - look in MOA segments
+                    // Try to find monetary amount in MOA segment with qualifier 9 (total amount)
+                    const moaMatch = content.match(/<S_MOA>\s*<C_C516>\s*<D_5025>9<\/D_5025>\s*<D_5004>([^<]+)<\/D_5004>/);
+                    if (moaMatch) {
+                        invoice.amount = parseFloat(moaMatch[1].replace(',', '.'));
+                    } else {
+                        // Try simpler MOA pattern
+                        const simpleMoaMatch = content.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/);
+                        if (simpleMoaMatch) {
+                            invoice.amount = parseFloat(simpleMoaMatch[1].replace(',', '.'));
+                        }
+                    }
                 }
                 
                 // Extract date
