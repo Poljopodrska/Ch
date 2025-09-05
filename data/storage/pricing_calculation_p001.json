@@ -1,0 +1,14 @@
+{
+  "product_id": "p001",
+  "production_cost": 15.5,
+  "goh": 2.3,
+  "moh": 1.8,
+  "loh": 1.2,
+  "profit": 3.2,
+  "total_cost": 20.8,
+  "selling_price": 24.0,
+  "vat_rate": 22.0,
+  "price_with_vat": 29.28,
+  "margin_percentage": 13.33333333333333,
+  "calculated_at": "2025-08-23T07:52:49.431082"
+}

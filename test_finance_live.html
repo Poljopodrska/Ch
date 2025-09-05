@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Finance Module Extraction</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .results { margin: 20px 0; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f0f0f0; }
+        .success { color: green; }
+        .fail { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Test Finance Module Data Extraction</h1>
+    <div>
+        <h2>Upload Test Files</h2>
+        <p>CSB Files: <input type="file" id="csb-files" multiple accept=".xml"></p>
+        <button onclick="testExtraction()">Test Extraction</button>
+    </div>
+    
+    <div id="results" class="results"></div>
+
+    <script>
+        // Copy the EXACT extraction logic from finance_matching.js
+        function extractInvoiceData(content, fileName) {
+            const invoice = {
+                fileName: fileName,
+                invoiceNumber: fileName.replace('_1.xml', '').replace('.xml', ''),
+                deliveryNotes: [],
+                supplierName: '',
+                amount: '',
+                date: ''
+            };
+            
+            // Extract supplier - EXACTLY as in the module
+            let supplierMatch = content.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
+            if (supplierMatch) {
+                invoice.supplierName = supplierMatch[1];
+            } else {
+                // Try eSLOG format - simplified for browser compatibility
+                supplierMatch = content.match(/<D_3036>([^<]+)<\/D_3036>/);
+                if (supplierMatch) invoice.supplierName = supplierMatch[1];
+            }
+            
+            // Extract amount - EXACTLY as in the module  
+            let amountMatch = content.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
+            if (amountMatch) {
+                invoice.amount = parseFloat(amountMatch[1].replace(',', '.'));
+            } else {
+                // Format 2: eSLOG 2.00 format (P-series)
+                // Extract all D_5004 values and find the one that looks like a total
+                const allAmounts = content.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/g);
+                if (allAmounts && allAmounts.length > 0) {
+                    // Extract the numeric value from the last match (usually the total)
+                    const lastAmount = allAmounts[allAmounts.length - 1];
+                    const amountMatch2 = lastAmount.match(/>([0-9]+\.?[0-9]*)</);
+                    if (amountMatch2) {
+                        invoice.amount = parseFloat(amountMatch2[1].replace(',', '.'));
+                    }
+                }
+            }
+            
+            // Extract date - EXACTLY as in the module
+            let dateMatch = content.match(/<DatumRacuna>([^<]+)<\/DatumRacuna>/);
+            if (dateMatch) {
+                invoice.date = dateMatch[1].substring(0, 10);
+            } else {
+                // Try eSLOG format - look for dates
+                // Find all D_2380 fields and look for one with date format
+                const allDates = content.match(/<D_2380>([^<]+)<\/D_2380>/g);
+                if (allDates && allDates.length > 0) {
+                    // Look for first date that matches date format (YYYY-MM-DD or YYYYMMDD)
+                    for (let dateStr of allDates) {
+                        const match = dateStr.match(/>([0-9]{4}[-]?[0-9]{2}[-]?[0-9]{2})</);
+                        if (match) {
+                            invoice.date = match[1].substring(0, 10);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            return invoice;
+        }
+        
+        function testExtraction() {
+            const csbFiles = document.getElementById('csb-files').files;
+            const resultsDiv = document.getElementById('results');
+            
+            if (csbFiles.length === 0) {
+                resultsDiv.innerHTML = '<p>Please select CSB invoice files to test</p>';
+                return;
+            }
+            
+            let html = '<h2>Extraction Results</h2>';
+            html += '<table><tr><th>File</th><th>Supplier</th><th>Amount</th><th>Date</th><th>Status</th></tr>';
+            
+            let processed = 0;
+            const results = [];
+            
+            for (let file of csbFiles) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const content = e.target.result;
+                    const invoice = extractInvoiceData(content, file.name);
+                    
+                    const hasAll = invoice.supplierName && invoice.amount && invoice.date;
+                    const status = hasAll ? 
+                        '<span class="success">✓ Complete</span>' : 
+                        '<span class="fail">✗ Missing data</span>';
+                    
+                    results.push({
+                        file: file.name,
+                        supplier: invoice.supplierName || 'NOT FOUND',
+                        amount: invoice.amount || 'NOT FOUND',
+                        date: invoice.date || 'NOT FOUND',
+                        status: status
+                    });
+                    
+                    processed++;
+                    if (processed === csbFiles.length) {
+                        // Display results sorted by filename
+                        results.sort((a, b) => a.file.localeCompare(b.file));
+                        
+                        let successCount = 0;
+                        for (let r of results) {
+                            if (r.status.includes('Complete')) successCount++;
+                            html += `<tr>
+                                <td>${r.file}</td>
+                                <td>${r.supplier}</td>
+                                <td>${r.amount}</td>
+                                <td>${r.date}</td>
+                                <td>${r.status}</td>
+                            </tr>`;
+                        }
+                        html += '</table>';
+                        
+                        // Add summary
+                        html += `<h3>Summary</h3>`;
+                        html += `<p>Successfully extracted all fields from ${successCount} of ${results.length} files (${(successCount/results.length*100).toFixed(1)}%)</p>`;
+                        
+                        // Add debug info
+                        html += '<h3>Debug Info</h3>';
+                        html += '<p>If data is missing, check the console for detailed information.</p>';
+                        
+                        resultsDiv.innerHTML = html;
+                        
+                        // Log details for debugging
+                        console.log('Extraction results:', results);
+                    }
+                };
+                reader.readAsText(file);
+            }
+        }
+    </script>
+</body>
+</html>

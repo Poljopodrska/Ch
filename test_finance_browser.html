@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Finance Extraction in Browser</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; background: #f5f5f5; border-radius: 5px; }
+        .success { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .info { color: blue; }
+        pre { background: white; padding: 10px; border: 1px solid #ddd; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Finance Module Extraction Test</h1>
+    <p>Testing regex patterns for browser compatibility</p>
+    
+    <div id="results"></div>
+    
+    <script>
+        // Test content from 38355_1.xml (IzdaniRacunEnostavni format)
+        const xml38xxx = `<?xml version="1.0" encoding="utf-8"?>
+<IzdaniRacunEnostavni>
+    <NazivPartnerja>
+        <NazivPartnerja1>TRANSPOREON GMBH</NazivPartnerja1>
+    </NazivPartnerja>
+    <DatumRacuna>2025-08-31T00:00:00.0Z</DatumRacuna>
+    <ZnesekRacuna>66.47</ZnesekRacuna>
+</IzdaniRacunEnostavni>`;
+
+        // Test content from P-series (eSLOG format) - simplified
+        const xmlPSeries = `<?xml version="1.0" encoding="UTF-8"?>
+<M_INVOIC>
+    <G_SG2>
+        <S_NAD>
+            <D_3035>SE</D_3035>
+            <C_C082>
+                <D_3039>SUPPLIER_ID</D_3039>
+            </C_C082>
+            <C_C058>
+                <D_3036>TEST SUPPLIER NAME</D_3036>
+            </C_C058>
+        </S_NAD>
+    </G_SG2>
+    <S_DTM>
+        <C_C507>
+            <D_2005>137</D_2005>
+            <D_2380>2025-09-15</D_2380>
+        </C_C507>
+    </S_DTM>
+    <S_MOA>
+        <C_C516>
+            <D_5025>9</D_5025>
+            <D_5004>123.45</D_5004>
+        </C_C516>
+    </S_MOA>
+</M_INVOIC>`;
+
+        function testExtraction() {
+            let results = '<h2>Test Results</h2>';
+            
+            // Test 38xxx format
+            results += '<div class="test-section">';
+            results += '<h3>Testing 38xxx Format (IzdaniRacunEnostavni)</h3>';
+            
+            const supplier38 = xml38xxx.match(/<NazivPartnerja1>([^<]+)<\/NazivPartnerja1>/);
+            const date38 = xml38xxx.match(/<DatumRacuna>([^<]+)<\/DatumRacuna>/);
+            const amount38 = xml38xxx.match(/<ZnesekRacuna>([^<]+)<\/ZnesekRacuna>/);
+            
+            results += '<p>Supplier: ' + (supplier38 ? '<span class="success">✓ ' + supplier38[1] + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '<p>Date: ' + (date38 ? '<span class="success">✓ ' + date38[1].substring(0,10) + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '<p>Amount: ' + (amount38 ? '<span class="success">✓ €' + amount38[1] + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '</div>';
+            
+            // Test P-series format with new patterns
+            results += '<div class="test-section">';
+            results += '<h3>Testing P-Series Format (eSLOG 2.00)</h3>';
+            
+            // Test supplier extraction - simplified pattern
+            let supplierP = xmlPSeries.match(/<D_3035>SE<\/D_3035>.*?<D_3036>([^<]+)<\/D_3036>/);
+            if (!supplierP) {
+                supplierP = xmlPSeries.match(/<D_3036>([^<]+)<\/D_3036>/);
+            }
+            
+            // Test date extraction - simplified pattern
+            let dateP = xmlPSeries.match(/<D_2005>137<\/D_2005>.*?<D_2380>([^<]+)<\/D_2380>/);
+            if (!dateP) {
+                dateP = xmlPSeries.match(/<D_2380>([^<]+)<\/D_2380>/);
+            }
+            
+            // Test amount extraction - simplified pattern
+            let amountP = xmlPSeries.match(/<D_5025>9<\/D_5025>.*?<D_5004>([^<]+)<\/D_5004>/);
+            if (!amountP) {
+                amountP = xmlPSeries.match(/<D_5004>([0-9]+\.?[0-9]*)<\/D_5004>/);
+            }
+            
+            results += '<p>Supplier: ' + (supplierP ? '<span class="success">✓ ' + supplierP[1] + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '<p>Date: ' + (dateP ? '<span class="success">✓ ' + dateP[1].substring(0,10) + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '<p>Amount: ' + (amountP ? '<span class="success">✓ €' + amountP[1] + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            results += '</div>';
+            
+            // Test with multiline content (the problematic case)
+            results += '<div class="test-section">';
+            results += '<h3>Testing Multiline Patterns (Browser Compatibility)</h3>';
+            
+            const multilineContent = `<S_NAD>
+            <D_3035>SE</D_3035>
+            <D_3036>MULTILINE SUPPLIER</D_3036>
+        </S_NAD>`;
+            
+            // This pattern should work even with newlines
+            const multilineTest = multilineContent.match(/<D_3035>SE<\/D_3035>.*?<D_3036>([^<]+)<\/D_3036>/);
+            
+            results += '<p>Multiline extraction: ';
+            if (multilineTest) {
+                results += '<span class="fail">✗ Pattern matched (should not match across lines)</span>';
+            } else {
+                results += '<span class="info">ℹ Pattern did not match (expected - need different approach)</span>';
+            }
+            results += '</p>';
+            
+            // Better approach - just look for D_3036 directly
+            const simplifiedTest = multilineContent.match(/<D_3036>([^<]+)<\/D_3036>/);
+            results += '<p>Simplified pattern: ' + (simplifiedTest ? '<span class="success">✓ ' + simplifiedTest[1] + '</span>' : '<span class="fail">✗ Not found</span>') + '</p>';
+            
+            results += '</div>';
+            
+            document.getElementById('results').innerHTML = results;
+        }
+        
+        // Run test on page load
+        testExtraction();
+    </script>
+</body>
+</html>

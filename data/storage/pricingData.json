@@ -1,0 +1,18 @@
+{
+  "p001": {
+    "production_cost": 15.5,
+    "goh": 2.3,
+    "moh": 1.8,
+    "loh": 1.2,
+    "profit": 3.2,
+    "vat": 22
+  },
+  "p002": {
+    "production_cost": 25.0,
+    "goh": 3.5,
+    "moh": 2.8,
+    "loh": 1.8,
+    "profit": 5.4,
+    "vat": 22
+  }
+}

@@ -65,8 +65,10 @@ const ChApp = {
     switchMainTab(mainCategory) {
         // Special handling for Finance module
         if (mainCategory === 'finance') {
+            console.log('Finance tab clicked, checking authentication...');
             // Check if user is authenticated for Finance module
             if (!this.checkFinanceAuth()) {
+                console.log('Not authenticated, showing password prompt...');
                 // Show password prompt
                 const password = prompt('Please enter the password to access Finance module:');
                 if (password !== 'Marina') {
@@ -76,6 +78,9 @@ const ChApp = {
                 }
                 // Store authentication time
                 sessionStorage.setItem('financeAuthTime', Date.now().toString());
+                console.log('Authentication successful');
+            } else {
+                console.log('Already authenticated');
             }
         }
         
@@ -1078,9 +1083,9 @@ const ChApp = {
                 return;
             }
             
-            // Load finance_matching.js module
+            // Load finance_matching.js module with cache busting
             const script = document.createElement('script');
-            script.src = 'modules/finance/finance_matching.js';
+            script.src = 'modules/finance/finance_matching.js?v=' + Date.now();
             script.onload = () => {
                 console.log('Finance Matching module loaded');
                 if (typeof FinanceMatching !== 'undefined') {
