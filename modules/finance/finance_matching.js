@@ -22,16 +22,20 @@ const FinanceMatching = {
                 <div class="matching-header">
                     <h1>📊 Invoice & Goods Receipt Matching System</h1>
                     <p class="subtitle">Welcome Marina! Match ININ goods receipts with CSB invoices</p>
+                    <div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 5px; margin-top: 15px; border: 1px solid #ffeeba;">
+                        <strong>ℹ️ Important:</strong> ININ contains only <strong>retail shop</strong> deliveries. CSB contains <strong>ALL</strong> company invoices (factory + retail).<br>
+                        Unmatched CSB invoices may be factory purchases that don't appear in ININ.
+                    </div>
                 </div>
                 
                 <div class="upload-section">
                     <div class="upload-card">
                         <div class="card-header inin-header">
-                            <h3>📦 ININ System (Shops)</h3>
-                            <span class="system-badge">Goods Receipts</span>
+                            <h3>🏬 ININ System (Retail Shops)</h3>
+                            <span class="system-badge">Shop Goods Receipts</span>
                         </div>
                         <div class="card-body">
-                            <p>Upload ININ goods receiving documents (.txt files)</p>
+                            <p>Upload ININ goods receiving documents from retail shops (.txt files)</p>
                             <input type="file" id="inin-upload" multiple accept=".txt" />
                             <div id="inin-status" class="upload-status"></div>
                         </div>
@@ -39,11 +43,11 @@ const FinanceMatching = {
                     
                     <div class="upload-card">
                         <div class="card-header csb-header">
-                            <h3>💳 CSB System (HQ)</h3>
-                            <span class="system-badge">Invoices</span>
+                            <h3>🏭 CSB System (All Company)</h3>
+                            <span class="system-badge">All Invoices (Factory + Retail)</span>
                         </div>
                         <div class="card-body">
-                            <p>Upload CSB invoice files (.xml files)</p>
+                            <p>Upload CSB invoice files - includes both factory and retail (.xml files)</p>
                             <input type="file" id="csb-upload" multiple accept=".xml" />
                             <div id="csb-status" class="upload-status"></div>
                         </div>
@@ -65,7 +69,7 @@ const FinanceMatching = {
                         <div class="summary-stats">
                             <div class="stat-card success">
                                 <span class="stat-number" id="matched-count">0</span>
-                                <span class="stat-label">Matched</span>
+                                <span class="stat-label">Matched Retail</span>
                             </div>
                             <div class="stat-card warning">
                                 <span class="stat-number" id="unmatched-inin">0</span>
@@ -73,7 +77,8 @@ const FinanceMatching = {
                             </div>
                             <div class="stat-card danger">
                                 <span class="stat-number" id="unmatched-inv">0</span>
-                                <span class="stat-label">Unmatched Invoices</span>
+                                <span class="stat-label">Unmatched CSB</span>
+                                <span style="font-size: 10px; opacity: 0.8;">(incl. factory)</span>
                             </div>
                         </div>
                     </div>
@@ -81,7 +86,7 @@ const FinanceMatching = {
                     <div class="tabs">
                         <button class="tab-btn active" data-tab="matched">✅ Matched Documents</button>
                         <button class="tab-btn" data-tab="unmatched-inin">⚠️ Unmatched ININ</button>
-                        <button class="tab-btn" data-tab="unmatched-invoices">❌ Unmatched Invoices</button>
+                        <button class="tab-btn" data-tab="unmatched-invoices">🏭 Unmatched Invoices (Factory+Retail)</button>
                         <button class="tab-btn" data-tab="all-inin">📦 All ININ Data</button>
                         <button class="tab-btn" data-tab="all-csb">💳 All CSB Data</button>
                     </div>
@@ -98,7 +103,7 @@ const FinanceMatching = {
                                     <th>Invoice Date</th>
                                     <th>Supplier Name</th>
                                     <th>Amount (€)</th>
-                                    <th>Status</th>
+                                    <th>Category</th>
                                 </tr>
                             </thead>
                             <tbody id="matched-tbody">
@@ -159,10 +164,13 @@ const FinanceMatching = {
                                 <!-- All ININ rows -->
                             </tbody>
                         </table>
+                        <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                            <strong>Note:</strong> ININ only contains retail shop deliveries
+                        </p>
                     </div>
                     
                     <div id="all-csb-tab" class="tab-content">
-                        <h3>💳 All CSB Invoices</h3>
+                        <h3>💳 All CSB Invoices (Factory + Retail)</h3>
                         <table class="results-table">
                             <thead>
                                 <tr>
@@ -179,6 +187,9 @@ const FinanceMatching = {
                                 <!-- All CSB rows -->
                             </tbody>
                         </table>
+                        <p style="margin-top: 10px; color: #666; font-size: 14px;">
+                            <strong>Note:</strong> CSB contains ALL company invoices. Only those with matching ININ delivery notes are retail.
+                        </p>
                     </div>
                     
                     <div class="export-section">
@@ -691,32 +702,73 @@ const FinanceMatching = {
         this.unmatchedININ = [];
         this.unmatchedInvoices = [];
         
+        console.log('Starting matching process...');
+        console.log('ININ documents (retail shops only):', Object.keys(this.ininDocuments).length);
+        console.log('CSB invoices (entire company):', Object.keys(this.csbInvoices).length);
+        
         // Create a map of delivery notes to goods receipts
         const deliveryNoteMap = {};
+        const ininDeliveryNotes = new Set();
         for (let gr in this.ininDocuments) {
             const doc = this.ininDocuments[gr];
             deliveryNoteMap[doc.deliveryNote] = gr;
+            ininDeliveryNotes.add(doc.deliveryNote);
         }
         
+        console.log('Unique delivery notes from retail shops:', ininDeliveryNotes.size);
+        
         // Match invoices with ININ documents
+        // Important: ININ only has retail shop deliveries
         const matchedININ = new Set();
+        let retailInvoiceCount = 0;
+        let checkedInvoices = 0;
         
         for (let invNum in this.csbInvoices) {
             const invoice = this.csbInvoices[invNum];
+            checkedInvoices++;
             
-            // Search for delivery notes in the invoice XML content
+            // Search for ININ delivery notes in the entire invoice XML content
             invoice.deliveryNotes = [];
             if (invoice.xmlContent) {
-                for (let gr in this.ininDocuments) {
-                    const deliveryNote = this.ininDocuments[gr].deliveryNote;
+                // Check each ININ delivery note against this invoice
+                for (let deliveryNote of ininDeliveryNotes) {
+                    // Search for exact match anywhere in XML
                     if (invoice.xmlContent.includes(deliveryNote)) {
                         invoice.deliveryNotes.push(deliveryNote);
+                        console.log(`Found retail delivery note "${deliveryNote}" in invoice ${invNum}`);
+                    }
+                }
+                
+                // Also check specific XML fields that might contain delivery notes
+                // For P-series: check RFF segments
+                const rffMatches = invoice.xmlContent.match(/<D_1154>([^<]+)<\/D_1154>/g);
+                if (rffMatches) {
+                    for (let match of rffMatches) {
+                        const value = match.replace(/<[^>]+>/g, '');
+                        if (ininDeliveryNotes.has(value) && !invoice.deliveryNotes.includes(value)) {
+                            invoice.deliveryNotes.push(value);
+                            console.log(`Found retail delivery note "${value}" in RFF field`);
+                        }
+                    }
+                }
+                
+                // For 38xxx series: check reference documents
+                const refDocMatches = invoice.xmlContent.match(/<StevilkaDokumenta>([^<]+)<\/StevilkaDokumenta>/g);
+                if (refDocMatches) {
+                    for (let match of refDocMatches) {
+                        const value = match.replace(/<[^>]+>/g, '');
+                        if (ininDeliveryNotes.has(value) && !invoice.deliveryNotes.includes(value)) {
+                            invoice.deliveryNotes.push(value);
+                            console.log(`Found retail delivery note "${value}" in reference document`);
+                        }
                     }
                 }
             }
             
             if (invoice.deliveryNotes.length > 0) {
-                // Invoice has matching delivery notes
+                // This is a RETAIL invoice (matches ININ delivery notes)
+                retailInvoiceCount++;
+                
                 for (let dn of invoice.deliveryNotes) {
                     const goodsReceipt = deliveryNoteMap[dn];
                     if (goodsReceipt) {
@@ -731,12 +783,15 @@ const FinanceMatching = {
                             invoiceNumber: invoice.invoiceNumberXML || invNum,
                             invoiceDate: invoice.date,
                             supplierName: invoice.supplierName,
-                            amount: invoice.amount
+                            amount: invoice.amount,
+                            category: 'RETAIL SHOP' // Mark as retail
                         });
                     }
                 }
             } else {
-                // Unmatched invoice
+                // This is either:
+                // 1. A FACTORY invoice (most likely)
+                // 2. A retail invoice where delivery note isn't in XML
                 this.unmatchedInvoices.push(invoice);
             }
         }
@@ -747,6 +802,13 @@ const FinanceMatching = {
                 this.unmatchedININ.push(this.ininDocuments[gr]);
             }
         }
+        
+        console.log(`\nMatching complete:`);
+        console.log(`- Checked ${checkedInvoices} invoices`);
+        console.log(`- Found ${retailInvoiceCount} retail invoices (have ININ delivery notes)`);
+        console.log(`- ${this.unmatchedInvoices.length} unmatched invoices (likely factory purchases)`);
+        console.log(`- Matched ${this.matchedDocuments.length} documents`);
+        console.log(`- ${this.unmatchedININ.length} unmatched ININ receipts`);
         
         this.displayResults();
     },
@@ -775,7 +837,7 @@ const FinanceMatching = {
                 <td>${match.invoiceDate}</td>
                 <td>${match.supplierName}</td>
                 <td>€${match.amount ? match.amount.toFixed(2) : 'N/A'}</td>
-                <td><span class="status-badge status-matched">✓ Matched</span></td>
+                <td><span class="status-badge status-matched">${match.category || 'RETAIL'}</span></td>
             `;
             matchedTbody.appendChild(row);
         });
