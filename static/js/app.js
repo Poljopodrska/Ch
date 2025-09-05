@@ -1061,9 +1061,41 @@ const ChApp = {
     },
     
     
-    // Finance view methods - completely blank pages
+    // Finance view methods
     async getFinanceOverviewView() {
-        return `<div style="min-height: 600px;"></div>`;
+        const html = `
+            <div id="finance-overview-content">
+                <!-- Finance Matching Module will be loaded here -->
+            </div>
+        `;
+        
+        // Load the Finance Matching module after DOM is ready
+        setTimeout(() => {
+            // Check if FinanceMatching is already loaded
+            if (typeof FinanceMatching !== 'undefined') {
+                console.log('FinanceMatching already loaded, initializing...');
+                FinanceMatching.init();
+                return;
+            }
+            
+            // Load finance_matching.js module
+            const script = document.createElement('script');
+            script.src = 'modules/finance/finance_matching.js';
+            script.onload = () => {
+                console.log('Finance Matching module loaded');
+                if (typeof FinanceMatching !== 'undefined') {
+                    FinanceMatching.init();
+                } else {
+                    console.error('FinanceMatching not found after loading script');
+                }
+            };
+            script.onerror = (e) => {
+                console.error('Failed to load finance_matching.js:', e);
+            };
+            document.head.appendChild(script);
+        }, 100);
+        
+        return html;
     },
     
     async getFinanceReportsView() {
