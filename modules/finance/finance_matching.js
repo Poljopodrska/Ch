@@ -66,6 +66,10 @@ const FinanceMatching = {
                 <div id="results-section" class="results-section" style="display: none;">
                     <div class="results-header">
                         <h2>📋 Matching Results</h2>
+                        <div id="suspicious-warning" style="display: none; background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ef5350;">
+                            <strong>⚠️ Warning: Suspicious Matches Detected!</strong>
+                            <div id="suspicious-details"></div>
+                        </div>
                         <div class="summary-stats">
                             <div class="stat-card success">
                                 <span class="stat-number" id="matched-count">0</span>
@@ -796,10 +800,62 @@ const FinanceMatching = {
             }
         }
         
+        // VALIDATION: Check for suspicious matches (delivery note in multiple invoices)
+        const deliveryNoteInvoiceCount = {};
+        const suspiciousMatches = [];
+        
+        // Count how many invoices each delivery note appears in
+        for (let invNum in this.csbInvoices) {
+            const invoice = this.csbInvoices[invNum];
+            if (invoice.deliveryNotes) {
+                for (let dn of invoice.deliveryNotes) {
+                    if (!deliveryNoteInvoiceCount[dn]) {
+                        deliveryNoteInvoiceCount[dn] = [];
+                    }
+                    deliveryNoteInvoiceCount[dn].push(invNum);
+                }
+            }
+        }
+        
+        // Identify suspicious delivery notes (appear in multiple invoices)
+        for (let dn in deliveryNoteInvoiceCount) {
+            if (deliveryNoteInvoiceCount[dn].length > 1) {
+                suspiciousMatches.push({
+                    deliveryNote: dn,
+                    invoiceCount: deliveryNoteInvoiceCount[dn].length,
+                    invoices: deliveryNoteInvoiceCount[dn]
+                });
+                console.warn(`⚠️ SUSPICIOUS: Delivery note "${dn}" appears in ${deliveryNoteInvoiceCount[dn].length} invoices!`);
+            }
+        }
+        
+        // Filter out suspicious matches from results
+        if (suspiciousMatches.length > 0) {
+            const suspiciousDNs = new Set(suspiciousMatches.map(s => s.deliveryNote));
+            const originalCount = this.matchedDocuments.length;
+            
+            // Remove suspicious matches
+            this.matchedDocuments = this.matchedDocuments.filter(match => {
+                if (suspiciousDNs.has(match.deliveryNote)) {
+                    console.log(`Removing suspicious match: ${match.deliveryNote}`);
+                    return false;
+                }
+                return true;
+            });
+            
+            const removedCount = originalCount - this.matchedDocuments.length;
+            console.log(`\n🔍 Removed ${removedCount} suspicious matches (delivery notes appearing in multiple invoices)`);
+            
+            // Store suspicious matches for display
+            this.suspiciousMatches = suspiciousMatches;
+        }
+        
         // Find unmatched ININ documents
+        const matchedDeliveryNotes = new Set(this.matchedDocuments.map(m => m.deliveryNote));
         for (let gr in this.ininDocuments) {
-            if (!matchedININ.has(gr)) {
-                this.unmatchedININ.push(this.ininDocuments[gr]);
+            const doc = this.ininDocuments[gr];
+            if (!matchedDeliveryNotes.has(doc.deliveryNote)) {
+                this.unmatchedININ.push(doc);
             }
         }
         
@@ -807,7 +863,8 @@ const FinanceMatching = {
         console.log(`- Checked ${checkedInvoices} invoices`);
         console.log(`- Found ${retailInvoiceCount} retail invoices (have ININ delivery notes)`);
         console.log(`- ${this.unmatchedInvoices.length} unmatched invoices (likely factory purchases)`);
-        console.log(`- Matched ${this.matchedDocuments.length} documents`);
+        console.log(`- VALID matches: ${this.matchedDocuments.length} (after filtering suspicious)`);
+        console.log(`- Suspicious matches removed: ${this.suspiciousMatches ? this.suspiciousMatches.length : 0}`);
         console.log(`- ${this.unmatchedININ.length} unmatched ININ receipts`);
         
         this.displayResults();
@@ -816,6 +873,26 @@ const FinanceMatching = {
     displayResults() {
         // Show results section
         document.getElementById('results-section').style.display = 'block';
+        
+        // Show suspicious matches warning if any
+        if (this.suspiciousMatches && this.suspiciousMatches.length > 0) {
+            const warningDiv = document.getElementById('suspicious-warning');
+            const detailsDiv = document.getElementById('suspicious-details');
+            
+            warningDiv.style.display = 'block';
+            
+            let warningHTML = '<ul style="margin-top: 10px;">';
+            for (let suspicious of this.suspiciousMatches.slice(0, 5)) {
+                warningHTML += `<li>Delivery note <strong>"${suspicious.deliveryNote}"</strong> appears in ${suspicious.invoiceCount} invoices - REMOVED as likely false positive</li>`;
+            }
+            if (this.suspiciousMatches.length > 5) {
+                warningHTML += `<li>... and ${this.suspiciousMatches.length - 5} more suspicious matches</li>`;
+            }
+            warningHTML += '</ul>';
+            warningHTML += '<p style="margin-top: 10px; font-size: 14px;">These have been filtered out. A delivery note should typically appear in only ONE invoice.</p>';
+            
+            detailsDiv.innerHTML = warningHTML;
+        }
         
         // Update statistics
         document.getElementById('matched-count').textContent = this.matchedDocuments.length;
