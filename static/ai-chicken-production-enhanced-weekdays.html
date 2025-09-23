@@ -739,13 +739,7 @@
                 // Use alternative data if last year had shortage
                 if (lastYearShortageMap[key]) {
                     value = alternativeData[currentProduct][dayNames[day]];
-                    reasons.push('📊🔄');
-                }
-
-                // Current year shortage adjustment
-                if (currentYearShortageMap[key]) {
-                    value *= 1.15;
-                    reasons.push('⚠️⬆️');
+                    // Don't add as a reason, it's just data substitution
                 }
 
                 // Weather adjustments (more varied)
@@ -786,55 +780,30 @@
                         }
                     }
 
-                    // Wind and cloudy conditions
-                    if (weather.weather === 'Clouds' && day === 1) {
-                        reasons.push('Oblačno →');
+                    // Extreme weather conditions only
+                    if (weather.weather === 'Thunderstorm') {
+                        value *= 0.8;
+                        reasons.push('Nevihta ↓↓');
+                    } else if (weather.weather === 'Snow') {
+                        value *= 0.9;
+                        reasons.push('Sneg ↓');
                     }
                 }
 
-                // Promotional patterns
-                if (day === 0 && currentProduct === 'Bedra') { // Monday
-                    value *= 0.95;
-                    reasons.push('Konkurenca ↓');
-                } else if (day === 0 && currentProduct === 'File prsi') {
-                    value *= 1.05;
-                    reasons.push('Promocija ↑');
-                }
-
-                // Market trends
-                if (day === 4 && (currentProduct === 'Ražnjiči' || currentProduct === 'Krila')) { // Friday
-                    value *= 1.15;
-                    reasons.push('Vikend priprave ↑');
-                } else if (day === 4 && currentProduct === 'File prsi') {
-                    value *= 1.08;
-                    reasons.push('Povpraševanje ↑');
-                }
-
-                // Special events and seasonal patterns
-                if (day === 3 && currentProduct === 'Ražnjiči') {
-                    value *= 1.1;
-                    reasons.push('Sezonsko ↑');
-                }
-
-                // Supply chain factors
-                if (day === 1 && currentProduct === 'Krila') {
-                    value *= 0.97;
-                    reasons.push('Dobava ↓');
-                }
-
-                // Holiday or event proximity
-                if (day === 2 && currentProduct === 'File prsi') {
-                    value *= 1.03;
-                    reasons.push('Dogodek ↑');
-                } else if (day === 2 && currentProduct === 'Bedra') {
-                    value *= 0.96;
-                    reasons.push('Cena ↓');
-                }
-
-                // Regional demand patterns
-                if (day === 3 && currentProduct === 'Bedra') {
-                    value *= 1.04;
-                    reasons.push('Lokalno ↑');
+                // Holiday effects (mock - in real system would check actual calendar)
+                if (day === 2) { // Wednesday - simulate day before holiday
+                    if (currentProduct === 'Ražnjiči' || currentProduct === 'Krila') {
+                        value *= 1.12;
+                        reasons.push('Pred praznikom ↑');
+                    }
+                } else if (day === 4) { // Friday
+                    if (currentProduct === 'Ražnjiči') {
+                        value *= 1.15;
+                        reasons.push('Praznik ↑↑');
+                    } else if (currentProduct === 'File prsi') {
+                        value *= 1.08;
+                        reasons.push('Praznik ↑');
+                    }
                 }
 
                 value = Math.round(value);
