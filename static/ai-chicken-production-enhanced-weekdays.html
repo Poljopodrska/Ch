@@ -371,7 +371,7 @@
                     <tbody>
                         <!-- Weather Row -->
                         <tr class="weather-row">
-                            <td class="row-header section-header">🌤️ VREME</td>
+                            <td class="row-header section-header" style="color: black; font-weight: bold;">VREME</td>
                             <td class="weather-cell" id="weather-0">
                                 <span class="loading-weather"></span>
                             </td>
@@ -392,7 +392,7 @@
 
                         <!-- Last Year Sales -->
                         <tr>
-                            <td class="row-header section-header">📊 LANI</td>
+                            <td class="row-header section-header" style="color: black; font-weight: bold;">LANI</td>
                             <td id="hist-0">850<br><input type="checkbox" class="shortage-checkbox" id="shortage-last-0" onchange="markShortage('last', 0)"><label class="shortage-label">pomanjkanje</label></td>
                             <td id="hist-1">920<br><input type="checkbox" class="shortage-checkbox" id="shortage-last-1" onchange="markShortage('last', 1)"><label class="shortage-label">pomanjkanje</label></td>
                             <td id="hist-2">980<br><input type="checkbox" class="shortage-checkbox" id="shortage-last-2" onchange="markShortage('last', 2)"><label class="shortage-label">pomanjkanje</label></td>
@@ -403,7 +403,7 @@
 
                         <!-- AI Prognosis Section -->
                         <tr id="ai-header" style="display: none;">
-                            <td class="row-header section-header">🤖 AI PROGNOZA</td>
+                            <td class="row-header section-header" style="color: black; font-weight: bold;">AI PROGNOZA</td>
                             <td id="ai-0">-</td>
                             <td id="ai-1">-</td>
                             <td id="ai-2">-</td>
@@ -412,7 +412,7 @@
                             <td id="ai-total" class="total-row">-</td>
                         </tr>
                         <tr id="ai-reasons" style="display: none;">
-                            <td class="row-header" style="background: #e8eaf6;">📍 Razlogi</td>
+                            <td class="row-header" style="background: #e8eaf6; color: black; font-weight: bold;">Razlogi</td>
                             <td id="reason-0" class="reason-cell">-</td>
                             <td id="reason-1" class="reason-cell">-</td>
                             <td id="reason-2" class="reason-cell">-</td>
@@ -423,7 +423,7 @@
 
                         <!-- Actual Sales Input -->
                         <tr>
-                            <td class="row-header section-header">✏️ DEJANSKA PRODAJA</td>
+                            <td class="row-header section-header" style="color: black; font-weight: bold;">DEJANSKA PRODAJA</td>
                             <td><input type="number" class="actual-input" id="actual-0" onchange="updateActuals()"></td>
                             <td><input type="number" class="actual-input" id="actual-1" onchange="updateActuals()"></td>
                             <td><input type="number" class="actual-input" id="actual-2" onchange="updateActuals()"></td>
@@ -434,7 +434,7 @@
 
                         <!-- Current Year Shortage -->
                         <tr class="current-shortage-row">
-                            <td class="row-header" style="background: #ffcdd2;">⚠️ Pomanjkanje letos</td>
+                            <td class="row-header" style="background: #ffcdd2; color: black; font-weight: bold;">Pomanjkanje letos</td>
                             <td><input type="checkbox" class="shortage-checkbox" id="shortage-current-0" onchange="markShortage('current', 0)"></td>
                             <td><input type="checkbox" class="shortage-checkbox" id="shortage-current-1" onchange="markShortage('current', 1)"></td>
                             <td><input type="checkbox" class="shortage-checkbox" id="shortage-current-2" onchange="markShortage('current', 2)"></td>
@@ -448,7 +448,7 @@
 
             <!-- Chart -->
             <div class="chart-container">
-                <div class="chart-title">📊 Primerjava: <span id="chartProductName">Bedra</span></div>
+                <div class="chart-title">Primerjava: <span id="chartProductName">Bedra</span></div>
                 <canvas id="comparisonChart"></canvas>
             </div>
         </div>
@@ -601,13 +601,13 @@
         }
 
         function useMockWeatherData() {
-            // More varied mock data for demonstration
+            // More realistic mock data for demonstration
             realWeatherData = [
                 { temp: 15, minTemp: 8, weather: 'Clouds', description: 'oblačno', rain: 0 },
-                { temp: 12, minTemp: 6, weather: 'Rain', description: 'dež', rain: 4.2 },
+                { temp: 14, minTemp: 9, weather: 'Clouds', description: 'oblačno', rain: 1.8 },
                 { temp: 18, minTemp: 10, weather: 'Clear', description: 'jasno', rain: 0 },
                 { temp: 22, minTemp: 14, weather: 'Clear', description: 'sončno', rain: 0 },
-                { temp: 28, minTemp: 18, weather: 'Clear', description: 'vroče', rain: 0 }
+                { temp: 20, minTemp: 15, weather: 'Partly Cloudy', description: 'delno oblačno', rain: 0 }
             ];
             displayWeather();
         }
@@ -622,7 +622,7 @@
                     <span class="weather-icon">${icon}</span>
                     <span class="weather-temp">${weather.temp}°</span>
                     <span class="weather-desc">${weather.description}</span>
-                    ${weather.rain > 0 ? `<br>💧 ${weather.rain.toFixed(1)}mm` : ''}
+                    ${weather.rain > 0 ? `<br><span style="color: #2196f3; font-size: 0.9em;">Padavine: ${weather.rain.toFixed(1)}mm</span>` : ''}
                 `;
             }
         }
@@ -757,10 +757,10 @@
                         if (currentProduct === 'Ražnjiči' || currentProduct === 'Krila') {
                             if (weather.rain > 3) {
                                 value *= 0.85;
-                                reasons.push('🌧️⬇️⬇️');
+                                reasons.push('Močan dež ↓↓');
                             } else {
                                 value *= 0.92;
-                                reasons.push('💧⬇️');
+                                reasons.push('Dež ↓');
                             }
                         }
                     }
@@ -769,37 +769,48 @@
                     if (weather.temp < 10) {
                         if (currentProduct === 'Bedra' || currentProduct === 'File prsi') {
                             value *= 1.08;
-                            reasons.push('❄️⬆️');
+                            reasons.push('Mraz ↑');
                         }
                     } else if (weather.temp > 25) {
                         if (currentProduct === 'Ražnjiči') {
                             value *= 1.18;
-                            reasons.push('☀️⬆️⬆️');
+                            reasons.push('Vročina ↑↑');
                         } else if (currentProduct === 'Krila') {
                             value *= 1.12;
-                            reasons.push('☀️⬆️');
+                            reasons.push('Toplo ↑');
+                        }
+                    } else if (weather.temp > 20) {
+                        if (currentProduct === 'Ražnjiči') {
+                            value *= 1.05;
+                            reasons.push('Prijetno ↑');
                         }
                     }
 
-                    // Wind (mock additional factor)
-                    if (day === 2) {
-                        reasons.push('💨➡️');
+                    // Wind and cloudy conditions
+                    if (weather.weather === 'Clouds' && day === 1) {
+                        reasons.push('Oblačno →');
                     }
                 }
 
                 // Day-specific patterns
                 if (day === 0) { // Monday
                     value *= 0.95;
-                    reasons.push('📅⬇️');
+                    reasons.push('Ponedeljek ↓');
                 } else if (day === 4) { // Friday
                     value *= 1.15;
-                    reasons.push('🎉⬆️');
+                    reasons.push('Petek ↑');
                 }
 
-                // Special events (mock)
+                // Special events and seasonal patterns
                 if (day === 3 && currentProduct === 'Ražnjiči') {
                     value *= 1.1;
-                    reasons.push('🎯⬆️');
+                    reasons.push('Sezonsko ↑');
+                }
+
+                // Holiday proximity
+                if (day === 2 && currentProduct === 'File prsi') {
+                    value *= 1.03;
+                    reasons.push('Pred praznikom ↑');
                 }
 
                 value = Math.round(value);
@@ -824,12 +835,12 @@
                 if (reasons.length > 0) {
                     reasonCell.innerHTML = reasons.map(r => {
                         let className = 'reason-neutral';
-                        if (r.includes('⬆️')) className = 'reason-up';
-                        else if (r.includes('⬇️')) className = 'reason-down';
+                        if (r.includes('↑')) className = 'reason-up';
+                        else if (r.includes('↓')) className = 'reason-down';
                         return `<span class="reason-badge ${className}">${r}</span>`;
                     }).join(' ');
                 } else {
-                    reasonCell.innerHTML = '✓';
+                    reasonCell.innerHTML = '<span style="color: green; font-weight: bold;">✓</span>';
                 }
             }
 
