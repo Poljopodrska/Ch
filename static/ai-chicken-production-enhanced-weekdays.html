@@ -792,13 +792,22 @@
                     }
                 }
 
-                // Day-specific patterns
-                if (day === 0) { // Monday
+                // Promotional patterns
+                if (day === 0 && currentProduct === 'Bedra') { // Monday
                     value *= 0.95;
-                    reasons.push('Ponedeljek ↓');
-                } else if (day === 4) { // Friday
+                    reasons.push('Konkurenca ↓');
+                } else if (day === 0 && currentProduct === 'File prsi') {
+                    value *= 1.05;
+                    reasons.push('Promocija ↑');
+                }
+
+                // Market trends
+                if (day === 4 && (currentProduct === 'Ražnjiči' || currentProduct === 'Krila')) { // Friday
                     value *= 1.15;
-                    reasons.push('Petek ↑');
+                    reasons.push('Vikend priprave ↑');
+                } else if (day === 4 && currentProduct === 'File prsi') {
+                    value *= 1.08;
+                    reasons.push('Povpraševanje ↑');
                 }
 
                 // Special events and seasonal patterns
@@ -807,10 +816,25 @@
                     reasons.push('Sezonsko ↑');
                 }
 
-                // Holiday proximity
+                // Supply chain factors
+                if (day === 1 && currentProduct === 'Krila') {
+                    value *= 0.97;
+                    reasons.push('Dobava ↓');
+                }
+
+                // Holiday or event proximity
                 if (day === 2 && currentProduct === 'File prsi') {
                     value *= 1.03;
-                    reasons.push('Pred praznikom ↑');
+                    reasons.push('Dogodek ↑');
+                } else if (day === 2 && currentProduct === 'Bedra') {
+                    value *= 0.96;
+                    reasons.push('Cena ↓');
+                }
+
+                // Regional demand patterns
+                if (day === 3 && currentProduct === 'Bedra') {
+                    value *= 1.04;
+                    reasons.push('Lokalno ↑');
                 }
 
                 value = Math.round(value);
