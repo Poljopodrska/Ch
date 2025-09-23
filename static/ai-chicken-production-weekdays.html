@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Piščančja Proizvodnja - Weekdays</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c02425 0%, #f0cb35 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* Product selector */
+        .product-selector {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .product-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-dropdown label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .product-dropdown select {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .product-dropdown select:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-table th.row-header {
+            text-align: left;
+            padding-left: 20px;
+            min-width: 180px;
+        }
+
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            border-right: 1px solid #f5f5f5;
+            text-align: center;
+        }
+
+        .data-table td.row-header {
+            text-align: left;
+            padding-left: 20px;
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        /* Weather row */
+        .weather-row {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .weather-cell {
+            padding: 15px !important;
+        }
+
+        .weather-icon {
+            font-size: 2.5em;
+            display: block;
+        }
+
+        .weather-temp {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1976d2;
+            margin: 5px 0;
+        }
+
+        .weather-desc {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* Section headers */
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            padding: 12px !important;
+        }
+
+        .historical-row {
+            background: #fff;
+        }
+
+        .ai-row {
+            background: #fff3e0;
+        }
+
+        .actual-row {
+            background: #e8f5e9;
+        }
+
+        /* Shortage checkbox */
+        .shortage-checkbox {
+            margin-left: 8px;
+            cursor: pointer;
+            transform: scale(1.3);
+            vertical-align: middle;
+        }
+
+        .shortage-label {
+            font-size: 0.8em;
+            color: #f44336;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Input fields */
+        .actual-input {
+            width: 90px;
+            padding: 8px;
+            border: 2px solid #4caf50;
+            border-radius: 6px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .actual-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        /* Totals */
+        .total-row {
+            background: #eceff1;
+            font-weight: bold;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Calculate button */
+        .calculate-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Value indicators */
+        .increase {
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .decrease {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        /* Reason indicators */
+        .reason-cell {
+            background: #f5f5f5;
+            padding: 10px !important;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .reason-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin: 2px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .reason-up {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .reason-down {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        /* Product name display */
+        .current-product {
+            font-size: 1.2em;
+            color: #1976d2;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(33, 150, 243, 0.1);
+            border-radius: 8px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐔 AI Piščančja Proizvodnja</h1>
+            <p>Pivka, Slovenija - Delovni dnevi (Pon-Pet)</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Product Selector -->
+            <div class="product-selector">
+                <div class="product-dropdown">
+                    <label for="productSelect">Izberi produkt:</label>
+                    <select id="productSelect" onchange="changeProduct()">
+                        <option value="Bedra">🍗 Bedra</option>
+                        <option value="File prsi">🥩 File prsi</option>
+                        <option value="Krila">🍖 Krila</option>
+                        <option value="Ražnjiči">🍢 Ražnjiči</option>
+                    </select>
+                </div>
+                <button class="calculate-btn" onclick="generateAIPrognosis()">
+                    🤖 Generiraj AI prognozo
+                </button>
+            </div>
+
+            <!-- Main Data Table -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="row-header">
+                                <span class="current-product" id="currentProductDisplay">🍗 Bedra</span>
+                            </th>
+                            <th>Ponedeljek</th>
+                            <th>Torek</th>
+                            <th>Sreda</th>
+                            <th>Četrtek</th>
+                            <th>Petek</th>
+                            <th>SKUPAJ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Weather Row -->
+                        <tr class="weather-row">
+                            <td class="row-header section-header">🌤️ VREME</td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-temp">28°</span>
+                                <span class="weather-desc">jasno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☁️</span>
+                                <span class="weather-temp">26°</span>
+                                <span class="weather-desc">oblačno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">🌧️</span>
+                                <span class="weather-temp">21°</span>
+                                <span class="weather-desc">dež</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☁️</span>
+                                <span class="weather-temp">23°</span>
+                                <span class="weather-desc">oblačno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-temp">29°</span>
+                                <span class="weather-desc">sončno</span>
+                            </td>
+                            <td style="background: #e3f2fd;">-</td>
+                        </tr>
+
+                        <!-- Last Year Sales -->
+                        <tr>
+                            <td class="row-header section-header">📊 LANI</td>
+                            <td id="hist-0">850<br><input type="checkbox" class="shortage-checkbox" id="shortage-0" onchange="markShortage(0)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td id="hist-1">920<br><input type="checkbox" class="shortage-checkbox" id="shortage-1" onchange="markShortage(1)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td id="hist-2">980<br><input type="checkbox" class="shortage-checkbox" id="shortage-2" onchange="markShortage(2)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td id="hist-3">1100<br><input type="checkbox" class="shortage-checkbox" id="shortage-3" onchange="markShortage(3)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td id="hist-4">1350<br><input type="checkbox" class="shortage-checkbox" id="shortage-4" onchange="markShortage(4)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td id="hist-total" class="total-row">4950</td>
+                        </tr>
+
+                        <!-- AI Prognosis Section -->
+                        <tr id="ai-header" style="display: none;">
+                            <td class="row-header section-header">🤖 AI PROGNOZA</td>
+                            <td id="ai-0">-</td>
+                            <td id="ai-1">-</td>
+                            <td id="ai-2">-</td>
+                            <td id="ai-3">-</td>
+                            <td id="ai-4">-</td>
+                            <td id="ai-total" class="total-row">-</td>
+                        </tr>
+                        <tr id="ai-reasons" style="display: none;">
+                            <td class="row-header" style="background: #e8eaf6;">📍 Razlogi</td>
+                            <td id="reason-0" class="reason-cell">-</td>
+                            <td id="reason-1" class="reason-cell">-</td>
+                            <td id="reason-2" class="reason-cell">-</td>
+                            <td id="reason-3" class="reason-cell">-</td>
+                            <td id="reason-4" class="reason-cell">-</td>
+                            <td style="background: #f5f5f5;">-</td>
+                        </tr>
+
+                        <!-- Actual Sales Input -->
+                        <tr>
+                            <td class="row-header section-header">✏️ DEJANSKA PRODAJA</td>
+                            <td><input type="number" class="actual-input" id="actual-0" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-1" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-2" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-3" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-4" onchange="updateActuals()"></td>
+                            <td id="actual-total" class="total-row">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <div class="chart-title">📊 Primerjava prodaje: <span id="chartProductName">Bedra</span></div>
+                <canvas id="comparisonChart" height="80"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let currentProduct = 'Bedra';
+        let shortageMap = {};
+        let aiPrognosis = [];
+        let actualSales = [];
+
+        const productEmojis = {
+            'Bedra': '🍗',
+            'File prsi': '🥩',
+            'Krila': '🍖',
+            'Ražnjiči': '🍢'
+        };
+
+        // Historical data (Monday-Friday only)
+        const historicalData = {
+            'Bedra': [850, 920, 980, 1100, 1350],
+            'File prsi': [1200, 1250, 1300, 1400, 1650],
+            'Krila': [600, 650, 700, 750, 950],
+            'Ražnjiči': [400, 420, 450, 500, 650]
+        };
+
+        // Weather data (Monday-Friday only)
+        const weatherData = [
+            { temp: 28, weather: 'Clear', rain: 0 },
+            { temp: 26, weather: 'Clouds', rain: 0 },
+            { temp: 21, weather: 'Rain', rain: 3.5 },
+            { temp: 23, weather: 'Clouds', rain: 0 },
+            { temp: 29, weather: 'Clear', rain: 0 }
+        ];
+
+        let chart = null;
+
+        // Initialize on load
+        window.addEventListener('load', function() {
+            initializeChart();
+            updateDisplay();
+        });
+
+        function changeProduct() {
+            currentProduct = document.getElementById('productSelect').value;
+
+            // Update product display
+            document.getElementById('currentProductDisplay').textContent =
+                `${productEmojis[currentProduct]} ${currentProduct}`;
+            document.getElementById('chartProductName').textContent = currentProduct;
+
+            // Reset data
+            shortageMap = {};
+            aiPrognosis = [];
+            actualSales = [];
+
+            // Clear checkboxes
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`shortage-${i}`).checked = false;
+            }
+
+            // Clear AI display
+            document.getElementById('ai-header').style.display = 'none';
+            document.getElementById('ai-reasons').style.display = 'none';
+
+            // Clear actual inputs
+            for (let i = 0; i < 5; i++) {
+                document.getElementById(`actual-${i}`).value = '';
+            }
+            document.getElementById('actual-total').textContent = '-';
+
+            // Update display
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const data = historicalData[currentProduct];
+            let total = 0;
+
+            // Update historical data cells
+            for (let i = 0; i < 5; i++) {
+                const cell = document.getElementById(`hist-${i}`);
+                cell.innerHTML = `${data[i]}<br><input type="checkbox" class="shortage-checkbox" id="shortage-${i}" onchange="markShortage(${i})"><label class="shortage-label">pomanjkanje</label>`;
+                total += data[i];
+            }
+
+            document.getElementById('hist-total').textContent = total;
+
+            // Update chart
+            updateChart();
+        }
+
+        function markShortage(dayIndex) {
+            const checkbox = document.getElementById(`shortage-${dayIndex}`);
+            const key = `${currentProduct}-${dayIndex}`;
+
+            if (checkbox.checked) {
+                shortageMap[key] = true;
+            } else {
+                delete shortageMap[key];
+            }
+        }
+
+        function generateAIPrognosis() {
+            // Show AI sections
+            document.getElementById('ai-header').style.display = 'table-row';
+            document.getElementById('ai-reasons').style.display = 'table-row';
+
+            // Reset
+            aiPrognosis = [];
+            let total = 0;
+
+            // Calculate for each weekday
+            for (let day = 0; day < 5; day++) {
+                let value = historicalData[currentProduct][day];
+                let reasons = [];
+
+                // Shortage adjustment
+                if (shortageMap[`${currentProduct}-${day}`]) {
+                    value *= 1.2;
+                    reasons.push('📦⬆️');
+                }
+
+                // Weather adjustments
+                const weather = weatherData[day];
+                if (weather.rain > 0) {
+                    if (currentProduct === 'Ražnjiči' || currentProduct === 'Krila') {
+                        value *= 0.9;
+                        reasons.push('🌧️⬇️');
+                    }
+                }
+
+                if (weather.temp > 28) {
+                    if (currentProduct === 'Ražnjiči') {
+                        value *= 1.15;
+                        reasons.push('☀️⬆️');
+                    } else if (currentProduct === 'Krila') {
+                        value *= 1.1;
+                        reasons.push('☀️⬆️');
+                    }
+                }
+
+                // Friday boost (end of week)
+                if (day === 4) {
+                    value *= 1.15;
+                    reasons.push('📅⬆️');
+                }
+
+                value = Math.round(value);
+                aiPrognosis.push(value);
+                total += value;
+
+                // Display value with change
+                const cell = document.getElementById(`ai-${day}`);
+                const historical = historicalData[currentProduct][day];
+                const change = ((value - historical) / historical * 100).toFixed(0);
+
+                if (Math.abs(change) > 5) {
+                    cell.innerHTML = `${value}<br><span class="${change > 0 ? 'increase' : 'decrease'}">(${change > 0 ? '+' : ''}${change}%)</span>`;
+                } else {
+                    cell.innerHTML = value;
+                }
+
+                // Display reasons
+                const reasonCell = document.getElementById(`reason-${day}`);
+                if (reasons.length > 0) {
+                    reasonCell.innerHTML = reasons.map(r => {
+                        const isUp = r.includes('⬆️');
+                        return `<span class="reason-badge reason-${isUp ? 'up' : 'down'}">${r}</span>`;
+                    }).join(' ');
+                } else {
+                    reasonCell.innerHTML = '✓';
+                }
+            }
+
+            document.getElementById('ai-total').textContent = total;
+            updateChart();
+        }
+
+        function updateActuals() {
+            actualSales = [];
+            let total = 0;
+
+            for (let day = 0; day < 5; day++) {
+                const input = document.getElementById(`actual-${day}`);
+                const value = parseInt(input.value) || 0;
+                actualSales.push(value);
+                total += value;
+            }
+
+            document.getElementById('actual-total').textContent = total || '-';
+            updateChart();
+        }
+
+        function initializeChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek'],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Količina (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const datasets = [];
+
+            // Historical data
+            datasets.push({
+                label: 'Lani',
+                data: historicalData[currentProduct],
+                borderColor: '#9e9e9e',
+                backgroundColor: 'transparent',
+                borderWidth: 2,
+                borderDash: [5, 5],
+                tension: 0.4
+            });
+
+            // AI prognosis
+            if (aiPrognosis.length > 0) {
+                datasets.push({
+                    label: 'AI Prognoza',
+                    data: aiPrognosis,
+                    borderColor: '#2196f3',
+                    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4
+                });
+            }
+
+            // Actual sales
+            if (actualSales.some(v => v > 0)) {
+                datasets.push({
+                    label: 'Dejanska prodaja',
+                    data: actualSales,
+                    borderColor: '#4caf50',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    pointStyle: 'rect',
+                    pointRadius: 8,
+                    tension: 0.4
+                });
+            }
+
+            chart.data.datasets = datasets;
+            chart.update();
+        }
+    </script>
+</body>
+</html>
