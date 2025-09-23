@@ -15,6 +15,28 @@
     <!-- Version Display (Constitutional Requirement) -->
     <div class="version-display">Loading...</div>
     
+    <!-- AI PLANNING MODEL BUTTON -->
+    <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+        <button onclick="window.open('ai-planning-model.html', '_blank')" style="
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            🤖 AI Planning Model
+            <span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 10px;">NEW</span>
+        </button>
+    </div>
+
     <!-- DEPLOYMENT VERIFICATION BANNER -->
     <div style="background: #FFD700; color: black; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; border: 3px solid #FF6B6B; margin: 10px;">
         🚀 v0.3.4 DEPLOYED - FIXED MOCKAPI ERROR 🚀
@@ -31,6 +53,7 @@
                 <a href="#pricing" class="nav-link">Cene</a>
                 <a href="#planning" class="nav-link">Načrtovanje</a>
                 <a href="#production-planning" class="nav-link">BOM in proizvodnja</a>
+                <a href="#ai-planning" class="nav-link">🤖 AI Planning Model</a>
                 <a href="#stock-report" class="nav-link">Zaloge</a>
                 <a href="#modules" class="nav-link">Moduli</a>
                 <a href="#settings" class="nav-link">Nastavitve</a>
