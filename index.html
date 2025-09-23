@@ -51,6 +51,31 @@
             flex-direction: column;
         }
         
+        /* AI Planning Button */
+        .ai-planning-btn {
+            position: fixed;
+            top: 10px;
+            right: 150px;
+            z-index: 9999;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-planning-btn:hover {
+            transform: scale(1.05);
+        }
+
         /* Version Display */
         .version-display {
             position: fixed;
@@ -223,9 +248,15 @@
     </style>
 </head>
 <body>
+    <!-- AI Planning Model Button -->
+    <button class="ai-planning-btn" onclick="window.open('static/ai-planning-model.html', '_blank')">
+        🤖 AI Planning Model
+        <span style="font-size: 10px; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px;">NEW</span>
+    </button>
+
     <!-- Version Display -->
     <div class="version-display">v0.5.13 - CRM INTEGRATED</div>
-    
+
     <!-- Main Application -->
     <div id="app">
         <header>
