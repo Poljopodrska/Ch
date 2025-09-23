@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Piščančja Proizvodnja - Simple</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c02425 0%, #f0cb35 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .data-table th.row-header {
+            text-align: left;
+            padding-left: 15px;
+            min-width: 150px;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            border-right: 1px solid #f5f5f5;
+            text-align: center;
+        }
+
+        .data-table td.row-header {
+            text-align: left;
+            padding-left: 15px;
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        /* Weather row */
+        .weather-row {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .weather-cell {
+            padding: 15px !important;
+        }
+
+        .weather-icon {
+            font-size: 2.5em;
+            display: block;
+        }
+
+        .weather-temp {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1976d2;
+            margin: 5px 0;
+        }
+
+        .weather-desc {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        /* Product rows */
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            padding: 12px !important;
+        }
+
+        .historical-row {
+            background: #fff;
+        }
+
+        .ai-row {
+            background: #fff3e0;
+        }
+
+        .actual-row {
+            background: #e8f5e9;
+        }
+
+        /* Shortage checkbox */
+        .shortage-checkbox {
+            margin-left: 8px;
+            cursor: pointer;
+            transform: scale(1.3);
+            vertical-align: middle;
+        }
+
+        .shortage-label {
+            font-size: 0.8em;
+            color: #f44336;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Input fields */
+        .actual-input {
+            width: 80px;
+            padding: 6px;
+            border: 2px solid #4caf50;
+            border-radius: 4px;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .actual-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        /* Totals */
+        .total-row {
+            background: #eceff1;
+            font-weight: bold;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* Calculate button */
+        .calculate-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            transition: transform 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Value indicators */
+        .increase {
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .decrease {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        /* Weekend highlight */
+        .weekend-column {
+            background: rgba(156, 39, 176, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐔 AI Piščančja Proizvodnja</h1>
+            <p>Pivka, Slovenija</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Main Data Table -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="row-header">Podatki / Dan</th>
+                            <th>Ponedeljek</th>
+                            <th>Torek</th>
+                            <th>Sreda</th>
+                            <th>Četrtek</th>
+                            <th>Petek</th>
+                            <th class="weekend-column">Sobota</th>
+                            <th class="weekend-column">Nedelja</th>
+                            <th>SKUPAJ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Weather Row -->
+                        <tr class="weather-row">
+                            <td class="row-header section-header">🌤️ VREME</td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-temp">28°</span>
+                                <span class="weather-desc">jasno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☁️</span>
+                                <span class="weather-temp">26°</span>
+                                <span class="weather-desc">oblačno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">🌧️</span>
+                                <span class="weather-temp">21°</span>
+                                <span class="weather-desc">dež</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☁️</span>
+                                <span class="weather-temp">23°</span>
+                                <span class="weather-desc">oblačno</span>
+                            </td>
+                            <td class="weather-cell">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-temp">29°</span>
+                                <span class="weather-desc">sončno</span>
+                            </td>
+                            <td class="weather-cell weekend-column">
+                                <span class="weather-icon">☀️</span>
+                                <span class="weather-temp">31°</span>
+                                <span class="weather-desc">jasno</span>
+                            </td>
+                            <td class="weather-cell weekend-column">
+                                <span class="weather-icon">☁️</span>
+                                <span class="weather-temp">30°</span>
+                                <span class="weather-desc">delno oblačno</span>
+                            </td>
+                            <td style="background: #e3f2fd;">-</td>
+                        </tr>
+
+                        <!-- Last Year Sales Section -->
+                        <tr>
+                            <td colspan="9" class="section-header" style="text-align: center;">
+                                📊 PRODAJA LANI (označite pomanjkanja ✓)
+                            </td>
+                        </tr>
+                        <tr class="historical-row">
+                            <td class="row-header">Bedra</td>
+                            <td>850<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-0" onchange="markShortage('Bedra', 0)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>920<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-1" onchange="markShortage('Bedra', 1)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>980<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-2" onchange="markShortage('Bedra', 2)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1100<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-3" onchange="markShortage('Bedra', 3)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1350<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-4" onchange="markShortage('Bedra', 4)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">1600<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-5" onchange="markShortage('Bedra', 5)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">1200<br><input type="checkbox" class="shortage-checkbox" id="shortage-bedra-6" onchange="markShortage('Bedra', 6)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="total-row">8000</td>
+                        </tr>
+                        <tr class="historical-row">
+                            <td class="row-header">File prsi</td>
+                            <td>1200<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-0" onchange="markShortage('File prsi', 0)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1250<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-1" onchange="markShortage('File prsi', 1)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1300<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-2" onchange="markShortage('File prsi', 2)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1400<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-3" onchange="markShortage('File prsi', 3)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>1650<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-4" onchange="markShortage('File prsi', 4)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">1900<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-5" onchange="markShortage('File prsi', 5)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">1500<br><input type="checkbox" class="shortage-checkbox" id="shortage-file-6" onchange="markShortage('File prsi', 6)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="total-row">10200</td>
+                        </tr>
+                        <tr class="historical-row">
+                            <td class="row-header">Krila</td>
+                            <td>600<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-0" onchange="markShortage('Krila', 0)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>650<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-1" onchange="markShortage('Krila', 1)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>700<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-2" onchange="markShortage('Krila', 2)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>750<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-3" onchange="markShortage('Krila', 3)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>950<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-4" onchange="markShortage('Krila', 4)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">1200<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-5" onchange="markShortage('Krila', 5)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">900<br><input type="checkbox" class="shortage-checkbox" id="shortage-krila-6" onchange="markShortage('Krila', 6)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="total-row">5750</td>
+                        </tr>
+                        <tr class="historical-row">
+                            <td class="row-header">Ražnjiči</td>
+                            <td>400<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-0" onchange="markShortage('Ražnjiči', 0)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>420<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-1" onchange="markShortage('Ražnjiči', 1)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>450<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-2" onchange="markShortage('Ražnjiči', 2)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>500<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-3" onchange="markShortage('Ražnjiči', 3)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td>650<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-4" onchange="markShortage('Ražnjiči', 4)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">800<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-5" onchange="markShortage('Ražnjiči', 5)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="weekend-column">600<br><input type="checkbox" class="shortage-checkbox" id="shortage-raznjici-6" onchange="markShortage('Ražnjiči', 6)"><label class="shortage-label">pomanjkanje</label></td>
+                            <td class="total-row">3820</td>
+                        </tr>
+
+                        <!-- AI Prognosis Section -->
+                        <tr>
+                            <td colspan="9" style="padding: 20px;">
+                                <button class="calculate-btn" onclick="generateAIPrognosis()">
+                                    🤖 Generiraj AI prognozo
+                                </button>
+                            </td>
+                        </tr>
+                        <tr id="ai-header" style="display: none;">
+                            <td colspan="9" class="section-header" style="text-align: center;">
+                                🤖 AI PROGNOZA PRODAJE
+                            </td>
+                        </tr>
+                        <tr class="ai-row" id="ai-bedra" style="display: none;">
+                            <td class="row-header">Bedra</td>
+                            <td id="ai-bedra-0">-</td>
+                            <td id="ai-bedra-1">-</td>
+                            <td id="ai-bedra-2">-</td>
+                            <td id="ai-bedra-3">-</td>
+                            <td id="ai-bedra-4">-</td>
+                            <td id="ai-bedra-5" class="weekend-column">-</td>
+                            <td id="ai-bedra-6" class="weekend-column">-</td>
+                            <td id="ai-bedra-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="ai-row" id="ai-file" style="display: none;">
+                            <td class="row-header">File prsi</td>
+                            <td id="ai-file-0">-</td>
+                            <td id="ai-file-1">-</td>
+                            <td id="ai-file-2">-</td>
+                            <td id="ai-file-3">-</td>
+                            <td id="ai-file-4">-</td>
+                            <td id="ai-file-5" class="weekend-column">-</td>
+                            <td id="ai-file-6" class="weekend-column">-</td>
+                            <td id="ai-file-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="ai-row" id="ai-krila" style="display: none;">
+                            <td class="row-header">Krila</td>
+                            <td id="ai-krila-0">-</td>
+                            <td id="ai-krila-1">-</td>
+                            <td id="ai-krila-2">-</td>
+                            <td id="ai-krila-3">-</td>
+                            <td id="ai-krila-4">-</td>
+                            <td id="ai-krila-5" class="weekend-column">-</td>
+                            <td id="ai-krila-6" class="weekend-column">-</td>
+                            <td id="ai-krila-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="ai-row" id="ai-raznjici" style="display: none;">
+                            <td class="row-header">Ražnjiči</td>
+                            <td id="ai-raznjici-0">-</td>
+                            <td id="ai-raznjici-1">-</td>
+                            <td id="ai-raznjici-2">-</td>
+                            <td id="ai-raznjici-3">-</td>
+                            <td id="ai-raznjici-4">-</td>
+                            <td id="ai-raznjici-5" class="weekend-column">-</td>
+                            <td id="ai-raznjici-6" class="weekend-column">-</td>
+                            <td id="ai-raznjici-total" class="total-row">-</td>
+                        </tr>
+
+                        <!-- Actual Sales Input Section -->
+                        <tr>
+                            <td colspan="9" class="section-header" style="text-align: center;">
+                                ✏️ DEJANSKA PRODAJA (vnesite podatke)
+                            </td>
+                        </tr>
+                        <tr class="actual-row">
+                            <td class="row-header">Bedra</td>
+                            <td><input type="number" class="actual-input" id="actual-bedra-0" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-bedra-1" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-bedra-2" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-bedra-3" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-bedra-4" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-bedra-5" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-bedra-6" onchange="updateActuals()"></td>
+                            <td id="actual-bedra-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="actual-row">
+                            <td class="row-header">File prsi</td>
+                            <td><input type="number" class="actual-input" id="actual-file-0" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-file-1" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-file-2" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-file-3" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-file-4" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-file-5" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-file-6" onchange="updateActuals()"></td>
+                            <td id="actual-file-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="actual-row">
+                            <td class="row-header">Krila</td>
+                            <td><input type="number" class="actual-input" id="actual-krila-0" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-krila-1" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-krila-2" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-krila-3" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-krila-4" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-krila-5" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-krila-6" onchange="updateActuals()"></td>
+                            <td id="actual-krila-total" class="total-row">-</td>
+                        </tr>
+                        <tr class="actual-row">
+                            <td class="row-header">Ražnjiči</td>
+                            <td><input type="number" class="actual-input" id="actual-raznjici-0" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-raznjici-1" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-raznjici-2" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-raznjici-3" onchange="updateActuals()"></td>
+                            <td><input type="number" class="actual-input" id="actual-raznjici-4" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-raznjici-5" onchange="updateActuals()"></td>
+                            <td class="weekend-column"><input type="number" class="actual-input" id="actual-raznjici-6" onchange="updateActuals()"></td>
+                            <td id="actual-raznjici-total" class="total-row">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Chart -->
+            <div class="chart-container">
+                <div class="chart-title">📊 Primerjava: Lani vs AI Prognoza vs Dejanska prodaja</div>
+                <canvas id="comparisonChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let shortageMap = {};
+        let aiPrognosis = {};
+        let actualSales = {};
+
+        const products = ['Bedra', 'File prsi', 'Krila', 'Ražnjiči'];
+        const productIds = ['bedra', 'file', 'krila', 'raznjici'];
+
+        const historicalData = {
+            'Bedra': [850, 920, 980, 1100, 1350, 1600, 1200],
+            'File prsi': [1200, 1250, 1300, 1400, 1650, 1900, 1500],
+            'Krila': [600, 650, 700, 750, 950, 1200, 900],
+            'Ražnjiči': [400, 420, 450, 500, 650, 800, 600]
+        };
+
+        const weatherData = [
+            { temp: 28, weather: 'Clear', rain: 0 },
+            { temp: 26, weather: 'Clouds', rain: 0 },
+            { temp: 21, weather: 'Rain', rain: 3.5 },
+            { temp: 23, weather: 'Clouds', rain: 0 },
+            { temp: 29, weather: 'Clear', rain: 0 },
+            { temp: 31, weather: 'Clear', rain: 0 },
+            { temp: 30, weather: 'Clouds', rain: 0 }
+        ];
+
+        let chart = null;
+
+        // Initialize chart
+        window.addEventListener('load', function() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'],
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Količina (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+            updateChart();
+        });
+
+        function markShortage(product, dayIndex) {
+            const key = `${product}-${dayIndex}`;
+            const checkbox = document.getElementById(`shortage-${product.toLowerCase().replace(' ', '-')}-${dayIndex}`);
+
+            if (checkbox.checked) {
+                shortageMap[key] = true;
+            } else {
+                delete shortageMap[key];
+            }
+        }
+
+        function generateAIPrognosis() {
+            // Show AI sections
+            document.getElementById('ai-header').style.display = 'table-row';
+            productIds.forEach(id => {
+                document.getElementById(`ai-${id}`).style.display = 'table-row';
+            });
+
+            // Calculate AI prognosis
+            products.forEach((product, pIndex) => {
+                const productId = productIds[pIndex];
+                aiPrognosis[product] = [];
+                let total = 0;
+
+                for (let day = 0; day < 7; day++) {
+                    let value = historicalData[product][day];
+
+                    // If shortage, increase by 20%
+                    if (shortageMap[`${product}-${day}`]) {
+                        value *= 1.2;
+                    }
+
+                    // Weather adjustments
+                    const weather = weatherData[day];
+                    if (weather.rain > 0) {
+                        if (product === 'Ražnjiči' || product === 'Krila') {
+                            value *= 0.9; // Reduce outdoor products in rain
+                        }
+                    }
+                    if (weather.temp > 28) {
+                        if (product === 'Ražnjiči') {
+                            value *= 1.15; // Increase BBQ products in hot weather
+                        } else if (product === 'Krila') {
+                            value *= 1.1;
+                        }
+                    }
+
+                    // Weekend boost
+                    if (day === 5) value *= 1.35; // Saturday
+                    if (day === 6) value *= 1.2;  // Sunday
+
+                    value = Math.round(value);
+                    aiPrognosis[product].push(value);
+                    total += value;
+
+                    // Display with change indicator
+                    const cell = document.getElementById(`ai-${productId}-${day}`);
+                    const historical = historicalData[product][day];
+                    const change = ((value - historical) / historical * 100).toFixed(0);
+
+                    if (Math.abs(change) > 5) {
+                        cell.innerHTML = `${value}<br><span class="${change > 0 ? 'increase' : 'decrease'}">(${change > 0 ? '+' : ''}${change}%)</span>`;
+                    } else {
+                        cell.innerHTML = value;
+                    }
+                }
+
+                document.getElementById(`ai-${productId}-total`).textContent = total;
+            });
+
+            updateChart();
+        }
+
+        function updateActuals() {
+            products.forEach((product, pIndex) => {
+                const productId = productIds[pIndex];
+                actualSales[product] = [];
+                let total = 0;
+
+                for (let day = 0; day < 7; day++) {
+                    const input = document.getElementById(`actual-${productId}-${day}`);
+                    const value = parseInt(input.value) || 0;
+                    actualSales[product].push(value);
+                    total += value;
+                }
+
+                document.getElementById(`actual-${productId}-total`).textContent = total || '-';
+            });
+
+            updateChart();
+        }
+
+        function updateChart() {
+            const colors = {
+                'Bedra': '#ff6384',
+                'File prsi': '#36a2eb',
+                'Krila': '#ffcd56',
+                'Ražnjiči': '#4bc0c0'
+            };
+
+            const datasets = [];
+
+            products.forEach(product => {
+                // Historical data
+                datasets.push({
+                    label: `${product} (Lani)`,
+                    data: historicalData[product],
+                    borderColor: colors[product],
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [5, 5]
+                });
+
+                // AI prognosis (if generated)
+                if (aiPrognosis[product]) {
+                    datasets.push({
+                        label: `${product} (AI)`,
+                        data: aiPrognosis[product],
+                        borderColor: colors[product],
+                        backgroundColor: colors[product] + '33',
+                        borderWidth: 3
+                    });
+                }
+
+                // Actual sales (if entered)
+                if (actualSales[product] && actualSales[product].some(v => v > 0)) {
+                    datasets.push({
+                        label: `${product} (Dejanska)`,
+                        data: actualSales[product],
+                        borderColor: colors[product],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointStyle: 'rect',
+                        pointRadius: 6
+                    });
+                }
+            });
+
+            chart.data.datasets = datasets;
+            chart.update();
+        }
+    </script>
+</body>
+</html>
