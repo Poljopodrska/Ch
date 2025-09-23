@@ -719,6 +719,11 @@
                     updateDisplay();
                 }
             }
+
+            // Recalculate AI prognosis if it was already generated
+            if (aiPrognosis.length > 0) {
+                generateAIPrognosis();
+            }
         }
 
         function generateAIPrognosis() {
@@ -737,9 +742,11 @@
                 let reasons = [];
 
                 // Use alternative data if last year had shortage
+                let usingAltData = false;
                 if (lastYearShortageMap[key]) {
                     value = alternativeData[currentProduct][dayNames[day]];
-                    // Don't add as a reason, it's just data substitution
+                    usingAltData = true;
+                    reasons.push('Alt. podatki ➡');
                 }
 
                 // Weather adjustments - affects all products and days
@@ -811,11 +818,14 @@
                     : historicalData[currentProduct][day];
                 const change = ((value - baseValue) / baseValue * 100).toFixed(0);
 
+                let displayHtml = `${value}`;
                 if (Math.abs(change) > 5) {
-                    cell.innerHTML = `${value}<br><span class="${change > 0 ? 'increase' : 'decrease'}">(${change > 0 ? '+' : ''}${change}%)</span>`;
-                } else {
-                    cell.innerHTML = value;
+                    displayHtml += `<br><span class="${change > 0 ? 'increase' : 'decrease'}">(${change > 0 ? '+' : ''}${change}%)</span>`;
                 }
+                if (usingAltData) {
+                    displayHtml += `<br><span style="font-size: 0.75em; color: #666;">[alt]</span>`;
+                }
+                cell.innerHTML = displayHtml;
 
                 // Display reasons
                 const reasonCell = document.getElementById(`reason-${day}`);
