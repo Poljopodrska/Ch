@@ -489,8 +489,9 @@
                 let forecast = baseForecast * weatherAdjustment;
 
                 // Apply holiday impact (stronger as we get closer to holiday)
+                let proximityFactor = 0;
                 if (holidayType !== 'none') {
-                    const proximityFactor = Math.max(0, 1 - (daysBeforeHoliday - (7 - index)) / daysBeforeHoliday);
+                    proximityFactor = Math.max(0, 1 - (daysBeforeHoliday - (7 - index)) / daysBeforeHoliday);
                     const holidayBoost = 1 + (holidayImpacts[holidayType] - 1) * proximityFactor;
                     forecast *= holidayBoost;
                 }
