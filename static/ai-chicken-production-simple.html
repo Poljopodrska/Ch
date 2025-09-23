@@ -221,6 +221,33 @@
         .weekend-column {
             background: rgba(156, 39, 176, 0.05);
         }
+
+        /* Reason indicators */
+        .reason-cell {
+            background: #f5f5f5;
+            padding: 8px !important;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .reason-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 12px;
+            margin: 2px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .reason-up {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .reason-down {
+            background: #ffcdd2;
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -352,6 +379,17 @@
                             <td colspan="9" class="section-header" style="text-align: center;">
                                 🤖 AI PROGNOZA PRODAJE
                             </td>
+                        </tr>
+                        <tr id="ai-reasons" style="display: none;">
+                            <td class="row-header" style="background: #e8eaf6; font-size: 0.9em;">📊 Razlogi</td>
+                            <td id="reason-0" class="reason-cell">-</td>
+                            <td id="reason-1" class="reason-cell">-</td>
+                            <td id="reason-2" class="reason-cell">-</td>
+                            <td id="reason-3" class="reason-cell">-</td>
+                            <td id="reason-4" class="reason-cell">-</td>
+                            <td id="reason-5" class="reason-cell weekend-column">-</td>
+                            <td id="reason-6" class="reason-cell weekend-column">-</td>
+                            <td style="background: #f5f5f5;">-</td>
                         </tr>
                         <tr class="ai-row" id="ai-bedra" style="display: none;">
                             <td class="row-header">Bedra</td>
@@ -532,8 +570,14 @@
         }
 
         function generateAIPrognosis() {
+            // Reset reasons
+            for (let i = 0; i < 7; i++) {
+                document.getElementById(`reason-${i}`).innerHTML = '-';
+            }
+
             // Show AI sections
             document.getElementById('ai-header').style.display = 'table-row';
+            document.getElementById('ai-reasons').style.display = 'table-row';
             productIds.forEach(id => {
                 document.getElementById(`ai-${id}`).style.display = 'table-row';
             });
@@ -546,10 +590,12 @@
 
                 for (let day = 0; day < 7; day++) {
                     let value = historicalData[product][day];
+                    let dayReasons = [];
 
                     // If shortage, increase by 20%
                     if (shortageMap[`${product}-${day}`]) {
                         value *= 1.2;
+                        dayReasons.push('📦⬆️');
                     }
 
                     // Weather adjustments
@@ -557,19 +603,31 @@
                     if (weather.rain > 0) {
                         if (product === 'Ražnjiči' || product === 'Krila') {
                             value *= 0.9; // Reduce outdoor products in rain
+                            dayReasons.push('🌧️⬇️');
                         }
                     }
                     if (weather.temp > 28) {
                         if (product === 'Ražnjiči') {
                             value *= 1.15; // Increase BBQ products in hot weather
+                            dayReasons.push('☀️⬆️');
                         } else if (product === 'Krila') {
                             value *= 1.1;
+                            dayReasons.push('☀️⬆️');
                         }
                     }
 
                     // Weekend boost
-                    if (day === 5) value *= 1.35; // Saturday
-                    if (day === 6) value *= 1.2;  // Sunday
+                    if (day === 5) {
+                        value *= 1.35; // Saturday
+                        dayReasons.push('🎉⬆️');
+                    }
+                    if (day === 6) {
+                        value *= 1.2;  // Sunday
+                        dayReasons.push('🎊⬆️');
+                    }
+
+                    // Update reasons display for this day
+                    updateDayReasons(day, dayReasons);
 
                     value = Math.round(value);
                     aiPrognosis[product].push(value);
@@ -591,6 +649,28 @@
             });
 
             updateChart();
+        }
+
+        function updateDayReasons(day, newReasons) {
+            const reasonCell = document.getElementById(`reason-${day}`);
+            const currentContent = reasonCell.innerHTML;
+
+            if (currentContent === '-' && newReasons.length > 0) {
+                reasonCell.innerHTML = '';
+            }
+
+            if (newReasons.length > 0) {
+                const existingReasons = currentContent === '-' ? [] : currentContent.split('<br>');
+                const uniqueNewReasons = newReasons.filter(r => !existingReasons.includes(r));
+
+                uniqueNewReasons.forEach(reason => {
+                    if (currentContent !== '-' && currentContent !== '') {
+                        reasonCell.innerHTML += '<br>';
+                    }
+                    const isUp = reason.includes('⬆️');
+                    reasonCell.innerHTML += `<span class="reason-badge reason-${isUp ? 'up' : 'down'}">${reason}</span>`;
+                });
+            }
         }
 
         function updateActuals() {
