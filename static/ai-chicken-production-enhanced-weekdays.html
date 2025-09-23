@@ -604,10 +604,10 @@
             // More realistic mock data for demonstration
             realWeatherData = [
                 { temp: 15, minTemp: 8, weather: 'Clouds', description: 'oblačno', rain: 0 },
-                { temp: 14, minTemp: 9, weather: 'Clouds', description: 'oblačno', rain: 1.8 },
+                { temp: 14, minTemp: 9, weather: 'Rain', description: 'deževno', rain: 3.5 },
                 { temp: 18, minTemp: 10, weather: 'Clear', description: 'jasno', rain: 0 },
                 { temp: 22, minTemp: 14, weather: 'Clear', description: 'sončno', rain: 0 },
-                { temp: 20, minTemp: 15, weather: 'Partly Cloudy', description: 'delno oblačno', rain: 0 }
+                { temp: 19, minTemp: 15, weather: 'Clear', description: 'lepo', rain: 0 }
             ];
             displayWeather();
         }
@@ -742,51 +742,45 @@
                     // Don't add as a reason, it's just data substitution
                 }
 
-                // Weather adjustments (more varied)
+                // Weather adjustments - affects all products and days
                 if (realWeatherData[day]) {
                     const weather = realWeatherData[day];
 
-                    // Rain impact
-                    if (weather.rain > 0) {
-                        if (currentProduct === 'Ražnjiči' || currentProduct === 'Krila') {
-                            if (weather.rain > 3) {
-                                value *= 0.85;
-                                reasons.push('Močan dež ↓↓');
-                            } else {
-                                value *= 0.92;
-                                reasons.push('Dež ↓');
-                            }
-                        }
+                    // Rain impact - reduces sales up to 15%
+                    if (weather.rain > 5) {
+                        value *= 0.85; // -15%
+                        reasons.push('Močan dež ↓↓');
+                    } else if (weather.rain > 2) {
+                        value *= 0.90; // -10%
+                        reasons.push('Dež ↓');
+                    } else if (weather.rain > 0) {
+                        value *= 0.95; // -5%
+                        reasons.push('Rahel dež ↓');
+                    }
+                    // Sunny/clear weather - increases sales up to 15%
+                    else if (weather.weather === 'Clear' && weather.temp > 20) {
+                        value *= 1.15; // +15%
+                        reasons.push('Sončno ↑↑');
+                    } else if (weather.weather === 'Clear' && weather.temp > 15) {
+                        value *= 1.10; // +10%
+                        reasons.push('Lepo vreme ↑');
+                    } else if (weather.weather === 'Clear') {
+                        value *= 1.05; // +5%
+                        reasons.push('Jasno ↑');
+                    }
+                    // Cloudy weather - neutral to slight decrease
+                    else if (weather.weather === 'Clouds') {
+                        value *= 0.98; // -2%
+                        reasons.push('Oblačno ↓');
                     }
 
-                    // Temperature impact
-                    if (weather.temp < 10) {
-                        if (currentProduct === 'Bedra' || currentProduct === 'File prsi') {
-                            value *= 1.08;
-                            reasons.push('Mraz ↑');
-                        }
-                    } else if (weather.temp > 25) {
-                        if (currentProduct === 'Ražnjiči') {
-                            value *= 1.18;
-                            reasons.push('Vročina ↑↑');
-                        } else if (currentProduct === 'Krila') {
-                            value *= 1.12;
-                            reasons.push('Toplo ↑');
-                        }
-                    } else if (weather.temp > 20) {
-                        if (currentProduct === 'Ražnjiči') {
-                            value *= 1.05;
-                            reasons.push('Prijetno ↑');
-                        }
-                    }
-
-                    // Extreme weather conditions only
+                    // Extreme weather conditions
                     if (weather.weather === 'Thunderstorm') {
-                        value *= 0.8;
+                        value *= 0.85; // -15%
                         reasons.push('Nevihta ↓↓');
                     } else if (weather.weather === 'Snow') {
-                        value *= 0.9;
-                        reasons.push('Sneg ↓');
+                        value *= 0.85; // -15%
+                        reasons.push('Sneg ↓↓');
                     }
                 }
 
