@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Piščančja Proizvodnja - Unified View</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #c02425 0%, #f0cb35 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .location-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            margin: 10px 0;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .controls-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 1em;
+        }
+
+        .control-btn:hover {
+            background: #1976d2;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .calculate-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .unified-table-container {
+            background: white;
+            border-radius: 15px;
+            overflow-x: auto;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .unified-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .unified-table th {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .unified-table th.row-header {
+            text-align: left;
+            padding-left: 15px;
+            min-width: 150px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .unified-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            border-right: 1px solid #f0f0f0;
+            text-align: center;
+            position: relative;
+        }
+
+        .unified-table td.row-header {
+            text-align: left;
+            padding-left: 15px;
+            font-weight: 600;
+            background: #f8f9fa;
+            position: sticky;
+            left: 0;
+            z-index: 5;
+        }
+
+        /* Weather row styling */
+        .weather-row {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        }
+
+        .weather-cell {
+            padding: 10px !important;
+        }
+
+        .weather-icon {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .weather-temp {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1976d2;
+        }
+
+        .weather-desc {
+            font-size: 0.85em;
+            color: #555;
+            font-style: italic;
+        }
+
+        /* Section separators */
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: bold;
+            padding: 10px !important;
+        }
+
+        /* Product rows */
+        .product-header {
+            background: #e8eaf6;
+            font-weight: bold;
+            color: #3949ab;
+        }
+
+        .historical-row {
+            background: #fff;
+        }
+
+        .plan-row {
+            background: #e8f5e9;
+        }
+
+        .ai-row {
+            background: #fff3e0;
+        }
+
+        /* Input styling */
+        .manual-input {
+            width: 70px;
+            padding: 4px;
+            border: 2px solid #4caf50;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .manual-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        /* Shortage styling */
+        .shortage-cell {
+            background: #ffebee !important;
+            color: #c62828;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .shortage-checkbox {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .shortage-marker {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #ff5722;
+            color: white;
+            border-radius: 3px;
+            font-size: 0.75em;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+
+        .shortage-marker.active {
+            background: #d32f2f;
+        }
+
+        /* Totals */
+        .total-row {
+            background: #eceff1;
+            font-weight: bold;
+        }
+
+        .grand-total {
+            background: #cfd8dc;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        /* Chart section */
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-title {
+            text-align: center;
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        /* AI Reasoning */
+        .ai-reasoning {
+            background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .ai-reasoning h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+        }
+
+        .reasoning-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .reasoning-item {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Value change indicators */
+        .increase {
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        .decrease {
+            color: #f44336;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+
+        /* Today highlight */
+        .today-column {
+            background: rgba(255, 235, 59, 0.1);
+            border: 2px solid #ffc107;
+        }
+
+        /* Weekend highlight */
+        .weekend-column {
+            background: rgba(156, 39, 176, 0.05);
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐔 AI Piščančja Proizvodnja - Unified Dashboard</h1>
+            <div class="location-badge">📍 Pivka, Slovenija</div>
+            <p>Celostni pregled proizvodnje - vse na enem mestu</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Controls Section -->
+            <div class="controls-section">
+                <div>
+                    <button class="control-btn" onclick="markTestShortages()">📝 Testni podatki</button>
+                    <button class="control-btn" onclick="clearAllShortages()">🔄 Počisti vse</button>
+                    <button class="control-btn" onclick="exportData()">📥 Izvozi podatke</button>
+                </div>
+                <button class="calculate-btn" onclick="calculateAIForecast()">
+                    🚀 Generiraj AI napoved
+                </button>
+                <div style="font-size: 0.9em; color: #666;">
+                    Kliknite na celice za označitev pomanjkanja
+                </div>
+            </div>
+
+            <!-- Unified Table -->
+            <div class="unified-table-container">
+                <table class="unified-table" id="unifiedTable">
+                    <thead>
+                        <tr>
+                            <th class="row-header">Dan / Podatki</th>
+                            <th>Ponedeljek<br><span style="font-size: 0.8em; font-weight: normal;" id="date-0"></span></th>
+                            <th>Torek<br><span style="font-size: 0.8em; font-weight: normal;" id="date-1"></span></th>
+                            <th>Sreda<br><span style="font-size: 0.8em; font-weight: normal;" id="date-2"></span></th>
+                            <th>Četrtek<br><span style="font-size: 0.8em; font-weight: normal;" id="date-3"></span></th>
+                            <th>Petek<br><span style="font-size: 0.8em; font-weight: normal;" id="date-4"></span></th>
+                            <th class="weekend-column">Sobota<br><span style="font-size: 0.8em; font-weight: normal;" id="date-5"></span></th>
+                            <th class="weekend-column">Nedelja<br><span style="font-size: 0.8em; font-weight: normal;" id="date-6"></span></th>
+                            <th style="background: #263238;">SKUPAJ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="9" class="loading">
+                                <div class="loading-spinner"></div>
+                                <div>Nalagam podatke...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- AI Reasoning Section -->
+            <div class="ai-reasoning" id="aiReasoning" style="display: none;">
+                <h3>🧠 AI Analiza in prilagoditve:</h3>
+                <ul class="reasoning-list" id="reasoningList">
+                </ul>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-container">
+                <div class="chart-title">📊 Vizualna primerjava: Zgodovinski vs Načrt vs AI Napoved</div>
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const USE_SIMULATED_DATA = true;
+        let weatherData = null;
+        let comparisonChart = null;
+        let shortageMap = {};
+        let currentShortages = {};
+        let manualPlan = {};
+        let aiAdjustedData = {};
+
+        // Days and dates
+        const dayNames = ['Ponedeljek', 'Torek', 'Sreda', 'Četrtek', 'Petek', 'Sobota', 'Nedelja'];
+        const products = ['Bedra', 'File prsi', 'Krila', 'Ražnjiči'];
+
+        // Historical data
+        const historicalData = {
+            'Bedra': [850, 920, 980, 1100, 1350, 1600, 1200],
+            'File prsi': [1200, 1250, 1300, 1400, 1650, 1900, 1500],
+            'Krila': [600, 650, 700, 750, 950, 1200, 900],
+            'Ražnjiči': [400, 420, 450, 500, 650, 800, 600]
+        };
+
+        // Alternative data for shortage compensation
+        const alternativeData = {
+            'Bedra': [880, 950, 1000, 1150, 1400, 1650, 1250],
+            'File prsi': [1250, 1300, 1350, 1450, 1700, 1950, 1550],
+            'Krila': [620, 680, 720, 780, 980, 1250, 930],
+            'Ražnjiči': [420, 440, 470, 520, 680, 830, 620]
+        };
+
+        // Weather icons
+        const weatherIcons = {
+            'Clear': '☀️',
+            'Clouds': '☁️',
+            'Rain': '🌧️',
+            'Drizzle': '🌦️',
+            'Thunderstorm': '⛈️',
+            'Snow': '❄️',
+            'Mist': '🌫️'
+        };
+
+        // Initialize on load
+        window.addEventListener('load', function() {
+            setupDates();
+            loadWeatherData();
+            initializeChart();
+        });
+
+        function setupDates() {
+            const today = new Date();
+            const monday = new Date(today);
+            const day = monday.getDay();
+            const diff = monday.getDate() - day + (day === 0 ? -6 : 1);
+            monday.setDate(diff);
+
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                const dateStr = `${date.getDate()}.${date.getMonth() + 1}.`;
+                document.getElementById(`date-${i}`).textContent = dateStr;
+
+                // Highlight today
+                if (date.toDateString() === today.toDateString()) {
+                    document.querySelector(`th:nth-child(${i + 2})`).classList.add('today-column');
+                }
+            }
+        }
+
+        function generateSimulatedWeatherData() {
+            const weatherPatterns = [
+                { weather: 'Clear', description: 'jasno', temp: 24, minTemp: 15, maxTemp: 28, rain: 0 },
+                { weather: 'Clouds', description: 'delno oblačno', temp: 22, minTemp: 14, maxTemp: 26, rain: 0 },
+                { weather: 'Rain', description: 'rahel dež', temp: 18, minTemp: 12, maxTemp: 21, rain: 3.5 },
+                { weather: 'Clouds', description: 'oblačno', temp: 19, minTemp: 13, maxTemp: 23, rain: 0 },
+                { weather: 'Clear', description: 'sončno', temp: 25, minTemp: 16, maxTemp: 29, rain: 0 },
+                { weather: 'Clear', description: 'jasno', temp: 27, minTemp: 17, maxTemp: 31, rain: 0 },
+                { weather: 'Clouds', description: 'delno oblačno', temp: 26, minTemp: 16, maxTemp: 30, rain: 0 }
+            ];
+            return weatherPatterns;
+        }
+
+        async function loadWeatherData() {
+            weatherData = generateSimulatedWeatherData();
+            buildUnifiedTable();
+        }
+
+        function buildUnifiedTable() {
+            const tbody = document.getElementById('tableBody');
+            let html = '';
+
+            // Weather row
+            html += '<tr class="weather-row">';
+            html += '<td class="row-header section-header">🌤️ VREME</td>';
+            weatherData.forEach(day => {
+                const icon = weatherIcons[day.weather] || '🌤️';
+                html += `<td class="weather-cell">
+                    <span class="weather-icon">${icon}</span>
+                    <span class="weather-temp">${day.maxTemp}°</span><br>
+                    <span class="weather-desc">${day.description}</span>
+                    ${day.rain > 0 ? `<br>💧 ${day.rain}mm` : ''}
+                </td>`;
+            });
+            html += '<td style="background: #e3f2fd;">-</td>';
+            html += '</tr>';
+
+            // Historical data section header
+            html += '<tr>';
+            html += '<td class="row-header section-header">📊 LANI (zgodovinski)</td>';
+            html += '<td colspan="8" class="section-header" style="text-align: center;">Kliknite na celice za označitev pomanjkanja</td>';
+            html += '</tr>';
+
+            // Historical data rows
+            products.forEach(product => {
+                html += '<tr class="historical-row">';
+                html += `<td class="row-header product-header">${product}</td>`;
+
+                let total = 0;
+                historicalData[product].forEach((value, dayIndex) => {
+                    const cellId = `hist-${product.replace(' ', '-')}-${dayIndex}`;
+                    total += value;
+                    html += `<td id="${cellId}" onclick="toggleShortage('${product}', ${dayIndex}, '${cellId}')" style="cursor: pointer;">
+                        ${value}
+                    </td>`;
+                });
+
+                html += `<td class="total-row">${total}</td>`;
+                html += '</tr>';
+            });
+
+            // Historical totals
+            html += '<tr class="total-row">';
+            html += '<td class="row-header">Skupaj lani</td>';
+            let grandTotalHist = 0;
+            for (let i = 0; i < 7; i++) {
+                let dayTotal = 0;
+                products.forEach(product => {
+                    dayTotal += historicalData[product][i];
+                });
+                grandTotalHist += dayTotal;
+                html += `<td>${dayTotal}</td>`;
+            }
+            html += `<td class="grand-total">${grandTotalHist}</td>`;
+            html += '</tr>';
+
+            // Manual plan section header
+            html += '<tr>';
+            html += '<td class="row-header section-header">✏️ ROČNI NAČRT</td>';
+            html += '<td colspan="8" class="section-header" style="text-align: center;">Vnesite načrtovane količine</td>';
+            html += '</tr>';
+
+            // Manual plan input rows
+            products.forEach(product => {
+                html += '<tr class="plan-row">';
+                html += `<td class="row-header product-header">${product}</td>`;
+
+                historicalData[product].forEach((value, dayIndex) => {
+                    const inputId = `plan-${product.replace(' ', '-')}-${dayIndex}`;
+                    html += `<td>
+                        <input type="number"
+                               id="${inputId}"
+                               class="manual-input"
+                               placeholder="${value}"
+                               onchange="updateManualPlan('${product}', ${dayIndex}, this.value)">
+                    </td>`;
+                });
+
+                html += `<td class="total-row" id="plan-total-${product.replace(' ', '-')}">-</td>`;
+                html += '</tr>';
+            });
+
+            // Manual plan totals
+            html += '<tr class="total-row">';
+            html += '<td class="row-header">Načrt skupaj</td>';
+            for (let i = 0; i < 7; i++) {
+                html += `<td id="plan-day-total-${i}">-</td>`;
+            }
+            html += `<td class="grand-total" id="plan-grand-total">-</td>`;
+            html += '</tr>';
+
+            // AI forecast section will be added after calculation
+            html += '<tr id="ai-section-placeholder">';
+            html += '<td class="row-header section-header">🤖 AI NAPOVED</td>';
+            html += '<td colspan="8" class="section-header" style="text-align: center;">Kliknite "Generiraj AI napoved" za izračun</td>';
+            html += '</tr>';
+
+            tbody.innerHTML = html;
+        }
+
+        function toggleShortage(product, dayIndex, cellId) {
+            const key = `${product}-${dayIndex}`;
+            const cell = document.getElementById(cellId);
+
+            if (shortageMap[key]) {
+                delete shortageMap[key];
+                cell.classList.remove('shortage-cell');
+                cell.innerHTML = historicalData[product][dayIndex];
+            } else {
+                shortageMap[key] = true;
+                cell.classList.add('shortage-cell');
+                const altValue = alternativeData[product][dayIndex];
+                cell.innerHTML = `
+                    <span style="text-decoration: line-through;">${historicalData[product][dayIndex]}</span>
+                    <br>→ ${altValue}
+                `;
+            }
+        }
+
+        function updateManualPlan(product, dayIndex, value) {
+            const key = `${product}-${dayIndex}`;
+            if (value && value > 0) {
+                manualPlan[key] = parseInt(value);
+            } else {
+                delete manualPlan[key];
+            }
+            updateManualPlanTotals();
+        }
+
+        function updateManualPlanTotals() {
+            // Update product totals
+            products.forEach(product => {
+                let total = 0;
+                for (let i = 0; i < 7; i++) {
+                    const key = `${product}-${i}`;
+                    total += manualPlan[key] || 0;
+                }
+                const totalCell = document.getElementById(`plan-total-${product.replace(' ', '-')}`);
+                if (totalCell) {
+                    totalCell.textContent = total > 0 ? total : '-';
+                }
+            });
+
+            // Update day totals
+            for (let i = 0; i < 7; i++) {
+                let dayTotal = 0;
+                products.forEach(product => {
+                    const key = `${product}-${i}`;
+                    dayTotal += manualPlan[key] || 0;
+                });
+                const dayTotalCell = document.getElementById(`plan-day-total-${i}`);
+                if (dayTotalCell) {
+                    dayTotalCell.textContent = dayTotal > 0 ? dayTotal : '-';
+                }
+            }
+
+            // Update grand total
+            let grandTotal = 0;
+            Object.values(manualPlan).forEach(value => {
+                grandTotal += value;
+            });
+            const grandTotalCell = document.getElementById('plan-grand-total');
+            if (grandTotalCell) {
+                grandTotalCell.textContent = grandTotal > 0 ? grandTotal : '-';
+            }
+        }
+
+        function calculateAIForecast() {
+            // Calculate AI adjustments
+            aiAdjustedData = {};
+
+            products.forEach(product => {
+                aiAdjustedData[product] = [];
+
+                historicalData[product].forEach((baseValue, dayIndex) => {
+                    let adjustedValue = baseValue;
+
+                    // Check for shortage compensation
+                    const shortageKey = `${product}-${dayIndex}`;
+                    if (shortageMap[shortageKey]) {
+                        adjustedValue = alternativeData[product][dayIndex];
+                    }
+
+                    // Check for manual plan override
+                    if (manualPlan[shortageKey] && manualPlan[shortageKey] > 0) {
+                        adjustedValue = manualPlan[shortageKey];
+                    } else {
+                        // Apply weather adjustments
+                        const weather = weatherData[dayIndex];
+                        if (weather && weather.rain > 0) {
+                            if (product === 'Ražnjiči' || product === 'Krila') {
+                                adjustedValue *= 0.9;
+                            }
+                        }
+
+                        if (weather && weather.maxTemp > 25) {
+                            if (product === 'Ražnjiči') {
+                                adjustedValue *= 1.2;
+                            } else if (product === 'Krila') {
+                                adjustedValue *= 1.15;
+                            }
+                        }
+
+                        // Weekend boost
+                        if (dayIndex === 5) { // Saturday
+                            adjustedValue *= 1.4;
+                        } else if (dayIndex === 6) { // Sunday
+                            adjustedValue *= 1.25;
+                        }
+                    }
+
+                    aiAdjustedData[product].push(Math.round(adjustedValue));
+                });
+            });
+
+            // Add AI forecast rows to table
+            addAIForecastToTable();
+
+            // Show reasoning
+            displayAIReasoning();
+
+            // Update chart
+            updateChart();
+        }
+
+        function addAIForecastToTable() {
+            const placeholder = document.getElementById('ai-section-placeholder');
+            let html = '';
+
+            // Keep the header
+            html += '<td class="row-header section-header">🤖 AI NAPOVED</td>';
+            html += '<td colspan="8" class="section-header" style="text-align: center;">Optimizirana proizvodnja na osnovi AI analize</td>';
+
+            // Add AI forecast rows
+            products.forEach(product => {
+                html += '</tr><tr class="ai-row">';
+                html += `<td class="row-header product-header">${product}</td>`;
+
+                let total = 0;
+                aiAdjustedData[product].forEach((value, dayIndex) => {
+                    const baseValue = shortageMap[`${product}-${dayIndex}`]
+                        ? alternativeData[product][dayIndex]
+                        : historicalData[product][dayIndex];
+
+                    const change = ((value - baseValue) / baseValue * 100).toFixed(0);
+                    const changeClass = value > baseValue ? 'increase' : value < baseValue ? 'decrease' : '';
+
+                    total += value;
+                    html += `<td>
+                        ${value}
+                        ${Math.abs(change) > 5 ? `<br><span class="${changeClass}">(${change > 0 ? '+' : ''}${change}%)</span>` : ''}
+                    </td>`;
+                });
+
+                html += `<td class="total-row">${total}</td>`;
+            });
+
+            // AI totals
+            html += '</tr><tr class="total-row">';
+            html += '<td class="row-header">AI skupaj</td>';
+            let grandTotalAI = 0;
+            for (let i = 0; i < 7; i++) {
+                let dayTotal = 0;
+                products.forEach(product => {
+                    dayTotal += aiAdjustedData[product][i];
+                });
+                grandTotalAI += dayTotal;
+                html += `<td>${dayTotal}</td>`;
+            }
+            html += `<td class="grand-total">${grandTotalAI}</td>`;
+
+            placeholder.innerHTML = html;
+        }
+
+        function displayAIReasoning() {
+            const reasonings = [];
+
+            // Shortage handling
+            if (Object.keys(shortageMap).length > 0) {
+                reasonings.push({
+                    icon: '🔄',
+                    text: `Kompenzacija za ${Object.keys(shortageMap).length} dni s pomanjkanjem - uporaba alternativnih podatkov`
+                });
+            }
+
+            // Manual plan
+            if (Object.keys(manualPlan).length > 0) {
+                reasonings.push({
+                    icon: '📝',
+                    text: `Vključenih ${Object.keys(manualPlan).length} ročno načrtovanih vrednosti`
+                });
+            }
+
+            // Weather impact
+            const rainyDays = weatherData.filter(d => d.rain > 0).length;
+            if (rainyDays > 0) {
+                reasonings.push({
+                    icon: '🌧️',
+                    text: `Dež napovedan za ${rainyDays} dni - prilagoditev zunanjih produktov`
+                });
+            }
+
+            const hotDays = weatherData.filter(d => d.maxTemp > 25).length;
+            if (hotDays > 0) {
+                reasonings.push({
+                    icon: '☀️',
+                    text: `${hotDays} dni z visokimi temperaturami - povečanje žar produktov`
+                });
+            }
+
+            // Weekend
+            reasonings.push({
+                icon: '📅',
+                text: 'Vikend multiplikator: Sobota +40%, Nedelja +25%'
+            });
+
+            const section = document.getElementById('aiReasoning');
+            const list = document.getElementById('reasoningList');
+
+            let html = '';
+            reasonings.forEach(r => {
+                html += `
+                    <li class="reasoning-item">
+                        <span style="font-size: 1.5em;">${r.icon}</span>
+                        <span>${r.text}</span>
+                    </li>
+                `;
+            });
+
+            list.innerHTML = html;
+            section.style.display = 'block';
+        }
+
+        function initializeChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            comparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dayNames,
+                    datasets: []
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Količina (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart() {
+            const colors = {
+                'Bedra': '#ff6384',
+                'File prsi': '#36a2eb',
+                'Krila': '#ffcd56',
+                'Ražnjiči': '#4bc0c0'
+            };
+
+            const datasets = [];
+
+            // Add datasets for each product
+            products.forEach(product => {
+                // Historical data
+                datasets.push({
+                    label: `${product} (Lani)`,
+                    data: historicalData[product],
+                    borderColor: colors[product],
+                    backgroundColor: 'transparent',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    tension: 0.4
+                });
+
+                // AI forecast
+                datasets.push({
+                    label: `${product} (AI)`,
+                    data: aiAdjustedData[product],
+                    borderColor: colors[product],
+                    backgroundColor: colors[product] + '33',
+                    borderWidth: 3,
+                    tension: 0.4
+                });
+
+                // Manual plan (if exists)
+                const manualData = [];
+                for (let i = 0; i < 7; i++) {
+                    const key = `${product}-${i}`;
+                    if (manualPlan[key]) {
+                        manualData.push(manualPlan[key]);
+                    } else {
+                        manualData.push(null);
+                    }
+                }
+
+                if (manualData.some(v => v !== null)) {
+                    datasets.push({
+                        label: `${product} (Načrt)`,
+                        data: manualData,
+                        borderColor: colors[product],
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [10, 5],
+                        pointStyle: 'rect',
+                        tension: 0.4
+                    });
+                }
+            });
+
+            comparisonChart.data.datasets = datasets;
+            comparisonChart.update();
+        }
+
+        function clearAllShortages() {
+            shortageMap = {};
+            currentShortages = {};
+            manualPlan = {};
+            aiAdjustedData = {};
+            buildUnifiedTable();
+
+            // Reset chart
+            comparisonChart.data.datasets = [];
+            comparisonChart.update();
+
+            // Hide reasoning
+            document.getElementById('aiReasoning').style.display = 'none';
+        }
+
+        function markTestShortages() {
+            shortageMap = {
+                'Bedra-2': true,
+                'File prsi-4': true,
+                'Krila-5': true
+            };
+
+            // Refresh table
+            buildUnifiedTable();
+
+            // Apply shortage styling
+            Object.keys(shortageMap).forEach(key => {
+                const [product, dayIndex] = key.split('-');
+                const cellId = `hist-${product.replace(' ', '-')}-${dayIndex}`;
+                const cell = document.getElementById(cellId);
+                if (cell) {
+                    toggleShortage(product, parseInt(dayIndex), cellId);
+                }
+            });
+
+            // Add some test manual plans
+            manualPlan = {
+                'Bedra-0': 900,
+                'File prsi-1': 1300,
+                'Krila-3': 800,
+                'Ražnjiči-6': 700
+            };
+
+            // Update manual plan inputs
+            Object.keys(manualPlan).forEach(key => {
+                const [product, dayIndex] = key.split('-');
+                const inputId = `plan-${product.replace(' ', '-')}-${dayIndex}`;
+                const input = document.getElementById(inputId);
+                if (input) {
+                    input.value = manualPlan[key];
+                }
+            });
+
+            updateManualPlanTotals();
+        }
+
+        function exportData() {
+            alert('Izvoz podatkov bo kmalu na voljo!');
+        }
+    </script>
+</body>
+</html>
