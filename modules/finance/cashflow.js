@@ -47,6 +47,10 @@ const CashFlow = {
 
         // Load data
         this.loadCashFlowData();
+
+        // Calculate all formulas
+        this.recalculateFormulas();
+
         this.renderCashFlowGrid();
 
         this.initialized = true;
@@ -1037,8 +1041,11 @@ const CashFlow = {
             }
         });
 
-        // Recalculate totals
+        // Recalculate totals for this row
         this.recalculateTotals(rowType);
+
+        // Recalculate all formulas (disbursements, net CF, cash ending, etc.)
+        this.recalculateFormulas();
 
         // Mark as edited
         this.state.editedCells.add(cellId);
@@ -1088,8 +1095,11 @@ const CashFlow = {
             week.total = Object.values(week.days).reduce((sum, d) => sum + d.value, 0);
         });
 
-        // Recalculate totals
+        // Recalculate totals for this row
         this.recalculateTotals(rowType);
+
+        // Recalculate all formulas (disbursements, net CF, cash ending, etc.)
+        this.recalculateFormulas();
 
         // Mark as edited
         this.state.editedCells.add(`cell-${rowType}-${month}`);
@@ -1114,8 +1124,8 @@ const CashFlow = {
         });
     },
 
-    // Recalculate all derived values
-    recalculateAll() {
+    // Recalculate formulas (internal method without alert)
+    recalculateFormulas() {
         // For each period, calculate:
         // disbursements (parent) = nujni + pogojno nujni + nenujni
         // netCashFlow = receipts - disbursements
@@ -1131,7 +1141,10 @@ const CashFlow = {
         const cashBeginning = this.state.data.cashBeginning;
         const cashEnding = this.state.data.cashEnding;
 
-        let runningCash = cashBeginning.months[1].weeks[Object.keys(cashBeginning.months[1].weeks)[0]].days[1].value;
+        // Get initial cash beginning value (first day of year)
+        const firstWeekOfYear = Object.keys(cashBeginning.months[1].weeks)[0];
+        const firstDayOfYear = Object.keys(cashBeginning.months[1].weeks[firstWeekOfYear].days)[0];
+        let runningCash = cashBeginning.months[1].weeks[firstWeekOfYear].days[firstDayOfYear].value;
 
         for (let month = 1; month <= 12; month++) {
             const weeksInMonth = this.getCalendarWeeksInMonth(this.state.currentYear, month);
@@ -1148,10 +1161,16 @@ const CashFlow = {
                     // Update parent disbursements row
                     disbursements.months[month].weeks[weekNum].days[day].value = totalDisbursements;
 
+                    // Set cash beginning for this day
                     cashBeginning.months[month].weeks[weekNum].days[day].value = runningCash;
+
+                    // Calculate net cash flow
                     netCashFlow.months[month].weeks[weekNum].days[day].value = receipt - totalDisbursements;
+
+                    // Calculate cash ending
                     cashEnding.months[month].weeks[weekNum].days[day].value = runningCash + (receipt - totalDisbursements);
 
+                    // Cash ending becomes next day's cash beginning
                     runningCash = cashEnding.months[month].weeks[weekNum].days[day].value;
                 });
 
@@ -1176,11 +1195,14 @@ const CashFlow = {
                 this.recalculateTotals(type);
             });
         }
+    },
 
+    // Recalculate all derived values (user-triggered with alert)
+    recalculateAll() {
+        this.recalculateFormulas();
         this.state.unsavedChanges = true;
         this.updateSaveButton();
         this.renderCashFlowGrid();
-
         alert('🔄 Vsi izračuni denarnega toka posodobljeni!');
     },
 
@@ -1244,6 +1266,9 @@ const CashFlow = {
 
             // Regenerate default data
             this.state.data = this.generateCashFlowData();
+
+            // Recalculate all formulas
+            this.recalculateFormulas();
 
             this.renderCashFlowGrid();
         }
