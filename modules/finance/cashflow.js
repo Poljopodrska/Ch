@@ -13,7 +13,8 @@ const CashFlow = {
         // Expansion state for drill-down
         expanded: {
             months: new Set(),  // Which months are expanded to show weeks
-            weeks: new Set()    // Which weeks are expanded to show days
+            weeks: new Set(),   // Which weeks are expanded to show days
+            rows: new Set()     // Which rows are expanded (e.g., 'disbursements')
         },
 
         // Data structure
@@ -78,6 +79,7 @@ const CashFlow = {
         return {
             cashBeginning: this.generateRowData('cashBeginning', year),
             receipts: this.generateRowData('receipts', year),
+            disbursements: this.generateRowData('disbursements', year),
             disbursementsNujni: this.generateRowData('disbursementsNujni', year),
             disbursementsPogojnoNujni: this.generateRowData('disbursementsPogojnoNujni', year),
             disbursementsNenujni: this.generateRowData('disbursementsNenujni', year),
@@ -170,6 +172,10 @@ const CashFlow = {
                 const seasonalReceiptFactor = 1 + 0.15 * Math.sin((month - 1) * Math.PI / 6);
                 return Math.round(baseReceipts * receiptFactor * seasonalReceiptFactor * (0.9 + Math.random() * 0.2));
 
+            case 'disbursements':
+                // Parent disbursements - sum of all categories (will be calculated)
+                return 0;
+
             case 'disbursementsNujni':
                 // Essential disbursements - consistent every day
                 const nujniFactor = isWeekend ? 0.5 : 1.0;
@@ -203,6 +209,7 @@ const CashFlow = {
         const labels = {
             'cashBeginning': 'Začetno stanje',
             'receipts': 'Prejemki',
+            'disbursements': 'Izplačila',
             'disbursementsNujni': 'Izplačila - Nujni',
             'disbursementsPogojnoNujni': 'Izplačila - Pogojno nujni',
             'disbursementsNenujni': 'Izplačila - Nenujni',
@@ -214,8 +221,8 @@ const CashFlow = {
 
     // Check if row is editable
     isRowEditable(rowType) {
-        // Receipts and all disbursement categories are directly editable
-        // Others are calculated
+        // Receipts and all disbursement sub-categories are directly editable
+        // Parent disbursements and others are calculated
         return rowType === 'receipts' ||
                rowType === 'disbursementsNujni' ||
                rowType === 'disbursementsPogojnoNujni' ||
@@ -426,11 +433,26 @@ const CashFlow = {
                 /* Row type specific styling */
                 .row-cashBeginning { background: #e3f2fd; }
                 .row-receipts { background: #e8f5e9; }
+                .row-disbursements { background: #ffe0e0; }
                 .row-disbursementsNujni { background: #ffebee; }
                 .row-disbursementsPogojnoNujni { background: #fff3e0; }
                 .row-disbursementsNenujni { background: #fce4ec; }
                 .row-netCashFlow { background: #f3e5f5; }
                 .row-cashEnding { background: #e0f2f1; }
+
+                /* Expandable row styling */
+                .row-expandable {
+                    cursor: pointer;
+                    font-weight: 700;
+                }
+
+                .row-expandable:hover {
+                    background: #ffd0d0 !important;
+                }
+
+                .row-child {
+                    padding-left: 20px !important;
+                }
 
                 /* Cell styling based on data */
                 .cell-past {
@@ -550,12 +572,13 @@ const CashFlow = {
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>💰 <strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>
                         <li>📈 <strong>Prejemki:</strong> Prilivi gotovine iz prodaje in drugih virov (urejanje)</li>
-                        <li>🔴 <strong>Izplačila - Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
-                        <li>🟠 <strong>Izplačila - Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
-                        <li>🟡 <strong>Izplačila - Nenujni:</strong> Nenujni izdatki (urejanje)</li>
+                        <li>📉 <strong>Izplačila:</strong> Skupna izplačila (klikni za razširitev na kategorije)</li>
+                        <li style="margin-left: 20px;">🔴 <strong>Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
+                        <li style="margin-left: 20px;">🟠 <strong>Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
+                        <li style="margin-left: 20px;">🟡 <strong>Nenujni:</strong> Nenujni izdatki (urejanje)</li>
                         <li>💸 <strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
                         <li>💵 <strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
-                        <li>📅 <strong>Razširljivo:</strong> Klikni mesece → tedne → dneve za podroben pogled</li>
+                        <li>📅 <strong>Razširljivo:</strong> Klikni mesece → tedne → dneve in vrstice za podroben pogled</li>
                     </ul>
                 </div>
             </div>
@@ -698,24 +721,41 @@ const CashFlow = {
         const rows = [
             'cashBeginning',
             'receipts',
-            'disbursementsNujni',
-            'disbursementsPogojnoNujni',
-            'disbursementsNenujni',
+            'disbursements', // Parent row
             'netCashFlow',
             'cashEnding'
+        ];
+
+        const disbursementChildren = [
+            'disbursementsNujni',
+            'disbursementsPogojnoNujni',
+            'disbursementsNenujni'
         ];
 
         rows.forEach((rowType) => {
             const rowData = this.state.data[rowType];
 
-            html += `<tr class="row-${rowType}">`;
+            // Check if this is an expandable row
+            const isExpandable = rowType === 'disbursements';
+            const isExpanded = this.state.expanded.rows.has('disbursements');
+
+            html += `<tr class="row-${rowType} ${isExpandable ? 'row-expandable' : ''}">`;
 
             // Row type cell
-            html += `
-                <td class="row-type-cell">
-                    ${this.getRowShortLabel(rowType)}
-                </td>
-            `;
+            if (isExpandable) {
+                html += `
+                    <td class="row-type-cell" onclick="CashFlow.toggleRow('disbursements')">
+                        <span class="expand-icon ${isExpanded ? 'expanded' : ''}">▶</span>
+                        ${this.getRowShortLabel(rowType)}
+                    </td>
+                `;
+            } else {
+                html += `
+                    <td class="row-type-cell">
+                        ${this.getRowShortLabel(rowType)}
+                    </td>
+                `;
+            }
 
             // Data cells based on expansion state
             html += this.renderDataCells(rowType);
@@ -728,6 +768,34 @@ const CashFlow = {
             `;
 
             html += '</tr>';
+
+            // If disbursements is expanded, show child rows
+            if (isExpandable && isExpanded) {
+                disbursementChildren.forEach((childType) => {
+                    const childData = this.state.data[childType];
+
+                    html += `<tr class="row-${childType} row-child">`;
+
+                    // Row type cell with indentation
+                    html += `
+                        <td class="row-type-cell row-child">
+                            ${this.getRowShortLabel(childType)}
+                        </td>
+                    `;
+
+                    // Data cells
+                    html += this.renderDataCells(childType);
+
+                    // Total cell
+                    html += `
+                        <td class="cell-total ${this.getCellValueClass(childType, childData.total)}">
+                            ${this.formatCurrency(childData.total)}
+                        </td>
+                    `;
+
+                    html += '</tr>';
+                });
+            }
         });
 
         return html;
@@ -738,9 +806,10 @@ const CashFlow = {
         const labels = {
             'cashBeginning': '💰 Začetno stanje',
             'receipts': '📈 Prejemki',
-            'disbursementsNujni': '🔴 Izplačila - Nujni',
-            'disbursementsPogojnoNujni': '🟠 Izplačila - Pogojno nujni',
-            'disbursementsNenujni': '🟡 Izplačila - Nenujni',
+            'disbursements': '📉 Izplačila',
+            'disbursementsNujni': '🔴 Nujni',
+            'disbursementsPogojnoNujni': '🟠 Pogojno nujni',
+            'disbursementsNenujni': '🟡 Nenujni',
             'netCashFlow': '💸 Neto denarni tok',
             'cashEnding': '💵 Končno stanje'
         };
@@ -846,7 +915,7 @@ const CashFlow = {
 
     // Get value class for positive/negative
     getCellValueClass(rowType, value) {
-        if (rowType.includes('disbursements')) {
+        if (rowType === 'disbursements' || rowType.includes('disbursements')) {
             return value > 0 ? 'cell-negative' : '';
         }
         if (rowType === 'netCashFlow') {
@@ -878,6 +947,16 @@ const CashFlow = {
             this.state.expanded.weeks.delete(weekKey);
         } else {
             this.state.expanded.weeks.add(weekKey);
+        }
+        this.renderCashFlowGrid();
+    },
+
+    // Toggle row expansion
+    toggleRow(rowKey) {
+        if (this.state.expanded.rows.has(rowKey)) {
+            this.state.expanded.rows.delete(rowKey);
+        } else {
+            this.state.expanded.rows.add(rowKey);
         }
         this.renderCashFlowGrid();
     },
@@ -1038,11 +1117,13 @@ const CashFlow = {
     // Recalculate all derived values
     recalculateAll() {
         // For each period, calculate:
-        // netCashFlow = receipts - (nujni + pogojno nujni + nenujni)
+        // disbursements (parent) = nujni + pogojno nujni + nenujni
+        // netCashFlow = receipts - disbursements
         // cashEnding = cashBeginning + netCashFlow
         // next period's cashBeginning = previous period's cashEnding
 
         const receipts = this.state.data.receipts;
+        const disbursements = this.state.data.disbursements;
         const disbursementsNujni = this.state.data.disbursementsNujni;
         const disbursementsPogojnoNujni = this.state.data.disbursementsPogojnoNujni;
         const disbursementsNenujni = this.state.data.disbursementsNenujni;
@@ -1064,6 +1145,9 @@ const CashFlow = {
 
                     const totalDisbursements = disbursementNujni + disbursementPogojnoNujni + disbursementNenujni;
 
+                    // Update parent disbursements row
+                    disbursements.months[month].weeks[weekNum].days[day].value = totalDisbursements;
+
                     cashBeginning.months[month].weeks[weekNum].days[day].value = runningCash;
                     netCashFlow.months[month].weeks[weekNum].days[day].value = receipt - totalDisbursements;
                     cashEnding.months[month].weeks[weekNum].days[day].value = runningCash + (receipt - totalDisbursements);
@@ -1072,7 +1156,7 @@ const CashFlow = {
                 });
 
                 // Recalculate week totals
-                ['cashBeginning', 'netCashFlow', 'cashEnding'].forEach(type => {
+                ['cashBeginning', 'disbursements', 'netCashFlow', 'cashEnding'].forEach(type => {
                     const weekData = this.state.data[type].months[month].weeks[weekNum];
                     weekData.total = Object.values(weekData.days).reduce((sum, d) => sum + d.value, 0);
                 });
@@ -1082,6 +1166,7 @@ const CashFlow = {
             [
                 'cashBeginning',
                 'receipts',
+                'disbursements',
                 'disbursementsNujni',
                 'disbursementsPogojnoNujni',
                 'disbursementsNenujni',
