@@ -597,8 +597,22 @@ const CashFlow = {
             if (isExpanded) {
                 // Show weeks for this month
                 const weeksInMonth = this.getCalendarWeeksInMonth(this.state.currentYear, month);
+
+                // Calculate correct colspan: sum of (days in expanded weeks + 1 for non-expanded weeks)
+                let monthColspan = 0;
+                weeksInMonth.forEach(weekNum => {
+                    const weekKey = `week-${month}-${weekNum}`;
+                    const weekExpanded = this.state.expanded.weeks.has(weekKey);
+                    if (weekExpanded) {
+                        const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
+                        monthColspan += daysInWeek.length;
+                    } else {
+                        monthColspan += 1;
+                    }
+                });
+
                 monthHeaders += `
-                    <th class="month-header" colspan="${weeksInMonth.length}"
+                    <th class="month-header" colspan="${monthColspan}"
                         onclick="CashFlow.toggleMonth('${monthKey}')">
                         <span class="expand-icon expanded">▶</span>
                         ${this.getMonthShort(month)}
