@@ -1,0 +1,1197 @@
+// Ch Cash Flow Module - Expandable time-based cash flow planning
+// Uses same expandable hierarchy as Production Planning: months → weeks → days
+
+const CashFlow = {
+    VERSION: '1.0.0',
+
+    state: {
+        currentYear: new Date().getFullYear(),
+        currentMonth: new Date().getMonth() + 1,
+        currentDay: new Date().getDate(),
+        today: new Date(),
+
+        // Expansion state for drill-down
+        expanded: {
+            months: new Set(),  // Which months are expanded to show weeks
+            weeks: new Set()    // Which weeks are expanded to show days
+        },
+
+        // Data structure
+        data: {},
+        editedCells: new Set(),
+        unsavedChanges: false
+    },
+
+    // Initialize the module
+    init() {
+        console.log(`Cash Flow Module V${this.VERSION} initializing...`);
+
+        // Reset state for re-initialization
+        if (this.initialized) {
+            console.log('Cash Flow re-initializing, resetting state...');
+            this.initialized = false;
+            this.state.expanded.months.clear();
+            this.state.expanded.weeks.clear();
+            this.state.editedCells.clear();
+        }
+
+        const container = document.getElementById('cashflow-container');
+        if (!container) {
+            console.error('ERROR: cashflow-container not found!');
+            return;
+        }
+
+        // Clear any existing content
+        container.innerHTML = '';
+
+        // Load data
+        this.loadCashFlowData();
+        this.renderCashFlowGrid();
+
+        this.initialized = true;
+        console.log('Cash Flow Module initialized');
+    },
+
+    initialized: false,
+
+    // Load cash flow data
+    loadCashFlowData() {
+        // Load saved data from localStorage if available
+        const savedData = localStorage.getItem('cashFlowData');
+        const savedEditedCells = localStorage.getItem('cashFlowEditedCells');
+
+        if (savedData) {
+            this.state.data = JSON.parse(savedData);
+            if (savedEditedCells) {
+                this.state.editedCells = new Set(JSON.parse(savedEditedCells));
+            }
+        } else {
+            // Generate default data
+            this.state.data = this.generateCashFlowData();
+        }
+    },
+
+    // Generate cash flow data
+    generateCashFlowData() {
+        const year = this.state.currentYear;
+
+        return {
+            cashBeginning: this.generateRowData('cashBeginning', year),
+            receipts: this.generateRowData('receipts', year),
+            disbursements: this.generateRowData('disbursements', year),
+            netCashFlow: this.generateRowData('netCashFlow', year),
+            cashEnding: this.generateRowData('cashEnding', year)
+        };
+    },
+
+    // Generate data for a single row
+    generateRowData(rowType, year) {
+        const rowData = {
+            label: this.getRowLabel(rowType),
+            type: rowType,
+            total: 0,
+            editable: this.isRowEditable(rowType),
+            months: {}
+        };
+
+        // Generate monthly data
+        for (let month = 1; month <= 12; month++) {
+            const monthData = {
+                label: this.getMonthName(month),
+                shortLabel: this.getMonthShort(month),
+                total: 0,
+                editable: this.isMonthEditable(rowType, month),
+                weeks: {}
+            };
+
+            // Generate weekly data
+            const weeksInMonth = this.getCalendarWeeksInMonth(year, month);
+            weeksInMonth.forEach(weekNum => {
+                const weekData = {
+                    label: `KW${weekNum}`,
+                    total: 0,
+                    editable: this.isMonthEditable(rowType, month),
+                    days: {}
+                };
+
+                // Generate daily data
+                const daysInWeek = this.getDaysOfWeekInMonth(year, month, weekNum);
+                daysInWeek.forEach(day => {
+                    const value = this.generateDailyValue(rowType, year, month, day);
+                    const editable = this.isDayEditable(rowType, month, day);
+
+                    weekData.days[day] = {
+                        label: day.toString(),
+                        dayName: this.getDayShort(new Date(year, month - 1, day).getDay()),
+                        value: value,
+                        editable: editable,
+                        originalValue: value
+                    };
+
+                    weekData.total += value;
+                });
+
+                monthData.weeks[weekNum] = weekData;
+                monthData.total += weekData.total;
+            });
+
+            rowData.months[month] = monthData;
+            rowData.total += monthData.total;
+        }
+
+        return rowData;
+    },
+
+    // Generate daily values based on row type
+    generateDailyValue(rowType, year, month, day) {
+        const dayOfWeek = new Date(year, month - 1, day).getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isPast = new Date(year, month - 1, day) < new Date(this.state.today.getFullYear(), this.state.today.getMonth(), this.state.today.getDate());
+
+        // Base values for cash flow
+        const baseReceipts = 25000;
+        const baseDisbursements = 20000;
+
+        switch(rowType) {
+            case 'cashBeginning':
+                // Beginning cash - calculated from previous period
+                if (month === 1 && day === 1) {
+                    return 150000; // Starting balance for the year
+                }
+                return 0; // Will be calculated
+
+            case 'receipts':
+                // Cash receipts are lower on weekends
+                const receiptFactor = isWeekend ? 0.2 : 1.0;
+                const seasonalReceiptFactor = 1 + 0.15 * Math.sin((month - 1) * Math.PI / 6);
+                return Math.round(baseReceipts * receiptFactor * seasonalReceiptFactor * (0.9 + Math.random() * 0.2));
+
+            case 'disbursements':
+                // Cash disbursements are consistent on workdays
+                const disbursementFactor = isWeekend ? 0.1 : 1.0;
+                return Math.round(baseDisbursements * disbursementFactor * (0.9 + Math.random() * 0.2));
+
+            case 'netCashFlow':
+                // Calculated: receipts - disbursements
+                return 0; // Will be calculated
+
+            case 'cashEnding':
+                // Calculated: beginning + net cash flow
+                return 0; // Will be calculated
+
+            default:
+                return 0;
+        }
+    },
+
+    // Get row label
+    getRowLabel(rowType) {
+        const labels = {
+            'cashBeginning': 'Cash Beginning / Začetno stanje',
+            'receipts': 'Receipts / Prejemki',
+            'disbursements': 'Disbursements / Izplačila',
+            'netCashFlow': 'Net Cash Flow / Neto CF',
+            'cashEnding': 'Cash Ending / Končno stanje'
+        };
+        return labels[rowType] || rowType;
+    },
+
+    // Check if row is editable
+    isRowEditable(rowType) {
+        // Only receipts and disbursements are directly editable
+        // Others are calculated
+        return rowType === 'receipts' || rowType === 'disbursements';
+    },
+
+    // Check if month is editable
+    isMonthEditable(rowType, month) {
+        if (!this.isRowEditable(rowType)) return false;
+
+        // Can't edit past months
+        const today = this.state.today;
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth() + 1;
+
+        if (this.state.currentYear === currentYear) {
+            return month >= currentMonth;
+        }
+        return true;
+    },
+
+    // Check if day is editable
+    isDayEditable(rowType, month, day) {
+        if (!this.isRowEditable(rowType)) return false;
+
+        // Can't edit past days
+        const today = this.state.today;
+        const dateToCheck = new Date(this.state.currentYear, month - 1, day);
+        const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        return dateToCheck >= todayMidnight;
+    },
+
+    // Render the cash flow grid
+    renderCashFlowGrid() {
+        const container = document.getElementById('cashflow-container');
+        if (!container) return;
+
+        let html = `
+            <style>
+                .cashflow-container {
+                    padding: 20px;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                }
+
+                .cashflow-header {
+                    margin-bottom: 20px;
+                    padding: 15px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 8px;
+                }
+
+                .cashflow-controls {
+                    margin: 20px 0;
+                    display: flex;
+                    gap: 10px;
+                    align-items: center;
+                    flex-wrap: wrap;
+                }
+
+                .save-button {
+                    padding: 10px 20px;
+                    background: #4CAF50;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+
+                .save-button:hover {
+                    background: #45a049;
+                }
+
+                .save-button:disabled {
+                    background: #cccccc;
+                    cursor: not-allowed;
+                }
+
+                .calculate-button {
+                    padding: 10px 20px;
+                    background: #ff9800;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+
+                .export-button {
+                    padding: 10px 20px;
+                    background: #2196F3;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+
+                .unsaved-indicator {
+                    padding: 5px 10px;
+                    background: #ff9800;
+                    color: white;
+                    border-radius: 3px;
+                    font-size: 12px;
+                    display: none;
+                }
+
+                .unsaved-indicator.show {
+                    display: inline-block;
+                }
+
+                .cashflow-table-wrapper {
+                    background: white;
+                    border-radius: 8px;
+                    overflow-x: auto;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                }
+
+                .cashflow-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    min-width: 1400px;
+                }
+
+                .cashflow-table th {
+                    background: #667eea;
+                    color: white;
+                    padding: 8px 4px;
+                    text-align: center;
+                    font-weight: 600;
+                    border: 1px solid #5568d3;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                    font-size: 12px;
+                }
+
+                .cashflow-table th.row-type-header {
+                    text-align: left;
+                    min-width: 200px;
+                    background: #5568d3;
+                    padding: 8px;
+                }
+
+                /* Month headers with expand/collapse */
+                .month-header {
+                    background: #667eea !important;
+                    cursor: pointer;
+                    user-select: none;
+                    position: relative;
+                }
+
+                .month-header:hover {
+                    background: #5568d3 !important;
+                }
+
+                .week-header {
+                    background: #8b9dea !important;
+                    font-size: 11px;
+                    cursor: pointer;
+                }
+
+                .week-header:hover {
+                    background: #7688e8 !important;
+                }
+
+                .day-header {
+                    background: #abb7f0 !important;
+                    font-size: 10px;
+                }
+
+                .expand-icon {
+                    display: inline-block;
+                    width: 12px;
+                    font-size: 10px;
+                    margin-right: 2px;
+                    transition: transform 0.3s;
+                }
+
+                .expand-icon.expanded {
+                    transform: rotate(90deg);
+                }
+
+                .cashflow-table td {
+                    padding: 6px 4px;
+                    border: 1px solid #ddd;
+                    text-align: center;
+                    min-width: 50px;
+                    font-size: 12px;
+                    position: relative;
+                }
+
+                .row-type-cell {
+                    text-align: left !important;
+                    background: #f0f0f0;
+                    position: sticky;
+                    left: 0;
+                    z-index: 4;
+                    padding: 6px !important;
+                    min-width: 200px;
+                    border-right: 2px solid #666;
+                    font-size: 11px;
+                    font-weight: 600;
+                }
+
+                /* Row type specific styling */
+                .row-cashBeginning { background: #e3f2fd; }
+                .row-receipts { background: #e8f5e9; }
+                .row-disbursements { background: #ffebee; }
+                .row-netCashFlow { background: #fff3e0; }
+                .row-cashEnding { background: #f3e5f5; }
+
+                /* Cell styling based on data */
+                .cell-past {
+                    background: #fafafa;
+                    color: #7f8c8d;
+                }
+
+                .cell-current {
+                    background: #fff3e0;
+                    color: #e65100;
+                    font-weight: bold;
+                    border: 2px solid #ff9800;
+                }
+
+                .cell-future {
+                    background: #e3f2fd;
+                    color: #1565c0;
+                }
+
+                .cell-total {
+                    background: #fff8e1;
+                    font-weight: bold;
+                    border-left: 2px solid #666;
+                }
+
+                /* Editable cells */
+                .editable-cell {
+                    cursor: pointer;
+                    position: relative;
+                }
+
+                .editable-cell:hover {
+                    background: #bbdefb !important;
+                    box-shadow: inset 0 0 0 2px #2196f3;
+                }
+
+                .editable-cell.editing {
+                    padding: 0 !important;
+                }
+
+                .cell-input {
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    background: white;
+                    text-align: center;
+                    font-size: 11px;
+                    padding: 6px 4px;
+                    box-shadow: inset 0 0 0 2px #4CAF50;
+                }
+
+                .cell-input:focus {
+                    outline: none;
+                }
+
+                .edited-cell {
+                    background: #c8e6c9 !important;
+                    font-weight: bold;
+                }
+
+                .edited-cell::after {
+                    content: '*';
+                    color: #4CAF50;
+                    font-weight: bold;
+                    position: absolute;
+                    top: 1px;
+                    right: 2px;
+                    font-size: 10px;
+                }
+
+                /* Positive/Negative values */
+                .cell-positive {
+                    color: #2e7d32;
+                }
+
+                .cell-negative {
+                    color: #c62828;
+                }
+
+                .weekend-cell {
+                    background: #fafafa !important;
+                }
+            </style>
+
+            <div class="cashflow-container">
+                <div class="cashflow-header">
+                    <h2>💸 Cash Flow Planning</h2>
+                    <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
+                        V1.0.0 - Expandable Time-based Cash Flow | Click months → weeks → days
+                    </div>
+                </div>
+
+                <div class="cashflow-controls">
+                    <button class="save-button" onclick="CashFlow.saveData()" id="cf-save-btn" disabled>
+                        💾 Save Cash Flow
+                    </button>
+                    <button class="calculate-button" onclick="CashFlow.recalculateAll()">
+                        🔄 Recalculate All
+                    </button>
+                    <button class="export-button" onclick="CashFlow.exportData()">
+                        📁 Export Data
+                    </button>
+                    <button onclick="CashFlow.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                        🔄 Reset
+                    </button>
+                    <span class="unsaved-indicator" id="cf-unsaved-indicator">
+                        Unsaved changes
+                    </span>
+                </div>
+
+                <div class="cashflow-table-wrapper">
+                    ${this.renderTable()}
+                </div>
+
+                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                    <h4>💸 Cash Flow Planning:</h4>
+                    <ul style="margin: 10px 0; line-height: 1.6;">
+                        <li>💰 <strong>Cash Beginning:</strong> Starting cash for the period (auto-calculated)</li>
+                        <li>📈 <strong>Receipts:</strong> Cash inflows from sales and other sources (editable)</li>
+                        <li>📉 <strong>Disbursements:</strong> Cash outflows for expenses and payments (editable)</li>
+                        <li>💸 <strong>Net Cash Flow:</strong> Receipts - Disbursements (auto-calculated)</li>
+                        <li>💵 <strong>Cash Ending:</strong> Cash Beginning + Net Cash Flow (auto-calculated)</li>
+                        <li>📅 <strong>Expandable:</strong> Click months → weeks → days for detailed view</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        container.innerHTML = html;
+
+        // Set up event handlers
+        setTimeout(() => {
+            this.setupEventHandlers();
+        }, 100);
+    },
+
+    // Render the table
+    renderTable() {
+        const headers = this.renderHeaders();
+        const rows = this.renderAllRows();
+
+        return `
+            <table class="cashflow-table">
+                ${headers}
+                <tbody>
+                    ${rows}
+                </tbody>
+            </table>
+        `;
+    },
+
+    // Render headers with expandable months/weeks
+    renderHeaders() {
+        let monthHeaders = '<tr><th class="row-type-header" rowspan="2">Cash Flow Item</th>';
+        let subHeaders = '<tr>';
+
+        // Build month headers with potential expansion
+        for (let month = 1; month <= 12; month++) {
+            const monthKey = `month-${month}`;
+            const isExpanded = this.state.expanded.months.has(monthKey);
+
+            if (isExpanded) {
+                // Show weeks for this month
+                const weeksInMonth = this.getCalendarWeeksInMonth(this.state.currentYear, month);
+                monthHeaders += `
+                    <th class="month-header" colspan="${weeksInMonth.length}"
+                        onclick="CashFlow.toggleMonth('${monthKey}')">
+                        <span class="expand-icon expanded">▶</span>
+                        ${this.getMonthShort(month)}
+                    </th>
+                `;
+
+                // Add week sub-headers
+                weeksInMonth.forEach(weekNum => {
+                    const weekKey = `week-${month}-${weekNum}`;
+                    const weekExpanded = this.state.expanded.weeks.has(weekKey);
+
+                    if (weekExpanded) {
+                        // Show days for this week
+                        const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
+                        subHeaders += `
+                            <th class="week-header" colspan="${daysInWeek.length}"
+                                onclick="CashFlow.toggleWeek('${weekKey}')">
+                                <span class="expand-icon expanded">▶</span>KW${weekNum}
+                            </th>
+                        `;
+                    } else {
+                        subHeaders += `
+                            <th class="week-header"
+                                onclick="CashFlow.toggleWeek('${weekKey}')">
+                                <span class="expand-icon">▶</span>KW${weekNum}
+                            </th>
+                        `;
+                    }
+                });
+            } else {
+                monthHeaders += `
+                    <th class="month-header"
+                        onclick="CashFlow.toggleMonth('${monthKey}')">
+                        <span class="expand-icon">▶</span>
+                        ${this.getMonthShort(month)}
+                    </th>
+                `;
+                subHeaders += '<th>-</th>';
+            }
+        }
+
+        monthHeaders += '<th rowspan="2">Total</th></tr>';
+        subHeaders += '</tr>';
+
+        // Add day headers if any week is expanded
+        let dayHeaders = '';
+        if ([...this.state.expanded.weeks].length > 0) {
+            dayHeaders = '<tr><th></th>';
+
+            for (let month = 1; month <= 12; month++) {
+                const monthKey = `month-${month}`;
+                if (this.state.expanded.months.has(monthKey)) {
+                    const weeksInMonth = this.getCalendarWeeksInMonth(this.state.currentYear, month);
+                    weeksInMonth.forEach(weekNum => {
+                        const weekKey = `week-${month}-${weekNum}`;
+                        if (this.state.expanded.weeks.has(weekKey)) {
+                            const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
+                            daysInWeek.forEach(day => {
+                                const date = new Date(this.state.currentYear, month - 1, day);
+                                const dayName = this.getDayShort(date.getDay());
+                                const weekendClass = this.isWeekend(date) ? 'weekend' : '';
+                                dayHeaders += `<th class="day-header ${weekendClass}">${day}<br>${dayName}</th>`;
+                            });
+                        } else {
+                            dayHeaders += '<th>-</th>';
+                        }
+                    });
+                } else {
+                    dayHeaders += '<th>-</th>';
+                }
+            }
+
+            dayHeaders += '<th>-</th></tr>';
+        }
+
+        return '<thead>' + monthHeaders + subHeaders + dayHeaders + '</thead>';
+    },
+
+    // Render all rows
+    renderAllRows() {
+        let html = '';
+
+        const rows = ['cashBeginning', 'receipts', 'disbursements', 'netCashFlow', 'cashEnding'];
+
+        rows.forEach((rowType) => {
+            const rowData = this.state.data[rowType];
+
+            html += `<tr class="row-${rowType}">`;
+
+            // Row type cell
+            html += `
+                <td class="row-type-cell">
+                    ${this.getRowShortLabel(rowType)}
+                </td>
+            `;
+
+            // Data cells based on expansion state
+            html += this.renderDataCells(rowType);
+
+            // Total cell
+            html += `
+                <td class="cell-total ${this.getCellValueClass(rowType, rowData.total)}">
+                    ${this.formatCurrency(rowData.total)}
+                </td>
+            `;
+
+            html += '</tr>';
+        });
+
+        return html;
+    },
+
+    // Get short row label
+    getRowShortLabel(rowType) {
+        const labels = {
+            'cashBeginning': '💰 Cash Beginning',
+            'receipts': '📈 Receipts',
+            'disbursements': '📉 Disbursements',
+            'netCashFlow': '💸 Net Cash Flow',
+            'cashEnding': '💵 Cash Ending'
+        };
+        return labels[rowType] || rowType;
+    },
+
+    // Render data cells based on expansion state
+    renderDataCells(rowType) {
+        let html = '';
+        const rowData = this.state.data[rowType];
+
+        for (let month = 1; month <= 12; month++) {
+            const monthKey = `month-${month}`;
+            const monthData = rowData.months[month];
+
+            if (this.state.expanded.months.has(monthKey)) {
+                // Month is expanded - show weeks
+                const weeksInMonth = Object.keys(monthData.weeks);
+                weeksInMonth.forEach(weekNum => {
+                    const weekKey = `week-${month}-${weekNum}`;
+                    const weekData = monthData.weeks[weekNum];
+
+                    if (this.state.expanded.weeks.has(weekKey)) {
+                        // Week is expanded - show days
+                        Object.keys(weekData.days).forEach(day => {
+                            const dayData = weekData.days[day];
+                            const date = new Date(this.state.currentYear, month - 1, day);
+                            const weekendClass = this.isWeekend(date) ? 'weekend-cell' : '';
+                            const cellClass = this.getCellClass(rowType, month, day);
+                            const valueClass = this.getCellValueClass(rowType, dayData.value);
+                            const cellId = `cell-${rowType}-${month}-${day}`;
+                            const isEdited = this.state.editedCells.has(cellId);
+                            const editedClass = isEdited ? 'edited-cell' : '';
+                            const editableClass = dayData.editable ? 'editable-cell' : '';
+
+                            if (dayData.editable) {
+                                html += `
+                                    <td class="${cellClass} ${editableClass} ${editedClass} ${weekendClass} ${valueClass}"
+                                        data-cell-id="${cellId}"
+                                        data-row-type="${rowType}"
+                                        data-month="${month}"
+                                        data-day="${day}"
+                                        data-editable="true"
+                                        onclick="CashFlow.startEditing(this)">
+                                        ${this.formatCurrency(dayData.value)}
+                                    </td>
+                                `;
+                            } else {
+                                html += `<td class="${cellClass} ${weekendClass} ${valueClass}">${this.formatCurrency(dayData.value)}</td>`;
+                            }
+                        });
+                    } else {
+                        // Week not expanded - show week total
+                        const cellClass = this.getCellClass(rowType, month);
+                        const valueClass = this.getCellValueClass(rowType, weekData.total);
+                        html += `<td class="${cellClass} ${valueClass}">${this.formatCurrency(weekData.total)}</td>`;
+                    }
+                });
+            } else {
+                // Month not expanded - show month total
+                const cellClass = this.getCellClass(rowType, month);
+                const valueClass = this.getCellValueClass(rowType, monthData.total);
+                const cellId = `cell-${rowType}-${month}`;
+                const isEdited = this.state.editedCells.has(cellId);
+                const editedClass = isEdited ? 'edited-cell' : '';
+                const editableClass = monthData.editable ? 'editable-cell' : '';
+
+                if (monthData.editable) {
+                    html += `
+                        <td class="${cellClass} ${editableClass} ${editedClass} ${valueClass}"
+                            data-cell-id="${cellId}"
+                            data-row-type="${rowType}"
+                            data-month="${month}"
+                            data-editable="true"
+                            onclick="CashFlow.startEditingMonth(this)">
+                            ${this.formatCurrency(monthData.total)}
+                        </td>
+                    `;
+                } else {
+                    html += `<td class="${cellClass} ${valueClass}">${this.formatCurrency(monthData.total)}</td>`;
+                }
+            }
+        }
+
+        return html;
+    },
+
+    // Get cell class based on row type and date
+    getCellClass(rowType, month, day) {
+        // Check if past, current, or future
+        const today = this.state.today;
+        const dateToCheck = day ?
+            new Date(this.state.currentYear, month - 1, day) :
+            new Date(this.state.currentYear, month - 1, 15);
+
+        const isPast = dateToCheck < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const isCurrent = dateToCheck.toDateString() === today.toDateString();
+
+        if (isCurrent) return 'cell-current';
+        if (isPast) return 'cell-past';
+        return 'cell-future';
+    },
+
+    // Get value class for positive/negative
+    getCellValueClass(rowType, value) {
+        if (rowType === 'disbursements') {
+            return value > 0 ? 'cell-negative' : '';
+        }
+        if (rowType === 'netCashFlow') {
+            return value >= 0 ? 'cell-positive' : 'cell-negative';
+        }
+        return '';
+    },
+
+    // Toggle month expansion
+    toggleMonth(monthKey) {
+        if (this.state.expanded.months.has(monthKey)) {
+            this.state.expanded.months.delete(monthKey);
+            // Also collapse all weeks in this month
+            const month = parseInt(monthKey.split('-')[1]);
+            [...this.state.expanded.weeks].forEach(weekKey => {
+                if (weekKey.startsWith(`week-${month}-`)) {
+                    this.state.expanded.weeks.delete(weekKey);
+                }
+            });
+        } else {
+            this.state.expanded.months.add(monthKey);
+        }
+        this.renderCashFlowGrid();
+    },
+
+    // Toggle week expansion
+    toggleWeek(weekKey) {
+        if (this.state.expanded.weeks.has(weekKey)) {
+            this.state.expanded.weeks.delete(weekKey);
+        } else {
+            this.state.expanded.weeks.add(weekKey);
+        }
+        this.renderCashFlowGrid();
+    },
+
+    // Start editing a cell (day level)
+    startEditing(cell) {
+        if (cell.classList.contains('editing')) return;
+
+        const currentValue = parseInt(cell.textContent.replace(/[^0-9-]/g, '')) || 0;
+
+        cell.classList.add('editing');
+        cell.innerHTML = `<input type="number" class="cell-input" value="${currentValue}" step="1000">`;
+
+        const input = cell.querySelector('.cell-input');
+        input.focus();
+        input.select();
+
+        const saveEdit = () => {
+            const newValue = parseInt(input.value) || 0;
+            this.saveEdit(cell, newValue);
+        };
+
+        input.addEventListener('blur', saveEdit);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEdit();
+            }
+        });
+    },
+
+    // Start editing a month cell
+    startEditingMonth(cell) {
+        if (cell.classList.contains('editing')) return;
+
+        const currentValue = parseInt(cell.textContent.replace(/[^0-9-]/g, '')) || 0;
+
+        cell.classList.add('editing');
+        cell.innerHTML = `<input type="number" class="cell-input" value="${currentValue}" step="1000">`;
+
+        const input = cell.querySelector('.cell-input');
+        input.focus();
+        input.select();
+
+        const saveEdit = () => {
+            const newValue = parseInt(input.value) || 0;
+            this.saveMonthEdit(cell, newValue);
+        };
+
+        input.addEventListener('blur', saveEdit);
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                saveEdit();
+            }
+        });
+    },
+
+    // Save day edit
+    saveEdit(cell, newValue) {
+        const cellId = cell.dataset.cellId;
+        const rowType = cell.dataset.rowType;
+        const month = parseInt(cell.dataset.month);
+        const day = parseInt(cell.dataset.day);
+
+        // Update the data
+        const rowData = this.state.data[rowType];
+
+        // Find the correct week for this day
+        Object.keys(rowData.months[month].weeks).forEach(weekNum => {
+            if (rowData.months[month].weeks[weekNum].days[day]) {
+                rowData.months[month].weeks[weekNum].days[day].value = newValue;
+
+                // Recalculate week total
+                rowData.months[month].weeks[weekNum].total = Object.values(
+                    rowData.months[month].weeks[weekNum].days
+                ).reduce((sum, d) => sum + d.value, 0);
+            }
+        });
+
+        // Recalculate totals
+        this.recalculateTotals(rowType);
+
+        // Mark as edited
+        this.state.editedCells.add(cellId);
+        this.state.unsavedChanges = true;
+        this.updateSaveButton();
+
+        // Re-render
+        this.renderCashFlowGrid();
+    },
+
+    // Save month edit
+    saveMonthEdit(cell, newValue) {
+        const rowType = cell.dataset.rowType;
+        const month = parseInt(cell.dataset.month);
+
+        const rowData = this.state.data[rowType];
+        const monthData = rowData.months[month];
+
+        // Count editable days in the month
+        let editableDays = 0;
+        Object.values(monthData.weeks).forEach(week => {
+            Object.values(week.days).forEach(day => {
+                if (day.editable) editableDays++;
+            });
+        });
+
+        // Distribute value across editable days
+        const baseValuePerDay = Math.floor(newValue / editableDays);
+        let remainder = newValue - (baseValuePerDay * editableDays);
+
+        Object.values(monthData.weeks).forEach(week => {
+            Object.keys(week.days).forEach(dayKey => {
+                if (week.days[dayKey].editable) {
+                    let dayValue = baseValuePerDay;
+                    if (remainder > 0) {
+                        dayValue++;
+                        remainder--;
+                    } else if (remainder < 0) {
+                        dayValue--;
+                        remainder++;
+                    }
+                    week.days[dayKey].value = dayValue;
+                }
+            });
+
+            // Recalculate week total
+            week.total = Object.values(week.days).reduce((sum, d) => sum + d.value, 0);
+        });
+
+        // Recalculate totals
+        this.recalculateTotals(rowType);
+
+        // Mark as edited
+        this.state.editedCells.add(`cell-${rowType}-${month}`);
+        this.state.unsavedChanges = true;
+        this.updateSaveButton();
+
+        // Re-render
+        this.renderCashFlowGrid();
+    },
+
+    // Recalculate totals
+    recalculateTotals(rowType) {
+        const rowData = this.state.data[rowType];
+
+        rowData.total = 0;
+        Object.values(rowData.months).forEach(month => {
+            month.total = 0;
+            Object.values(month.weeks).forEach(week => {
+                month.total += week.total;
+            });
+            rowData.total += month.total;
+        });
+    },
+
+    // Recalculate all derived values
+    recalculateAll() {
+        // For each period, calculate:
+        // netCashFlow = receipts - disbursements
+        // cashEnding = cashBeginning + netCashFlow
+        // next period's cashBeginning = previous period's cashEnding
+
+        // We need to do this in chronological order
+        const receipts = this.state.data.receipts;
+        const disbursements = this.state.data.disbursements;
+        const netCashFlow = this.state.data.netCashFlow;
+        const cashBeginning = this.state.data.cashBeginning;
+        const cashEnding = this.state.data.cashEnding;
+
+        let runningCash = cashBeginning.months[1].weeks[Object.keys(cashBeginning.months[1].weeks)[0]].days[1].value;
+
+        for (let month = 1; month <= 12; month++) {
+            const weeksInMonth = this.getCalendarWeeksInMonth(this.state.currentYear, month);
+            weeksInMonth.forEach(weekNum => {
+                const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
+                daysInWeek.forEach(day => {
+                    const receipt = receipts.months[month].weeks[weekNum].days[day].value;
+                    const disbursement = disbursements.months[month].weeks[weekNum].days[day].value;
+
+                    cashBeginning.months[month].weeks[weekNum].days[day].value = runningCash;
+                    netCashFlow.months[month].weeks[weekNum].days[day].value = receipt - disbursement;
+                    cashEnding.months[month].weeks[weekNum].days[day].value = runningCash + (receipt - disbursement);
+
+                    runningCash = cashEnding.months[month].weeks[weekNum].days[day].value;
+                });
+
+                // Recalculate week totals
+                ['cashBeginning', 'netCashFlow', 'cashEnding'].forEach(type => {
+                    const weekData = this.state.data[type].months[month].weeks[weekNum];
+                    weekData.total = Object.values(weekData.days).reduce((sum, d) => sum + d.value, 0);
+                });
+            });
+
+            // Recalculate month totals
+            ['cashBeginning', 'receipts', 'disbursements', 'netCashFlow', 'cashEnding'].forEach(type => {
+                this.recalculateTotals(type);
+            });
+        }
+
+        this.state.unsavedChanges = true;
+        this.updateSaveButton();
+        this.renderCashFlowGrid();
+
+        alert('🔄 All cash flow calculations updated!');
+    },
+
+    // Update save button
+    updateSaveButton() {
+        const saveBtn = document.getElementById('cf-save-btn');
+        const indicator = document.getElementById('cf-unsaved-indicator');
+
+        if (saveBtn) {
+            saveBtn.disabled = !this.state.unsavedChanges;
+        }
+
+        if (indicator) {
+            if (this.state.unsavedChanges) {
+                indicator.classList.add('show');
+            } else {
+                indicator.classList.remove('show');
+            }
+        }
+    },
+
+    // Save data
+    saveData() {
+        localStorage.setItem('cashFlowData', JSON.stringify(this.state.data));
+        localStorage.setItem('cashFlowEditedCells', JSON.stringify([...this.state.editedCells]));
+
+        this.state.unsavedChanges = false;
+        this.updateSaveButton();
+
+        alert('✅ Cash flow data saved successfully!');
+    },
+
+    // Export data
+    exportData() {
+        const exportData = {
+            version: this.VERSION,
+            exportDate: new Date().toISOString(),
+            year: this.state.currentYear,
+            data: this.state.data
+        };
+
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataBlob = new Blob([dataStr], {type: 'application/json'});
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `cashflow-${this.state.currentYear}-${new Date().toISOString().split('T')[0]}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    },
+
+    // Reset data
+    resetData() {
+        if (confirm('Are you sure you want to reset all cash flow data? This will lose all your edits.')) {
+            this.state.editedCells.clear();
+            this.state.unsavedChanges = false;
+            localStorage.removeItem('cashFlowData');
+            localStorage.removeItem('cashFlowEditedCells');
+
+            // Regenerate default data
+            this.state.data = this.generateCashFlowData();
+
+            this.renderCashFlowGrid();
+        }
+    },
+
+    // Setup event handlers
+    setupEventHandlers() {
+        // Auto-save reminder
+        window.addEventListener('beforeunload', (e) => {
+            if (this.state.unsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+        });
+    },
+
+    // Helper functions
+    formatCurrency(num) {
+        return num.toLocaleString('sl-SI', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+    },
+
+    isWeekend(date) {
+        const day = date.getDay();
+        return day === 0 || day === 6;
+    },
+
+    getMonthName(month) {
+        const months = ['Januar', 'Februar', 'Marec', 'April', 'Maj', 'Junij',
+                       'Julij', 'Avgust', 'September', 'Oktober', 'November', 'December'];
+        return months[month - 1];
+    },
+
+    getMonthShort(month) {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Maj', 'Jun',
+                       'Jul', 'Avg', 'Sep', 'Okt', 'Nov', 'Dec'];
+        return months[month - 1];
+    },
+
+    getDayShort(dayOfWeek) {
+        const days = ['N', 'P', 'T', 'S', 'Č', 'P', 'S'];
+        return days[dayOfWeek];
+    },
+
+    getCalendarWeeksInMonth(year, month) {
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+
+        const firstWeek = this.getWeekNumber(firstDay);
+        const lastWeek = this.getWeekNumber(lastDay);
+
+        const weeks = [];
+        if (lastWeek < firstWeek) {
+            for (let w = firstWeek; w <= 52; w++) weeks.push(w);
+            for (let w = 1; w <= lastWeek; w++) weeks.push(w);
+        } else {
+            for (let w = firstWeek; w <= lastWeek; w++) weeks.push(w);
+        }
+
+        return weeks;
+    },
+
+    getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    },
+
+    getDaysOfWeekInMonth(year, month, weekNum) {
+        const days = [];
+        const daysInMonth = new Date(year, month, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month - 1, day);
+            if (this.getWeekNumber(date) === weekNum) {
+                days.push(day);
+            }
+        }
+
+        return days;
+    }
+};
+
+// Export for use
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = CashFlow;
+}
+
+// Make globally available
+if (typeof window !== 'undefined') {
+    window.CashFlow = CashFlow;
+}

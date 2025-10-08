@@ -170,13 +170,9 @@ const ChApp = {
                         <span class="nav-icon">💰</span>
                         <span class="nav-text">Overview</span>
                     </button>
-                    <button class="nav-link" data-view="finance-reports">
-                        <span class="nav-icon">📊</span>
-                        <span class="nav-text">Reports</span>
-                    </button>
-                    <button class="nav-link" data-view="finance-budgets">
-                        <span class="nav-icon">📈</span>
-                        <span class="nav-text">Budgets</span>
+                    <button class="nav-link" data-view="finance-cf">
+                        <span class="nav-icon">💸</span>
+                        <span class="nav-text">CF</span>
                     </button>
                 `;
                 this.currentSubTab = 'finance-overview';
@@ -262,10 +258,8 @@ const ChApp = {
                 return this.getManagementSalesView();
             case 'finance-overview':
                 return this.getFinanceOverviewView();
-            case 'finance-reports':
-                return this.getFinanceReportsView();
-            case 'finance-budgets':
-                return this.getFinanceBudgetsView();
+            case 'finance-cf':
+                return this.getFinanceCFView();
             default:
                 // Default to production planning if unknown view
                 return this.getProductionPlanningView();
@@ -1103,11 +1097,41 @@ const ChApp = {
         return html;
     },
     
-    async getFinanceReportsView() {
-        return `<div style="min-height: 600px;"></div>`;
-    },
-    
-    async getFinanceBudgetsView() {
-        return `<div style="min-height: 600px;"></div>`;
+    async getFinanceCFView() {
+        console.log('Loading Cash Flow module...');
+
+        const html = `
+            <div id="cashflow-container">
+                <!-- Cash Flow module will be loaded here -->
+            </div>
+        `;
+
+        // Load the Cash Flow module after DOM is ready
+        setTimeout(() => {
+            // Check if CashFlow is already loaded
+            if (typeof CashFlow !== 'undefined') {
+                console.log('CashFlow already loaded, initializing...');
+                CashFlow.init();
+                return;
+            }
+
+            // Load cashflow.js module
+            const script = document.createElement('script');
+            script.src = 'modules/finance/cashflow.js?v=' + Date.now();
+            script.onload = () => {
+                console.log('Cash Flow module loaded');
+                if (typeof CashFlow !== 'undefined') {
+                    CashFlow.init();
+                } else {
+                    console.error('CashFlow not found after loading script');
+                }
+            };
+            script.onerror = (e) => {
+                console.error('Failed to load cashflow.js:', e);
+            };
+            document.head.appendChild(script);
+        }, 100);
+
+        return html;
     }
 };
