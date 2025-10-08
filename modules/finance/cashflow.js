@@ -1,8 +1,8 @@
-// Ch Cash Flow Module - Expandable time-based cash flow planning
-// Uses same expandable hierarchy as Production Planning: months → weeks → days
+// Ch Cash Flow Module - Razširljivo časovno načrtovanje denarnega toka
+// Uporablja enako razširljivo hierarhijo kot proizvodno načrtovanje: meseci → tedni → dnevi
 
 const CashFlow = {
-    VERSION: '1.0.0',
+    VERSION: '1.1.0',
 
     state: {
         currentYear: new Date().getFullYear(),
@@ -78,7 +78,9 @@ const CashFlow = {
         return {
             cashBeginning: this.generateRowData('cashBeginning', year),
             receipts: this.generateRowData('receipts', year),
-            disbursements: this.generateRowData('disbursements', year),
+            disbursementsNujni: this.generateRowData('disbursementsNujni', year),
+            disbursementsPogojnoNujni: this.generateRowData('disbursementsPogojnoNujni', year),
+            disbursementsNenujni: this.generateRowData('disbursementsNenujni', year),
             netCashFlow: this.generateRowData('netCashFlow', year),
             cashEnding: this.generateRowData('cashEnding', year)
         };
@@ -150,7 +152,9 @@ const CashFlow = {
 
         // Base values for cash flow
         const baseReceipts = 25000;
-        const baseDisbursements = 20000;
+        const baseDisbursementsNujni = 12000;
+        const baseDisbursementsPogojnoNujni = 5000;
+        const baseDisbursementsNenujni = 3000;
 
         switch(rowType) {
             case 'cashBeginning':
@@ -166,13 +170,23 @@ const CashFlow = {
                 const seasonalReceiptFactor = 1 + 0.15 * Math.sin((month - 1) * Math.PI / 6);
                 return Math.round(baseReceipts * receiptFactor * seasonalReceiptFactor * (0.9 + Math.random() * 0.2));
 
-            case 'disbursements':
-                // Cash disbursements are consistent on workdays
-                const disbursementFactor = isWeekend ? 0.1 : 1.0;
-                return Math.round(baseDisbursements * disbursementFactor * (0.9 + Math.random() * 0.2));
+            case 'disbursementsNujni':
+                // Essential disbursements - consistent every day
+                const nujniFactor = isWeekend ? 0.5 : 1.0;
+                return Math.round(baseDisbursementsNujni * nujniFactor * (0.9 + Math.random() * 0.2));
+
+            case 'disbursementsPogojnoNujni':
+                // Conditionally urgent - mostly on workdays
+                const pogojnoNujniFactor = isWeekend ? 0.1 : 1.0;
+                return Math.round(baseDisbursementsPogojnoNujni * pogojnoNujniFactor * (0.85 + Math.random() * 0.3));
+
+            case 'disbursementsNenujni':
+                // Non-urgent - mainly on workdays, lower amounts
+                const nenujniFactor = isWeekend ? 0.05 : 1.0;
+                return Math.round(baseDisbursementsNenujni * nenujniFactor * (0.8 + Math.random() * 0.4));
 
             case 'netCashFlow':
-                // Calculated: receipts - disbursements
+                // Calculated: receipts - all disbursements
                 return 0; // Will be calculated
 
             case 'cashEnding':
@@ -187,20 +201,25 @@ const CashFlow = {
     // Get row label
     getRowLabel(rowType) {
         const labels = {
-            'cashBeginning': 'Cash Beginning / Začetno stanje',
-            'receipts': 'Receipts / Prejemki',
-            'disbursements': 'Disbursements / Izplačila',
-            'netCashFlow': 'Net Cash Flow / Neto CF',
-            'cashEnding': 'Cash Ending / Končno stanje'
+            'cashBeginning': 'Začetno stanje',
+            'receipts': 'Prejemki',
+            'disbursementsNujni': 'Izplačila - Nujni',
+            'disbursementsPogojnoNujni': 'Izplačila - Pogojno nujni',
+            'disbursementsNenujni': 'Izplačila - Nenujni',
+            'netCashFlow': 'Neto denarni tok',
+            'cashEnding': 'Končno stanje'
         };
         return labels[rowType] || rowType;
     },
 
     // Check if row is editable
     isRowEditable(rowType) {
-        // Only receipts and disbursements are directly editable
+        // Receipts and all disbursement categories are directly editable
         // Others are calculated
-        return rowType === 'receipts' || rowType === 'disbursements';
+        return rowType === 'receipts' ||
+               rowType === 'disbursementsNujni' ||
+               rowType === 'disbursementsPogojnoNujni' ||
+               rowType === 'disbursementsNenujni';
     },
 
     // Check if month is editable
@@ -407,9 +426,11 @@ const CashFlow = {
                 /* Row type specific styling */
                 .row-cashBeginning { background: #e3f2fd; }
                 .row-receipts { background: #e8f5e9; }
-                .row-disbursements { background: #ffebee; }
-                .row-netCashFlow { background: #fff3e0; }
-                .row-cashEnding { background: #f3e5f5; }
+                .row-disbursementsNujni { background: #ffebee; }
+                .row-disbursementsPogojnoNujni { background: #fff3e0; }
+                .row-disbursementsNenujni { background: #fce4ec; }
+                .row-netCashFlow { background: #f3e5f5; }
+                .row-cashEnding { background: #e0f2f1; }
 
                 /* Cell styling based on data */
                 .cell-past {
@@ -496,27 +517,27 @@ const CashFlow = {
 
             <div class="cashflow-container">
                 <div class="cashflow-header">
-                    <h2>💸 Cash Flow Planning</h2>
+                    <h2>💸 Načrtovanje denarnega toka</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
-                        V1.0.0 - Expandable Time-based Cash Flow | Click months → weeks → days
+                        V1.1.0 - Razširljiv časovno-osnovni denarni tok | Klikni mesece → tedne → dneve
                     </div>
                 </div>
 
                 <div class="cashflow-controls">
                     <button class="save-button" onclick="CashFlow.saveData()" id="cf-save-btn" disabled>
-                        💾 Save Cash Flow
+                        💾 Shrani
                     </button>
                     <button class="calculate-button" onclick="CashFlow.recalculateAll()">
-                        🔄 Recalculate All
+                        🔄 Preračunaj vse
                     </button>
                     <button class="export-button" onclick="CashFlow.exportData()">
-                        📁 Export Data
+                        📁 Izvozi
                     </button>
                     <button onclick="CashFlow.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        🔄 Reset
+                        🔄 Ponastavi
                     </button>
                     <span class="unsaved-indicator" id="cf-unsaved-indicator">
-                        Unsaved changes
+                        Neshranjene spremembe
                     </span>
                 </div>
 
@@ -525,14 +546,16 @@ const CashFlow = {
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <h4>💸 Cash Flow Planning:</h4>
+                    <h4>💸 Načrtovanje denarnega toka:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>💰 <strong>Cash Beginning:</strong> Starting cash for the period (auto-calculated)</li>
-                        <li>📈 <strong>Receipts:</strong> Cash inflows from sales and other sources (editable)</li>
-                        <li>📉 <strong>Disbursements:</strong> Cash outflows for expenses and payments (editable)</li>
-                        <li>💸 <strong>Net Cash Flow:</strong> Receipts - Disbursements (auto-calculated)</li>
-                        <li>💵 <strong>Cash Ending:</strong> Cash Beginning + Net Cash Flow (auto-calculated)</li>
-                        <li>📅 <strong>Expandable:</strong> Click months → weeks → days for detailed view</li>
+                        <li>💰 <strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>
+                        <li>📈 <strong>Prejemki:</strong> Prilivi gotovine iz prodaje in drugih virov (urejanje)</li>
+                        <li>🔴 <strong>Izplačila - Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
+                        <li>🟠 <strong>Izplačila - Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
+                        <li>🟡 <strong>Izplačila - Nenujni:</strong> Nenujni izdatki (urejanje)</li>
+                        <li>💸 <strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
+                        <li>💵 <strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
+                        <li>📅 <strong>Razširljivo:</strong> Klikni mesece → tedne → dneve za podroben pogled</li>
                     </ul>
                 </div>
             </div>
@@ -563,7 +586,7 @@ const CashFlow = {
 
     // Render headers with expandable months/weeks
     renderHeaders() {
-        let monthHeaders = '<tr><th class="row-type-header" rowspan="2">Cash Flow Item</th>';
+        let monthHeaders = '<tr><th class="row-type-header" rowspan="2">Postavka denarnega toka</th>';
         let subHeaders = '<tr>';
 
         // Build month headers with potential expansion
@@ -617,7 +640,7 @@ const CashFlow = {
             }
         }
 
-        monthHeaders += '<th rowspan="2">Total</th></tr>';
+        monthHeaders += '<th rowspan="2">Skupaj</th></tr>';
         subHeaders += '</tr>';
 
         // Add day headers if any week is expanded
@@ -658,7 +681,15 @@ const CashFlow = {
     renderAllRows() {
         let html = '';
 
-        const rows = ['cashBeginning', 'receipts', 'disbursements', 'netCashFlow', 'cashEnding'];
+        const rows = [
+            'cashBeginning',
+            'receipts',
+            'disbursementsNujni',
+            'disbursementsPogojnoNujni',
+            'disbursementsNenujni',
+            'netCashFlow',
+            'cashEnding'
+        ];
 
         rows.forEach((rowType) => {
             const rowData = this.state.data[rowType];
@@ -691,11 +722,13 @@ const CashFlow = {
     // Get short row label
     getRowShortLabel(rowType) {
         const labels = {
-            'cashBeginning': '💰 Cash Beginning',
-            'receipts': '📈 Receipts',
-            'disbursements': '📉 Disbursements',
-            'netCashFlow': '💸 Net Cash Flow',
-            'cashEnding': '💵 Cash Ending'
+            'cashBeginning': '💰 Začetno stanje',
+            'receipts': '📈 Prejemki',
+            'disbursementsNujni': '🔴 Izplačila - Nujni',
+            'disbursementsPogojnoNujni': '🟠 Izplačila - Pogojno nujni',
+            'disbursementsNenujni': '🟡 Izplačila - Nenujni',
+            'netCashFlow': '💸 Neto denarni tok',
+            'cashEnding': '💵 Končno stanje'
         };
         return labels[rowType] || rowType;
     },
@@ -799,7 +832,7 @@ const CashFlow = {
 
     // Get value class for positive/negative
     getCellValueClass(rowType, value) {
-        if (rowType === 'disbursements') {
+        if (rowType.includes('disbursements')) {
             return value > 0 ? 'cell-negative' : '';
         }
         if (rowType === 'netCashFlow') {
@@ -991,13 +1024,14 @@ const CashFlow = {
     // Recalculate all derived values
     recalculateAll() {
         // For each period, calculate:
-        // netCashFlow = receipts - disbursements
+        // netCashFlow = receipts - (nujni + pogojno nujni + nenujni)
         // cashEnding = cashBeginning + netCashFlow
         // next period's cashBeginning = previous period's cashEnding
 
-        // We need to do this in chronological order
         const receipts = this.state.data.receipts;
-        const disbursements = this.state.data.disbursements;
+        const disbursementsNujni = this.state.data.disbursementsNujni;
+        const disbursementsPogojnoNujni = this.state.data.disbursementsPogojnoNujni;
+        const disbursementsNenujni = this.state.data.disbursementsNenujni;
         const netCashFlow = this.state.data.netCashFlow;
         const cashBeginning = this.state.data.cashBeginning;
         const cashEnding = this.state.data.cashEnding;
@@ -1010,11 +1044,15 @@ const CashFlow = {
                 const daysInWeek = this.getDaysOfWeekInMonth(this.state.currentYear, month, weekNum);
                 daysInWeek.forEach(day => {
                     const receipt = receipts.months[month].weeks[weekNum].days[day].value;
-                    const disbursement = disbursements.months[month].weeks[weekNum].days[day].value;
+                    const disbursementNujni = disbursementsNujni.months[month].weeks[weekNum].days[day].value;
+                    const disbursementPogojnoNujni = disbursementsPogojnoNujni.months[month].weeks[weekNum].days[day].value;
+                    const disbursementNenujni = disbursementsNenujni.months[month].weeks[weekNum].days[day].value;
+
+                    const totalDisbursements = disbursementNujni + disbursementPogojnoNujni + disbursementNenujni;
 
                     cashBeginning.months[month].weeks[weekNum].days[day].value = runningCash;
-                    netCashFlow.months[month].weeks[weekNum].days[day].value = receipt - disbursement;
-                    cashEnding.months[month].weeks[weekNum].days[day].value = runningCash + (receipt - disbursement);
+                    netCashFlow.months[month].weeks[weekNum].days[day].value = receipt - totalDisbursements;
+                    cashEnding.months[month].weeks[weekNum].days[day].value = runningCash + (receipt - totalDisbursements);
 
                     runningCash = cashEnding.months[month].weeks[weekNum].days[day].value;
                 });
@@ -1027,7 +1065,15 @@ const CashFlow = {
             });
 
             // Recalculate month totals
-            ['cashBeginning', 'receipts', 'disbursements', 'netCashFlow', 'cashEnding'].forEach(type => {
+            [
+                'cashBeginning',
+                'receipts',
+                'disbursementsNujni',
+                'disbursementsPogojnoNujni',
+                'disbursementsNenujni',
+                'netCashFlow',
+                'cashEnding'
+            ].forEach(type => {
                 this.recalculateTotals(type);
             });
         }
@@ -1036,7 +1082,7 @@ const CashFlow = {
         this.updateSaveButton();
         this.renderCashFlowGrid();
 
-        alert('🔄 All cash flow calculations updated!');
+        alert('🔄 Vsi izračuni denarnega toka posodobljeni!');
     },
 
     // Update save button
@@ -1065,7 +1111,7 @@ const CashFlow = {
         this.state.unsavedChanges = false;
         this.updateSaveButton();
 
-        alert('✅ Cash flow data saved successfully!');
+        alert('✅ Podatki denarnega toka uspešno shranjeni!');
     },
 
     // Export data
@@ -1083,7 +1129,7 @@ const CashFlow = {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = `cashflow-${this.state.currentYear}-${new Date().toISOString().split('T')[0]}.json`;
+        link.download = `denarni-tok-${this.state.currentYear}-${new Date().toISOString().split('T')[0]}.json`;
         link.click();
 
         URL.revokeObjectURL(url);
@@ -1091,7 +1137,7 @@ const CashFlow = {
 
     // Reset data
     resetData() {
-        if (confirm('Are you sure you want to reset all cash flow data? This will lose all your edits.')) {
+        if (confirm('Ali ste prepričani, da želite ponastaviti vse podatke o denarnem toku? To bo izbrisalo vse vaše spremembe.')) {
             this.state.editedCells.clear();
             this.state.unsavedChanges = false;
             localStorage.removeItem('cashFlowData');
@@ -1110,7 +1156,7 @@ const CashFlow = {
         window.addEventListener('beforeunload', (e) => {
             if (this.state.unsavedChanges) {
                 e.preventDefault();
-                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                e.returnValue = 'Imate neshranjene spremembe. Ste prepričani, da želite zapustiti stran?';
             }
         });
     },
