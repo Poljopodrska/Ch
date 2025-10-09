@@ -116,16 +116,25 @@ class ForecastVisualization {
             this.state.cashflowForecast = data;
 
             // Update overview
-            document.getElementById('total-expected').textContent =
-                this.formatCurrency(data.summary.total_expected);
-            document.getElementById('invoice-count').textContent =
-                data.summary.invoice_count;
+            const totalExpectedEl = document.getElementById('total-expected');
+            const invoiceCountEl = document.getElementById('invoice-count');
+
+            if (totalExpectedEl) {
+                totalExpectedEl.textContent = this.formatCurrency(data.summary?.total_expected || 0);
+            }
+            if (invoiceCountEl) {
+                invoiceCountEl.textContent = data.summary?.invoice_count || 0;
+            }
 
             // Render chart
             this.renderChart(data);
 
         } catch (error) {
             console.error('Failed to load cash flow forecast:', error);
+            const totalExpectedEl = document.getElementById('total-expected');
+            const invoiceCountEl = document.getElementById('invoice-count');
+            if (totalExpectedEl) totalExpectedEl.textContent = 'Error';
+            if (invoiceCountEl) invoiceCountEl.textContent = '-';
         }
     }
 
@@ -278,6 +287,8 @@ class ForecastVisualization {
 
     renderChart(data) {
         const canvas = document.getElementById('forecast-chart');
+        if (!canvas) return;
+
         const ctx = canvas.getContext('2d');
 
         // Simple bar chart
@@ -286,10 +297,21 @@ class ForecastVisualization {
         canvas.width = canvas.offsetWidth;
         canvas.height = 300;
 
-        const maxAmount = Math.max(...chartData.map(d => d.cumulative || d.amount));
-        const barWidth = canvas.width / chartData.length;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Handle empty data
+        if (!chartData || chartData.length === 0) {
+            ctx.fillStyle = '#666';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('No cash flow data available', canvas.width / 2, canvas.height / 2);
+            ctx.font = '12px Arial';
+            ctx.fillText('Upload invoices and train the prediction model to see forecasts', canvas.width / 2, canvas.height / 2 + 25);
+            return;
+        }
+
+        const maxAmount = Math.max(...chartData.map(d => d.cumulative || d.amount), 1);
+        const barWidth = canvas.width / chartData.length;
 
         // Draw bars
         chartData.forEach((item, i) => {
