@@ -562,6 +562,9 @@ const CashFlow = {
                     <button onclick="CashFlow.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
                         🔄 Ponastavi
                     </button>
+                    <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                        🤖 AI Forecast
+                    </button>
                     <span class="unsaved-indicator" id="cf-unsaved-indicator">
                         Neshranjene spremembe
                     </span>
