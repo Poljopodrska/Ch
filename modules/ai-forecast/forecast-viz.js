@@ -136,6 +136,17 @@ class ForecastVisualization {
             );
             const data = await response.json();
 
+            // Check if model is trained
+            if (data.model_status === 'not_trained' || !data.model_metrics || Object.keys(data.model_metrics).length === 0) {
+                document.getElementById('timeseries-content').innerHTML =
+                    `<div class="info-message">
+                        <p><strong>📊 No Cash Flow Forecaster model trained yet</strong></p>
+                        <p>Upload payment history data and train the Prophet model to see trend analysis.</p>
+                    </div>`;
+                document.getElementById('trend-indicator').innerHTML = '<span style="color: #666;">-</span>';
+                return;
+            }
+
             const trendHtml = `
                 <div class="trend-summary">
                     <div class="trend-item">
@@ -170,7 +181,7 @@ class ForecastVisualization {
 
         } catch (error) {
             document.getElementById('timeseries-content').innerHTML =
-                `<div class="error">No time series model trained yet. Train the Cash Flow Forecaster model first.</div>`;
+                `<div class="error">Failed to load time series forecast. Please try again.</div>`;
         }
     }
 
