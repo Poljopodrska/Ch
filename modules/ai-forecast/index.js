@@ -181,11 +181,15 @@ const aiForecastModule = new AIForecastModule();
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         const appContainer = document.getElementById('app') || document.body;
+        // Clear loading screen
+        appContainer.innerHTML = '';
         appContainer.appendChild(aiForecastModule.render());
         aiForecastModule.init();
     });
 } else {
     const appContainer = document.getElementById('app') || document.body;
+    // Clear loading screen
+    appContainer.innerHTML = '';
     appContainer.appendChild(aiForecastModule.render());
     aiForecastModule.init();
 }
