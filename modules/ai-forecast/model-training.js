@@ -6,7 +6,7 @@
 
 class ModelTraining {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:8000/api/v1';
+        this.apiBaseUrl = 'http://54.172.17.102:8000/api/v1';
         this.state = {
             models: [],
             training: false

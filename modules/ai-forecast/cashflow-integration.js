@@ -5,7 +5,7 @@
  */
 
 const AIForecastIntegration = {
-    apiBaseUrl: 'http://localhost:8000/api/v1',
+    apiBaseUrl: 'http://54.172.17.102:8000/api/v1',
 
     /**
      * Add AI Forecast button to Cash Flow module
