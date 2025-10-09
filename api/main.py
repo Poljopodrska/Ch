@@ -161,6 +161,14 @@ async def test_planning():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Test page not found")
 
+@app.get("/ai-forecast.html")
+async def ai_forecast():
+    try:
+        with open("ai-forecast.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="AI Forecast page not found")
+
 # API routes for modules
 @app.get("/api/v1/products")
 async def get_products():
