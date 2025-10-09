@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: ch_forecasting_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-ch_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ch_password_dev}
+      POSTGRES_DB: ${DB_NAME:-ch_forecasting}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ch_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ch_forecasting_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # FastAPI Application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ch_forecasting_api
+    environment:
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-ch_user}
+      DB_PASSWORD: ${DB_PASSWORD:-ch_password_dev}
+      DB_NAME: ${DB_NAME:-ch_forecasting}
+
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # Application
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+
+      # AWS (for production)
+      AWS_REGION: ${AWS_REGION:-eu-central-1}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET:-ch-production-source-1753092181}
+
+      # Sentry (optional)
+      SENTRY_DSN: ${SENTRY_DSN:-}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app/app
+      - ./alembic:/app/alembic
+      - ml_models:/app/models
+      - upload_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Celery Worker (for async ML training)
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ch_forecasting_worker
+    environment:
+      # Same environment as API
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-ch_user}
+      DB_PASSWORD: ${DB_PASSWORD:-ch_password_dev}
+      DB_NAME: ${DB_NAME:-ch_forecasting}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-in-production}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    volumes:
+      - ./app:/app/app
+      - ml_models:/app/models
+      - upload_data:/app/uploads
+    depends_on:
+      - postgres
+      - redis
+    command: celery -A app.core.celery worker --loglevel=info
+
+volumes:
+  postgres_data:
+  redis_data:
+  ml_models:
+  upload_data:
