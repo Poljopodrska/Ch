@@ -174,6 +174,10 @@ const ChApp = {
                         <span class="nav-icon">💸</span>
                         <span class="nav-text">CF</span>
                     </button>
+                    <button class="nav-link" data-view="finance-payments">
+                        <span class="nav-icon">📊</span>
+                        <span class="nav-text">Payments</span>
+                    </button>
                 `;
                 this.currentSubTab = 'finance-overview';
                 break;
@@ -260,6 +264,8 @@ const ChApp = {
                 return this.getFinanceOverviewView();
             case 'finance-cf':
                 return this.getFinanceCFView();
+            case 'finance-payments':
+                return this.getFinancePaymentsView();
             default:
                 // Default to production planning if unknown view
                 return this.getProductionPlanningView();
@@ -1128,6 +1134,44 @@ const ChApp = {
             };
             script.onerror = (e) => {
                 console.error('Failed to load cashflow.js:', e);
+            };
+            document.head.appendChild(script);
+        }, 100);
+
+        return html;
+    },
+
+    async getFinancePaymentsView() {
+        console.log('Loading Payment Manager module...');
+
+        const html = `
+            <div id="payment-manager-container">
+                <!-- Payment Manager module will be loaded here -->
+            </div>
+        `;
+
+        // Load the Payment Manager module after DOM is ready
+        setTimeout(() => {
+            // Check if PaymentManager is already loaded
+            if (typeof PaymentManager !== 'undefined') {
+                console.log('PaymentManager already loaded, initializing...');
+                PaymentManager.init();
+                return;
+            }
+
+            // Load payment-manager.js module
+            const script = document.createElement('script');
+            script.src = 'modules/finance/payment-manager.js?v=' + Date.now();
+            script.onload = () => {
+                console.log('Payment Manager module loaded');
+                if (typeof PaymentManager !== 'undefined') {
+                    PaymentManager.init();
+                } else {
+                    console.error('PaymentManager not found after loading script');
+                }
+            };
+            script.onerror = (e) => {
+                console.error('Failed to load payment-manager.js:', e);
             };
             document.head.appendChild(script);
         }, 100);
