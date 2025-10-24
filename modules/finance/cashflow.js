@@ -156,44 +156,37 @@ const CashFlow = {
         const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const isPast = new Date(year, month - 1, day) < new Date(this.state.today.getFullYear(), this.state.today.getMonth(), this.state.today.getDate());
 
-        // Base values for cash flow
-        const baseReceipts = 25000;
-        const baseDisbursementsNujni = 12000;
-        const baseDisbursementsPogojnoNujni = 5000;
-        const baseDisbursementsNenujni = 3000;
+        // NO MOCK DATA - Start with zeros
+        // Users should load actual data via "Load Bank Forecast" button
 
         switch(rowType) {
             case 'cashBeginning':
                 // Beginning cash - calculated from previous period
                 if (month === 1 && day === 1) {
-                    return 150000; // Starting balance for the year
+                    // Starting balance - set to 0, will be calculated from actual data
+                    return 0;
                 }
                 return 0; // Will be calculated
 
             case 'receipts':
-                // Cash receipts are lower on weekends
-                const receiptFactor = isWeekend ? 0.2 : 1.0;
-                const seasonalReceiptFactor = 1 + 0.15 * Math.sin((month - 1) * Math.PI / 6);
-                return Math.round(baseReceipts * receiptFactor * seasonalReceiptFactor * (0.9 + Math.random() * 0.2));
+                // Start empty - load via Bank Forecast
+                return 0;
 
             case 'disbursements':
                 // Parent disbursements - sum of all categories (will be calculated)
                 return 0;
 
             case 'disbursementsNujni':
-                // Essential disbursements - consistent every day
-                const nujniFactor = isWeekend ? 0.5 : 1.0;
-                return Math.round(baseDisbursementsNujni * nujniFactor * (0.9 + Math.random() * 0.2));
+                // Start empty - load via Bank Forecast
+                return 0;
 
             case 'disbursementsPogojnoNujni':
-                // Conditionally urgent - mostly on workdays
-                const pogojnoNujniFactor = isWeekend ? 0.1 : 1.0;
-                return Math.round(baseDisbursementsPogojnoNujni * pogojnoNujniFactor * (0.85 + Math.random() * 0.3));
+                // Start empty - load via Bank Forecast
+                return 0;
 
             case 'disbursementsNenujni':
-                // Non-urgent - mainly on workdays, lower amounts
-                const nenujniFactor = isWeekend ? 0.05 : 1.0;
-                return Math.round(baseDisbursementsNenujni * nenujniFactor * (0.8 + Math.random() * 0.4));
+                // Start empty - load via Bank Forecast
+                return 0;
 
             case 'netCashFlow':
                 // Calculated: receipts - all disbursements
