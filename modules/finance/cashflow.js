@@ -553,6 +553,9 @@ const CashFlow = {
                     <button class="export-button" onclick="CashFlow.exportData()">
                         📁 Izvozi
                     </button>
+                    <button onclick="CashFlow.loadBankForecast()" style="padding: 10px 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);">
+                        🏦 Naloži napoved banke
+                    </button>
                     <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
                         🤖 AI Forecast
                     </button>
@@ -574,6 +577,7 @@ const CashFlow = {
                         <li>💸 <strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
                         <li>💵 <strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
                         <li>📅 <strong>Razširljivo:</strong> Klikni mesece → tedne → dneve in vrstice za podroben pogled</li>
+                        <li>🏦 <strong>Napoved banke:</strong> Uvozi napovedi plačil na podlagi analiz vedenja strank (AI)</li>
                     </ul>
                 </div>
             </div>
@@ -1344,6 +1348,154 @@ const CashFlow = {
         }
 
         return days;
+    },
+
+    // ========================================================================
+    // BANK FORECAST INTEGRATION
+    // ========================================================================
+
+    /**
+     * Load AI-based bank forecast from payment predictor
+     */
+    async loadBankForecast() {
+        console.log('Loading bank forecast...');
+
+        try {
+            // Load the forecast JSON
+            const response = await fetch('/BankData/bank_forecast_90days.json');
+            if (!response.ok) {
+                throw new Error(`Failed to load forecast: ${response.status}`);
+            }
+
+            const forecastData = await response.json();
+
+            // Show metadata
+            const metadata = forecastData.forecast_metadata;
+            console.log('Forecast metadata:', metadata);
+
+            // Confirm with user
+            const confirmed = confirm(
+                `🤖 Load AI Bank Forecast?\n\n` +
+                `Generated: ${new Date(metadata.generated_at).toLocaleString('sl-SI')}\n` +
+                `Period: ${metadata.forecast_days} days\n` +
+                `Customers Analyzed: ${metadata.total_customers_analyzed}\n` +
+                `Predictions: ${metadata.total_predictions}\n\n` +
+                `This will update Receipts and Disbursements with predicted values.\n` +
+                `Continue?`
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            // Process and import forecast data
+            this.importBankForecastData(forecastData.daily_forecast);
+
+            alert('✅ Bank forecast loaded successfully!\n\n' +
+                  'Receipts and Disbursements have been updated with AI predictions.\n' +
+                  'Review the changes and save when ready.');
+
+        } catch (error) {
+            console.error('Error loading bank forecast:', error);
+            alert(`❌ Error loading bank forecast:\n\n${error.message}\n\n` +
+                  `Make sure the forecast file exists at:\n/BankData/bank_forecast_90days.json`);
+        }
+    },
+
+    /**
+     * Import bank forecast data into CF grid
+     */
+    importBankForecastData(dailyForecast) {
+        console.log(`Importing ${dailyForecast.length} days of forecast data...`);
+
+        let receiptsUpdated = 0;
+        let disbursementsUpdated = 0;
+
+        // Process each day in the forecast
+        dailyForecast.forEach(dayData => {
+            const date = new Date(dayData.date);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+
+            // Only import if within current year view
+            if (year !== this.state.currentYear) {
+                return;
+            }
+
+            // Find the week number for this day
+            const weekNum = this.getWeekNumber(date);
+
+            try {
+                // Update Receipts
+                if (dayData.receipts > 0) {
+                    const receiptsRow = this.state.data.receipts;
+                    if (receiptsRow.months[month] &&
+                        receiptsRow.months[month].weeks[weekNum] &&
+                        receiptsRow.months[month].weeks[weekNum].days[day]) {
+
+                        receiptsRow.months[month].weeks[weekNum].days[day].value = dayData.receipts;
+                        receiptsUpdated++;
+                    }
+                }
+
+                // Update Disbursements (distribute across categories)
+                if (dayData.disbursements > 0) {
+                    // Distribute disbursements: 60% Nujni, 25% Pogojno Nujni, 15% Nenujni
+                    const nujni = dayData.disbursements * 0.60;
+                    const pogojnoNujni = dayData.disbursements * 0.25;
+                    const nenujni = dayData.disbursements * 0.15;
+
+                    // Update Nujni
+                    const nujniRow = this.state.data.disbursementsNujni;
+                    if (nujniRow.months[month] &&
+                        nujniRow.months[month].weeks[weekNum] &&
+                        nujniRow.months[month].weeks[weekNum].days[day]) {
+
+                        nujniRow.months[month].weeks[weekNum].days[day].value = nujni;
+                    }
+
+                    // Update Pogojno Nujni
+                    const pogojnoRow = this.state.data.disbursementsPogojnoNujni;
+                    if (pogojnoRow.months[month] &&
+                        pogojnoRow.months[month].weeks[weekNum] &&
+                        pogojnoRow.months[month].weeks[weekNum].days[day]) {
+
+                        pogojnoRow.months[month].weeks[weekNum].days[day].value = pogojnoNujni;
+                    }
+
+                    // Update Nenujni
+                    const nenujniRow = this.state.data.disbursementsNenujni;
+                    if (nenujniRow.months[month] &&
+                        nenujniRow.months[month].weeks[weekNum] &&
+                        nenujniRow.months[month].weeks[weekNum].days[day]) {
+
+                        nenujniRow.months[month].weeks[weekNum].days[day].value = nenujni;
+                    }
+
+                    disbursementsUpdated++;
+                }
+
+            } catch (error) {
+                console.error(`Error processing date ${dayData.date}:`, error);
+            }
+        });
+
+        console.log(`✓ Updated ${receiptsUpdated} receipt days`);
+        console.log(`✓ Updated ${disbursementsUpdated} disbursement days`);
+
+        // Recalculate all totals and formulas
+        ['receipts', 'disbursementsNujni', 'disbursementsPogojnoNujni', 'disbursementsNenujni'].forEach(type => {
+            this.recalculateTotals(type);
+        });
+
+        this.recalculateFormulas();
+
+        // Mark as having unsaved changes
+        this.state.unsavedChanges = true;
+
+        // Re-render the grid
+        this.renderCashFlowGrid();
     }
 };
 

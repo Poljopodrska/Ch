@@ -1,0 +1,622 @@
+{
+  "forecast_metadata": {
+    "generated_at": "2025-10-24T17:32:02.164495",
+    "forecast_start": "2025-10-24",
+    "forecast_end": "2026-01-22",
+    "forecast_days": 90,
+    "method": "XGBoost + Customer-Specific Behavior",
+    "total_customers_analyzed": 2139,
+    "total_predictions": 87
+  },
+  "daily_forecast": [
+    {
+      "date": "2025-10-25",
+      "receipts": 174874.58,
+      "disbursements": 106063.86,
+      "net_flow": 68810.72,
+      "transaction_count": 48
+    },
+    {
+      "date": "2025-10-26",
+      "receipts": 46929.37,
+      "disbursements": 61019.32,
+      "net_flow": -14089.95,
+      "transaction_count": 35
+    },
+    {
+      "date": "2025-10-27",
+      "receipts": 58775.67,
+      "disbursements": 125713.28,
+      "net_flow": -66937.61,
+      "transaction_count": 82
+    },
+    {
+      "date": "2025-10-28",
+      "receipts": 163788.48,
+      "disbursements": 53109.24,
+      "net_flow": 110679.24,
+      "transaction_count": 96
+    },
+    {
+      "date": "2025-10-29",
+      "receipts": 136151.46,
+      "disbursements": 115071.2,
+      "net_flow": 21080.26,
+      "transaction_count": 110
+    },
+    {
+      "date": "2025-10-30",
+      "receipts": 298475.78,
+      "disbursements": 90337.55,
+      "net_flow": 208138.23,
+      "transaction_count": 131
+    },
+    {
+      "date": "2025-10-31",
+      "receipts": 1909583.33,
+      "disbursements": 1222198.45,
+      "net_flow": 687384.88,
+      "transaction_count": 1526
+    },
+    {
+      "date": "2025-11-01",
+      "receipts": 43366.79,
+      "disbursements": 55488.2,
+      "net_flow": -12121.41,
+      "transaction_count": 48
+    },
+    {
+      "date": "2025-11-02",
+      "receipts": 50388.61,
+      "disbursements": 108047.65,
+      "net_flow": -57659.04,
+      "transaction_count": 28
+    },
+    {
+      "date": "2025-11-03",
+      "receipts": 94090.91,
+      "disbursements": 18266.72,
+      "net_flow": 75824.19,
+      "transaction_count": 71
+    },
+    {
+      "date": "2025-11-04",
+      "receipts": 798843.8,
+      "disbursements": 811850.0,
+      "net_flow": -13006.2,
+      "transaction_count": 597
+    },
+    {
+      "date": "2025-11-05",
+      "receipts": 125295.66,
+      "disbursements": 27878.42,
+      "net_flow": 97417.24,
+      "transaction_count": 75
+    },
+    {
+      "date": "2025-11-06",
+      "receipts": 125784.04,
+      "disbursements": 34361.95,
+      "net_flow": 91422.09,
+      "transaction_count": 70
+    },
+    {
+      "date": "2025-11-07",
+      "receipts": 178054.48,
+      "disbursements": 90659.22,
+      "net_flow": 87395.26,
+      "transaction_count": 107
+    },
+    {
+      "date": "2025-11-08",
+      "receipts": 48015.64,
+      "disbursements": 36564.72,
+      "net_flow": 11450.92,
+      "transaction_count": 43
+    },
+    {
+      "date": "2025-11-09",
+      "receipts": 30214.4,
+      "disbursements": 23718.15,
+      "net_flow": 6496.25,
+      "transaction_count": 23
+    },
+    {
+      "date": "2025-11-10",
+      "receipts": 94234.93,
+      "disbursements": 20678.84,
+      "net_flow": 73556.09,
+      "transaction_count": 58
+    },
+    {
+      "date": "2025-11-11",
+      "receipts": 190900.38,
+      "disbursements": 41027.98,
+      "net_flow": 149872.4,
+      "transaction_count": 115
+    },
+    {
+      "date": "2025-11-12",
+      "receipts": 124381.19,
+      "disbursements": 85913.11,
+      "net_flow": 38468.08,
+      "transaction_count": 99
+    },
+    {
+      "date": "2025-11-13",
+      "receipts": 178909.32,
+      "disbursements": 47853.4,
+      "net_flow": 131055.92,
+      "transaction_count": 93
+    },
+    {
+      "date": "2025-11-14",
+      "receipts": 451636.39,
+      "disbursements": 77693.15,
+      "net_flow": 373943.24,
+      "transaction_count": 240
+    },
+    {
+      "date": "2025-11-15",
+      "receipts": 15640.91,
+      "disbursements": 51727.6,
+      "net_flow": -36086.69,
+      "transaction_count": 25
+    },
+    {
+      "date": "2025-11-16",
+      "receipts": 29248.39,
+      "disbursements": 19955.83,
+      "net_flow": 9292.56,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-11-17",
+      "receipts": 60621.94,
+      "disbursements": 38833.74,
+      "net_flow": 21788.2,
+      "transaction_count": 68
+    },
+    {
+      "date": "2025-11-18",
+      "receipts": 151897.36,
+      "disbursements": 41407.29,
+      "net_flow": 110490.07,
+      "transaction_count": 104
+    },
+    {
+      "date": "2025-11-19",
+      "receipts": 144305.85,
+      "disbursements": 266569.2,
+      "net_flow": -122263.35,
+      "transaction_count": 135
+    },
+    {
+      "date": "2025-11-20",
+      "receipts": 88426.74,
+      "disbursements": 59581.41,
+      "net_flow": 28845.33,
+      "transaction_count": 32
+    },
+    {
+      "date": "2025-11-21",
+      "receipts": 61552.47,
+      "disbursements": 31410.59,
+      "net_flow": 30141.88,
+      "transaction_count": 20
+    },
+    {
+      "date": "2025-11-22",
+      "receipts": 3790.71,
+      "disbursements": 8338.73,
+      "net_flow": -4548.02,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-11-23",
+      "receipts": 4746.85,
+      "disbursements": 14533.58,
+      "net_flow": -9786.73,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-11-24",
+      "receipts": 10458.26,
+      "disbursements": 156470.28,
+      "net_flow": -146012.02,
+      "transaction_count": 12
+    },
+    {
+      "date": "2025-11-25",
+      "receipts": 11080.49,
+      "disbursements": 108879.15,
+      "net_flow": -97798.66,
+      "transaction_count": 17
+    },
+    {
+      "date": "2025-11-26",
+      "receipts": 10719.68,
+      "disbursements": 89121.84,
+      "net_flow": -78402.16,
+      "transaction_count": 16
+    },
+    {
+      "date": "2025-11-27",
+      "receipts": 13254.36,
+      "disbursements": 134533.04,
+      "net_flow": -121278.68,
+      "transaction_count": 21
+    },
+    {
+      "date": "2025-11-28",
+      "receipts": 9973.68,
+      "disbursements": 746.26,
+      "net_flow": 9227.42,
+      "transaction_count": 16
+    },
+    {
+      "date": "2025-11-29",
+      "receipts": 4334.53,
+      "disbursements": 49556.63,
+      "net_flow": -45222.1,
+      "transaction_count": 27
+    },
+    {
+      "date": "2025-11-30",
+      "receipts": 114.0,
+      "disbursements": 21674.45,
+      "net_flow": -21560.45,
+      "transaction_count": 8
+    },
+    {
+      "date": "2025-12-01",
+      "receipts": 10818.58,
+      "disbursements": 21361.41,
+      "net_flow": -10542.83,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-12-02",
+      "receipts": 947.75,
+      "disbursements": 85537.71,
+      "net_flow": -84589.96,
+      "transaction_count": 7
+    },
+    {
+      "date": "2025-12-03",
+      "receipts": 7917.92,
+      "disbursements": 15649.58,
+      "net_flow": -7731.66,
+      "transaction_count": 18
+    },
+    {
+      "date": "2025-12-04",
+      "receipts": 3950.28,
+      "disbursements": 261886.81,
+      "net_flow": -257936.53,
+      "transaction_count": 16
+    },
+    {
+      "date": "2025-12-05",
+      "receipts": 1839.86,
+      "disbursements": 89679.7,
+      "net_flow": -87839.84,
+      "transaction_count": 25
+    },
+    {
+      "date": "2025-12-06",
+      "receipts": 47639.75,
+      "disbursements": 50866.0,
+      "net_flow": -3226.25,
+      "transaction_count": 17
+    },
+    {
+      "date": "2025-12-07",
+      "receipts": 0,
+      "disbursements": 39676.1,
+      "net_flow": -39676.1,
+      "transaction_count": 12
+    },
+    {
+      "date": "2025-12-08",
+      "receipts": 16570.24,
+      "disbursements": 18955.1,
+      "net_flow": -2384.86,
+      "transaction_count": 27
+    },
+    {
+      "date": "2025-12-09",
+      "receipts": 617.82,
+      "disbursements": 30465.75,
+      "net_flow": -29847.93,
+      "transaction_count": 13
+    },
+    {
+      "date": "2025-12-10",
+      "receipts": 11642.33,
+      "disbursements": 30264.25,
+      "net_flow": -18621.92,
+      "transaction_count": 11
+    },
+    {
+      "date": "2025-12-11",
+      "receipts": 2188.67,
+      "disbursements": 32853.33,
+      "net_flow": -30664.66,
+      "transaction_count": 9
+    },
+    {
+      "date": "2025-12-12",
+      "receipts": 3438.9,
+      "disbursements": 17054.6,
+      "net_flow": -13615.7,
+      "transaction_count": 8
+    },
+    {
+      "date": "2025-12-13",
+      "receipts": 64135.87,
+      "disbursements": 30819.73,
+      "net_flow": 33316.14,
+      "transaction_count": 25
+    },
+    {
+      "date": "2025-12-14",
+      "receipts": 3159.9,
+      "disbursements": 32751.41,
+      "net_flow": -29591.51,
+      "transaction_count": 11
+    },
+    {
+      "date": "2025-12-15",
+      "receipts": 10346.34,
+      "disbursements": 65357.94,
+      "net_flow": -55011.6,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-12-16",
+      "receipts": 518.87,
+      "disbursements": 31220.48,
+      "net_flow": -30701.61,
+      "transaction_count": 14
+    },
+    {
+      "date": "2025-12-17",
+      "receipts": 16767.42,
+      "disbursements": 15372.02,
+      "net_flow": 1395.4,
+      "transaction_count": 47
+    },
+    {
+      "date": "2025-12-18",
+      "receipts": 2138.52,
+      "disbursements": 111771.72,
+      "net_flow": -109633.2,
+      "transaction_count": 9
+    },
+    {
+      "date": "2025-12-19",
+      "receipts": 2212.05,
+      "disbursements": 1599.39,
+      "net_flow": 612.66,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-12-20",
+      "receipts": 2418.75,
+      "disbursements": 208786.43,
+      "net_flow": -206367.68,
+      "transaction_count": 13
+    },
+    {
+      "date": "2025-12-21",
+      "receipts": 212.27,
+      "disbursements": 3207.91,
+      "net_flow": -2995.64,
+      "transaction_count": 4
+    },
+    {
+      "date": "2025-12-22",
+      "receipts": 43757.95,
+      "disbursements": 99258.29,
+      "net_flow": -55500.34,
+      "transaction_count": 27
+    },
+    {
+      "date": "2025-12-23",
+      "receipts": 10482.92,
+      "disbursements": 21714.6,
+      "net_flow": -11231.68,
+      "transaction_count": 26
+    },
+    {
+      "date": "2025-12-24",
+      "receipts": 5292.5,
+      "disbursements": 490.06,
+      "net_flow": 4802.44,
+      "transaction_count": 4
+    },
+    {
+      "date": "2025-12-25",
+      "receipts": 2307.97,
+      "disbursements": 432.69,
+      "net_flow": 1875.28,
+      "transaction_count": 4
+    },
+    {
+      "date": "2025-12-26",
+      "receipts": 525.18,
+      "disbursements": 22112.97,
+      "net_flow": -21587.79,
+      "transaction_count": 8
+    },
+    {
+      "date": "2025-12-27",
+      "receipts": 3124.34,
+      "disbursements": 10953.0,
+      "net_flow": -7828.66,
+      "transaction_count": 14
+    },
+    {
+      "date": "2025-12-28",
+      "receipts": 92008.92,
+      "disbursements": 8919.48,
+      "net_flow": 83089.44,
+      "transaction_count": 15
+    },
+    {
+      "date": "2025-12-29",
+      "receipts": 16050.03,
+      "disbursements": 4827.78,
+      "net_flow": 11222.25,
+      "transaction_count": 7
+    },
+    {
+      "date": "2025-12-30",
+      "receipts": 0,
+      "disbursements": 25576.69,
+      "net_flow": -25576.69,
+      "transaction_count": 3
+    },
+    {
+      "date": "2025-12-31",
+      "receipts": 0,
+      "disbursements": 660.0,
+      "net_flow": -660.0,
+      "transaction_count": 1
+    },
+    {
+      "date": "2026-01-01",
+      "receipts": 26505.96,
+      "disbursements": 0,
+      "net_flow": 26505.96,
+      "transaction_count": 1
+    },
+    {
+      "date": "2026-01-02",
+      "receipts": 153.09,
+      "disbursements": 13045.29,
+      "net_flow": -12892.2,
+      "transaction_count": 5
+    },
+    {
+      "date": "2026-01-03",
+      "receipts": 75.24,
+      "disbursements": 2904.74,
+      "net_flow": -2829.5,
+      "transaction_count": 5
+    },
+    {
+      "date": "2026-01-04",
+      "receipts": 0,
+      "disbursements": 193845.79,
+      "net_flow": -193845.79,
+      "transaction_count": 13
+    },
+    {
+      "date": "2026-01-05",
+      "receipts": 45.45,
+      "disbursements": 128241.85,
+      "net_flow": -128196.4,
+      "transaction_count": 7
+    },
+    {
+      "date": "2026-01-06",
+      "receipts": 99091.61,
+      "disbursements": 3361.28,
+      "net_flow": 95730.33,
+      "transaction_count": 5
+    },
+    {
+      "date": "2026-01-07",
+      "receipts": 5199.78,
+      "disbursements": 0,
+      "net_flow": 5199.78,
+      "transaction_count": 8
+    },
+    {
+      "date": "2026-01-08",
+      "receipts": 0,
+      "disbursements": 1523.85,
+      "net_flow": -1523.85,
+      "transaction_count": 1
+    },
+    {
+      "date": "2026-01-09",
+      "receipts": 511.08,
+      "disbursements": 2932.55,
+      "net_flow": -2421.47,
+      "transaction_count": 4
+    },
+    {
+      "date": "2026-01-10",
+      "receipts": 1325.18,
+      "disbursements": 0,
+      "net_flow": 1325.18,
+      "transaction_count": 1
+    },
+    {
+      "date": "2026-01-11",
+      "receipts": 14504.69,
+      "disbursements": 17615.81,
+      "net_flow": -3111.12,
+      "transaction_count": 4
+    },
+    {
+      "date": "2026-01-12",
+      "receipts": 60213.71,
+      "disbursements": 0,
+      "net_flow": 60213.71,
+      "transaction_count": 5
+    },
+    {
+      "date": "2026-01-13",
+      "receipts": 0,
+      "disbursements": 19988.72,
+      "net_flow": -19988.72,
+      "transaction_count": 3
+    },
+    {
+      "date": "2026-01-14",
+      "receipts": 1566.87,
+      "disbursements": 14753.84,
+      "net_flow": -13186.97,
+      "transaction_count": 7
+    },
+    {
+      "date": "2026-01-15",
+      "receipts": 1629.97,
+      "disbursements": 7482.93,
+      "net_flow": -5852.96,
+      "transaction_count": 5
+    },
+    {
+      "date": "2026-01-16",
+      "receipts": 175.07,
+      "disbursements": 0,
+      "net_flow": 175.07,
+      "transaction_count": 2
+    },
+    {
+      "date": "2026-01-19",
+      "receipts": 31.5,
+      "disbursements": 163092.86,
+      "net_flow": -163061.36,
+      "transaction_count": 2
+    },
+    {
+      "date": "2026-01-21",
+      "receipts": 148.78,
+      "disbursements": 0,
+      "net_flow": 148.78,
+      "transaction_count": 1
+    },
+    {
+      "date": "2026-01-22",
+      "receipts": 221.97,
+      "disbursements": 0,
+      "net_flow": 221.97,
+      "transaction_count": 1
+    }
+  ]
+}
