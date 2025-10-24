@@ -715,27 +715,37 @@ const PaymentManager = {
             // Show loading
             document.getElementById('pm-content').innerHTML = '<div class="loading">📥 Loading receivables data...</div>';
 
-            // Load from BankData
-            const [receivablesResponse, profilesResponse] = await Promise.all([
-                fetch('/BankData/terjtave PIvka 22.10.25.xlsx'),
-                fetch('/BankData/customer_payment_profiles.xlsx')
-            ]);
+            // Load real receivables data from converted JSON
+            const response = await fetch('/BankData/receivables_data.json');
+            if (!response.ok) {
+                throw new Error(`Failed to load receivables: ${response.status}`);
+            }
 
-            // For now, load from the forecast JSON which has the data processed
-            const forecastResponse = await fetch('/BankData/bank_forecast_90days.json');
-            const forecastData = await forecastResponse.json();
+            const data = await response.json();
 
-            // Convert forecast data to receivables format
-            this.state.customers = this.processReceivablesData(forecastData);
+            // Map to our format
+            this.state.customers = data.receivables.map(r => ({
+                id: r.id,
+                name: r.customer_name,
+                invoice: r.invoice,
+                amount: r.amount,
+                dueDate: r.due_date,
+                daysUntilDue: r.days_until_due,
+                daysOverdue: r.days_overdue,
+                contractualTerms: r.contractual_terms,
+                avgPaymentDelay: r.avg_payment_delay,
+                expectedPaymentDate: r.expected_payment_date,
+                reliability: r.reliability
+            }));
 
             // Re-render
             this.render();
 
-            console.log(`Loaded ${this.state.customers.length} receivables`);
+            console.log(`✓ Loaded ${this.state.customers.length} receivables (Total: €${this.formatCurrency(data.total_amount)})`);
 
         } catch (error) {
             console.error('Error loading receivables:', error);
-            alert(`❌ Error loading receivables:\n\n${error.message}`);
+            alert(`❌ Error loading receivables:\n\n${error.message}\n\nMake sure receivables_data.json exists in BankData folder.`);
             this.render();
         }
     },
@@ -748,12 +758,26 @@ const PaymentManager = {
             // Show loading
             document.getElementById('pm-content').innerHTML = '<div class="loading">📥 Loading payment obligations...</div>';
 
-            // Load from BankData
-            const forecastResponse = await fetch('/BankData/bank_forecast_90days.json');
-            const forecastData = await forecastResponse.json();
+            // Load real payables data from converted JSON
+            const response = await fetch('/BankData/payables_data.json');
+            if (!response.ok) {
+                throw new Error(`Failed to load payables: ${response.status}`);
+            }
 
-            // Convert forecast data to obligations format
-            this.state.suppliers = this.processObligationsData(forecastData);
+            const data = await response.json();
+
+            // Map to our format
+            this.state.suppliers = data.payables.map(p => ({
+                id: p.id,
+                name: p.supplier_name,
+                invoice: p.invoice,
+                amount: p.amount,
+                dueDate: p.due_date,
+                daysUntilDue: p.days_until_due,
+                daysOverdue: p.days_overdue,
+                urgency: p.urgency,
+                actualPayDate: p.actual_pay_date
+            }));
 
             // Load saved urgency classifications
             this.loadUrgencyClassifications();
@@ -761,77 +785,16 @@ const PaymentManager = {
             // Re-render
             this.render();
 
-            console.log(`Loaded ${this.state.suppliers.length} payment obligations`);
+            console.log(`✓ Loaded ${this.state.suppliers.length} payment obligations (Total: €${this.formatCurrency(data.total_amount)})`);
 
         } catch (error) {
             console.error('Error loading obligations:', error);
-            alert(`❌ Error loading obligations:\n\n${error.message}`);
+            alert(`❌ Error loading obligations:\n\n${error.message}\n\nMake sure payables_data.json exists in BankData folder.`);
             this.render();
         }
     },
 
-    /**
-     * Process receivables data
-     */
-    processReceivablesData(forecastData) {
-        const customers = [];
-        const today = new Date();
-
-        // Simulate receivables from forecast (in real implementation, load from Excel)
-        for (let i = 0; i < 20; i++) {
-            const dueDate = new Date(today);
-            dueDate.setDate(today.getDate() + Math.floor(Math.random() * 60) - 10);
-
-            const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
-            const avgDelay = 20 + Math.random() * 30;
-
-            customers.push({
-                id: `RECV-${i + 1}`,
-                name: `Customer ${i + 1}`,
-                invoice: `INV-2025-${(i + 1).toString().padStart(4, '0')}`,
-                amount: Math.floor(Math.random() * 50000) + 5000,
-                dueDate: dueDate.toISOString().split('T')[0],
-                daysUntilDue: daysUntilDue,
-                daysOverdue: daysUntilDue < 0 ? Math.abs(daysUntilDue) : 0,
-                contractualTerms: 30,
-                avgPaymentDelay: avgDelay,
-                expectedPaymentDate: new Date(dueDate.getTime() + avgDelay * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                reliability: Math.floor(Math.random() * 50) + 50
-            });
-        }
-
-        return customers.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
-    },
-
-    /**
-     * Process obligations data
-     */
-    processObligationsData(forecastData) {
-        const suppliers = [];
-        const today = new Date();
-
-        // Simulate obligations from forecast (in real implementation, load from Excel)
-        for (let i = 0; i < 15; i++) {
-            const dueDate = new Date(today);
-            dueDate.setDate(today.getDate() + Math.floor(Math.random() * 45) - 5);
-
-            const daysUntilDue = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
-
-            suppliers.push({
-                id: `OBLIG-${i + 1}`,
-                name: `Supplier ${i + 1}`,
-                invoice: `BILL-2025-${(i + 1).toString().padStart(4, '0')}`,
-                amount: Math.floor(Math.random() * 40000) + 3000,
-                dueDate: dueDate.toISOString().split('T')[0],
-                daysUntilDue: daysUntilDue,
-                daysOverdue: daysUntilDue < 0 ? Math.abs(daysUntilDue) : 0,
-                urgency: 'urgent', // Default
-                actualPayDate: null
-            });
-        }
-
-        return suppliers.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
-    },
+    // Mock data generation functions removed - now loading real data from Excel/JSON
 
     /**
      * Set urgency for a supplier
