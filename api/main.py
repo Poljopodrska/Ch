@@ -142,6 +142,7 @@ async def root():
 # Mount static directories
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/modules", StaticFiles(directory="modules"), name="modules")
+app.mount("/BankData", StaticFiles(directory="BankData"), name="bankdata")
 # Legacy meat-production-planner removed in v0.5.4
 
 # Serve debug pages
