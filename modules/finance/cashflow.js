@@ -1391,10 +1391,6 @@ const CashFlow = {
             // Process and import forecast data
             this.importBankForecastData(forecastData.daily_forecast);
 
-            alert('✅ Bank forecast loaded successfully!\n\n' +
-                  'Receipts and Disbursements have been updated with AI predictions.\n' +
-                  'Review the changes and save when ready.');
-
         } catch (error) {
             console.error('Error loading bank forecast:', error);
             alert(`❌ Error loading bank forecast:\n\n${error.message}\n\n` +
@@ -1410,6 +1406,9 @@ const CashFlow = {
 
         let receiptsUpdated = 0;
         let disbursementsUpdated = 0;
+        let totalReceipts = 0;
+        let totalDisbursements = 0;
+        const monthsWithData = new Set();
 
         // Process each day in the forecast
         dailyForecast.forEach(dayData => {
@@ -1436,6 +1435,8 @@ const CashFlow = {
 
                         receiptsRow.months[month].weeks[weekNum].days[day].value = dayData.receipts;
                         receiptsUpdated++;
+                        totalReceipts += dayData.receipts;
+                        monthsWithData.add(month);
                     }
                 }
 
@@ -1474,6 +1475,8 @@ const CashFlow = {
                     }
 
                     disbursementsUpdated++;
+                    totalDisbursements += dayData.disbursements;
+                    monthsWithData.add(month);
                 }
 
             } catch (error) {
@@ -1483,6 +1486,11 @@ const CashFlow = {
 
         console.log(`✓ Updated ${receiptsUpdated} receipt days`);
         console.log(`✓ Updated ${disbursementsUpdated} disbursement days`);
+
+        // Auto-expand months with data so user can see the changes
+        monthsWithData.forEach(month => {
+            this.state.expanded.months.add(`month-${month}`);
+        });
 
         // Recalculate all totals and formulas
         ['receipts', 'disbursementsNujni', 'disbursementsPogojnoNujni', 'disbursementsNenujni'].forEach(type => {
@@ -1496,6 +1504,19 @@ const CashFlow = {
 
         // Re-render the grid
         this.renderCashFlowGrid();
+
+        // Show detailed summary
+        const monthNames = Array.from(monthsWithData).map(m => this.getMonthShort(m)).join(', ');
+        alert(`✅ Bank Forecast Imported Successfully!\n\n` +
+              `📊 Summary:\n` +
+              `• Receipts: ${receiptsUpdated} days updated\n` +
+              `• Disbursements: ${disbursementsUpdated} days updated\n` +
+              `• Total Expected Receipts: €${this.formatCurrency(totalReceipts)}\n` +
+              `• Total Expected Disbursements: €${this.formatCurrency(totalDisbursements)}\n` +
+              `• Net Position: €${this.formatCurrency(totalReceipts - totalDisbursements)}\n\n` +
+              `📅 Months Updated: ${monthNames}\n\n` +
+              `✓ Months have been auto-expanded to show the data.\n` +
+              `✓ Click month headers to expand weeks, then weeks to see daily values.`);
     }
 };
 
