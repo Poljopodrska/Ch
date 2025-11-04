@@ -878,8 +878,7 @@ const PricingV4 = {
                                                    class="factor-input"
                                                    value="${this.state.industryProductionFactors['fresh-meat']}"
                                                    step="0.01"
-                                                   min="1.00"
-                                                   max="2.00">
+                                                   min="0.01">
                                         </td>
                                     </tr>
                                     <tr>
@@ -890,8 +889,7 @@ const PricingV4 = {
                                                    class="factor-input"
                                                    value="${this.state.industryProductionFactors['meat-products']}"
                                                    step="0.01"
-                                                   min="1.00"
-                                                   max="2.00">
+                                                   min="0.01">
                                         </td>
                                     </tr>
                                     <tr>
@@ -902,8 +900,7 @@ const PricingV4 = {
                                                    class="factor-input"
                                                    value="${this.state.industryProductionFactors['delamaris']}"
                                                    step="0.01"
-                                                   min="1.00"
-                                                   max="2.00">
+                                                   min="0.01">
                                         </td>
                                     </tr>
                                 </tbody>
@@ -1682,14 +1679,14 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             const meatProducts = parseFloat(document.getElementById('factor-meat-products').value);
             const delamaris = parseFloat(document.getElementById('factor-delamaris').value);
 
-            // Validate
+            // Validate - only check for valid numbers, allow any positive value
             if (isNaN(freshMeat) || isNaN(meatProducts) || isNaN(delamaris)) {
                 statusDiv.innerHTML = '<div class="error">❌ Invalid factor values</div>';
                 return;
             }
 
-            if (freshMeat < 1.0 || freshMeat > 2.0 || meatProducts < 1.0 || meatProducts > 2.0 || delamaris < 1.0 || delamaris > 2.0) {
-                statusDiv.innerHTML = '<div class="error">❌ Factors must be between 1.00 and 2.00</div>';
+            if (freshMeat <= 0 || meatProducts <= 0 || delamaris <= 0) {
+                statusDiv.innerHTML = '<div class="error">❌ Factors must be positive numbers</div>';
                 return;
             }
 
