@@ -302,7 +302,7 @@ const PricingV4 = {
                 id: 'fresh-meat',
                 nameSl: this.getText('freshMeat'),
                 nameHr: this.t.hr.freshMeat,
-                icon: '🥩',
+                icon: '🐔',
                 products: [
                     { id: 'p001', code: 'PIŠ-FILE', nameSl: this.t.sl.chickenFillet, nameHr: this.t.hr.chickenFillet, unit: this.getText('kg') },
                     { id: 'p002', code: 'PIŠ-PRSI', nameSl: this.t.sl.chickenBreast, nameHr: this.t.hr.chickenBreast, unit: this.getText('kg') },
@@ -316,7 +316,7 @@ const PricingV4 = {
                 id: 'meat-products',
                 nameSl: this.t.sl.meatProducts,
                 nameHr: this.t.hr.meatProducts,
-                icon: '🌭',
+                icon: '🥩',
                 products: [
                     { id: 'p007', code: 'KLB-KRANJSKA', nameSl: this.t.sl.carniolan, nameHr: this.t.hr.carniolan, unit: this.getText('kg') },
                     { id: 'p008', code: 'SUH-PRŠUT', nameSl: this.t.sl.prosciutto, nameHr: this.t.hr.prosciutto, unit: this.getText('kg') }
@@ -770,12 +770,9 @@ const PricingV4 = {
                                             <th>aktiven</th>
                                         </tr>
                                         <tr>
-                                            <td>PIŠ-FILE</td>
-                                            <td>${this.getName({nameSl: this.t.sl.chickenFillet, nameHr: this.t.hr.chickenFillet})}</td>
-                                            <td>kg</td>
-                                            <td>${this.getName({nameSl: this.t.sl.freshMeat, nameHr: this.t.hr.freshMeat})}</td>
-                                            <td>5.44</td>
-                                            <td>TRUE</td>
+                                            <td colspan="6" style="text-align: center; font-style: italic; color: #666;">
+                                                (${this.state.language === 'sl' ? 'aktiven: DA ali NE' : 'aktiven: DA ili NE'})
+                                            </td>
                                         </tr>
                                     </table>
                                     <p class="format-note"><strong>${this.getText('industrijaOptions')}:</strong> ${this.getName({nameSl: this.t.sl.freshMeat, nameHr: this.t.hr.freshMeat})}, ${this.getName({nameSl: this.t.sl.meatProducts, nameHr: this.t.hr.meatProducts})}, ${this.getText('delamaris')}</p>
@@ -795,15 +792,9 @@ const PricingV4 = {
                                             <th>aktiven</th>
                                         </tr>
                                         <tr>
-                                            <td>PIŠ-FILE</td>
-                                            <td>c001</td>
-                                            <td>Plodine</td>
-                                            <td>Trgovska veriga</td>
-                                            <td>7.25</td>
-                                            <td>15</td>
-                                            <td>3</td>
-                                            <td>11</td>
-                                            <td>TRUE</td>
+                                            <td colspan="9" style="text-align: center; font-style: italic; color: #666;">
+                                                (${this.state.language === 'sl' ? 'rabati v %, aktiven: DA ali NE' : 'rabati u %, aktiven: DA ili NE'})
+                                            </td>
                                         </tr>
                                     </table>
                                 </div>
