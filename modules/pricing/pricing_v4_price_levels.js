@@ -1508,12 +1508,14 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
 
+                    console.log('Available sheets in Excel:', workbook.SheetNames);
+
                     // Validate required sheets
                     if (!workbook.SheetNames.includes('Izdelki')) {
-                        throw new Error('Sheet "Izdelki" not found in Excel file');
+                        throw new Error(`Sheet "Izdelki" not found in Excel file. Available sheets: ${workbook.SheetNames.join(', ')}`);
                     }
                     if (!workbook.SheetNames.includes('Cene_Kupci')) {
-                        throw new Error('Sheet "Cene_Kupci" not found in Excel file');
+                        throw new Error(`Sheet "Cene_Kupci" not found in Excel file. Available sheets: ${workbook.SheetNames.join(', ')}`);
                     }
 
                     // Parse sheets
