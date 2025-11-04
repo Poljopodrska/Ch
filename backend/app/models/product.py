@@ -56,9 +56,36 @@ class Industry(Base):
 
     # Relationships
     products = relationship("Product", back_populates="industry")
+    production_factor = relationship("IndustryProductionFactor", back_populates="industry", uselist=False)
 
     def __repr__(self):
         return f"<Industry {self.code}: {self.name_sl}>"
+
+
+class IndustryProductionFactor(Base):
+    """
+    Production price factor for each industry (LC × factor = production price threshold).
+    Used to calculate 'Cijena iznad Proizvodne cijene' status.
+    This is a 3×2 table (3 industries, 1 factor value each).
+    """
+
+    __tablename__ = "industry_production_factors"
+
+    id = Column(Integer, primary_key=True, index=True)
+    industry_id = Column(Integer, ForeignKey("industries.id"), unique=True, nullable=False, index=True)
+
+    # The production factor: realized price must be >= (LC × production_factor)
+    production_factor = Column(Float, nullable=False, default=1.20)  # Default 1.20 (20% above LC)
+
+    # Metadata
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    industry = relationship("Industry", back_populates="production_factor")
+
+    def __repr__(self):
+        return f"<IndustryProductionFactor {self.industry.code if self.industry else 'N/A'}: {self.production_factor}>"
 
 
 class ProductBasePrice(Base):

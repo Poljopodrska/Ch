@@ -16,7 +16,14 @@ const PricingV4 = {
         customerPricing: {}, // Customer-specific pricing (CP, discounts, realized)
         editMode: false,
 
-        // Industry factors (controlled quarterly)
+        // Industry factors (controlled quarterly) - per industry production price factor
+        industryProductionFactors: {
+            'fresh-meat': 1.20,      // LC × 1.20 = Production price threshold for fresh meat
+            'meat-products': 1.25,   // LC × 1.25 = Production price threshold for meat products
+            'delamaris': 1.15        // LC × 1.15 = Production price threshold for Delamaris
+        },
+
+        // Global factors
         industryFactors: {
             ohFactor: 1.25,      // Overhead factor (LC * 1.25 = C0)
             minProfitMargin: 0.0425,  // 4.25% minimum profit
@@ -56,6 +63,9 @@ const PricingV4 = {
             strategicCmin: 'Strateški Cmin',
             cp: 'CP',
             realized: 'Realizirano',
+            aboveProduction: 'Iznad proizvodne cijene',
+            aboveC0: 'Iznad C0',
+            aboveCmin: 'Iznad Cmin',
             visualization: 'Vizualizacija',
 
             // Customer table
@@ -174,6 +184,9 @@ const PricingV4 = {
             strategicCmin: 'Strateški Cmin',
             cp: 'CP',
             realized: 'Realizirano',
+            aboveProduction: 'Iznad proizvodne cijene',
+            aboveC0: 'Iznad C0',
+            aboveCmin: 'Iznad Cmin',
             visualization: 'Vizualizacija',
 
             // Customer table
@@ -1131,13 +1144,40 @@ const PricingV4 = {
         const customers = this.state.customerPricing[productId] || {};
         let html = '';
 
-        Object.values(customers).forEach(custPricing => {
-            const coverageClass = custPricing.coverage.vsCmin >= 100 ? 'full' :
-                                 custPricing.coverage.vsCmin >= 95 ? 'good' :
-                                 custPricing.coverage.vsCmin >= 90 ? 'medium' : 'low';
+        // Get the industry for this product to determine production factor
+        const product = this.state.products.find(p => p.id === productId);
+        let industryId = 'fresh-meat'; // default
+        this.state.productGroups.forEach(group => {
+            if (group.products.find(p => p.id === productId)) {
+                industryId = group.id;
+            }
+        });
+        const productionFactor = this.state.industryProductionFactors[industryId] || 1.20;
 
+        // Add customer table header row
+        html += `
+            <tr class="customer-header-row">
+                <th colspan="2">${this.getText('customer')}</th>
+                <th>${this.getText('strategicCmin')}</th>
+                <th>${this.getText('cp')}</th>
+                <th>${this.getText('realized')}</th>
+                <th class="status-header" title="${this.getText('aboveProduction')} (LC × ${productionFactor.toFixed(2)})">${this.getText('aboveProduction')}</th>
+                <th class="status-header">${this.getText('aboveC0')}</th>
+                <th class="status-header">${this.getText('aboveCmin')}</th>
+            </tr>
+        `;
+
+        Object.values(customers).forEach(custPricing => {
             const detailKey = `${productId}_${custPricing.customerId}`;
             const isDetailExpanded = this.state.expanded.customerDetails.has(detailKey);
+
+            // Calculate production price threshold (LC × industry factor)
+            const productionPrice = basePrice.lc * productionFactor;
+
+            // Check if price is above thresholds
+            const aboveProduction = custPricing.realizedPrice >= productionPrice;
+            const aboveC0 = custPricing.realizedPrice >= basePrice.c0;
+            const aboveCmin = custPricing.realizedPrice >= basePrice.cmin;
 
             html += `
                 <tr class="customer-row">
@@ -1150,21 +1190,23 @@ const PricingV4 = {
                         <strong>👤 ${custPricing.customerName}</strong>
                         <br><small>${custPricing.customerType}</small>
                     </td>
-                    <td class="price-level strategic">
+                    <td class="price-simple strategic">
                         €${custPricing.strategicCmin.toFixed(2)}
-                        ${custPricing.strategicCmin > basePrice.cmin ?
-                            `<span class="buffer-badge">+${((custPricing.strategicCmin - basePrice.cmin) / basePrice.cmin * 100).toFixed(1)}%</span>` : ''}
                     </td>
-                    <td class="cp-price">
+                    <td class="price-simple cp">
                         €${custPricing.cp.toFixed(2)}
-                        <br><span class="discount-badge">-${custPricing.totalDiscounts}%</span>
                     </td>
-                    <td class="realized-cell">
-                        <strong>€${custPricing.realizedPrice.toFixed(2)}</strong>
-                        <br><span class="coverage ${coverageClass}">${custPricing.coverage.vsCmin.toFixed(1)}% ${this.getText('vsCmin')}</span>
+                    <td class="price-simple realized">
+                        €${custPricing.realizedPrice.toFixed(2)}
                     </td>
-                    <td class="visualization-cell">
-                        ${this.renderPriceFlowChart(basePrice, custPricing)}
+                    <td class="status-check ${aboveProduction ? 'pass' : 'fail'}">
+                        <span class="status-icon">${aboveProduction ? '✓' : '✗'}</span>
+                    </td>
+                    <td class="status-check ${aboveC0 ? 'pass' : 'fail'}">
+                        <span class="status-icon">${aboveC0 ? '✓' : '✗'}</span>
+                    </td>
+                    <td class="status-check ${aboveCmin ? 'pass' : 'fail'}">
+                        <span class="status-icon">${aboveCmin ? '✓' : '✗'}</span>
                     </td>
                 </tr>
                 ${isDetailExpanded ? this.renderDetailedBreakdown(productId, custPricing, basePrice) : ''}
@@ -1255,7 +1297,7 @@ const PricingV4 = {
 
         return `
             <tr class="detail-row">
-                <td colspan="6">
+                <td colspan="8">
                     <div class="detailed-breakdown">
                         <h4>📊 ${this.getText('detailedBreakdown')}: ${this.getName(product)} → ${custPricing.customerName}</h4>
 
@@ -2079,9 +2121,67 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     background: #eceff1;
                 }
 
+                .customer-header-row {
+                    background: #37474f !important;
+                    color: white;
+                    font-weight: 600;
+                }
+
+                .customer-header-row th {
+                    padding: 8px;
+                    font-size: 11px;
+                    text-align: center;
+                    border: 1px solid #546e7a;
+                }
+
+                .status-header {
+                    font-size: 10px !important;
+                    white-space: nowrap;
+                }
+
                 .customer-info {
                     padding-left: 40px !important;
                     position: relative;
+                }
+
+                .price-simple {
+                    text-align: right;
+                    font-weight: 600;
+                    font-size: 14px;
+                }
+
+                .price-simple.strategic {
+                    background: #9C27B010;
+                }
+
+                .price-simple.cp {
+                    background: #2196F310;
+                }
+
+                .price-simple.realized {
+                    background: #4CAF5010;
+                    color: #2e7d32;
+                }
+
+                .status-check {
+                    text-align: center;
+                    font-size: 20px;
+                    padding: 8px;
+                }
+
+                .status-check.pass {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+
+                .status-check.fail {
+                    background: #ffebee;
+                    color: #c62828;
+                }
+
+                .status-icon {
+                    font-weight: bold;
+                    font-size: 22px;
                 }
 
                 .expand-detail-btn {

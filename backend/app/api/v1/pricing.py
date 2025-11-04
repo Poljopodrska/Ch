@@ -11,7 +11,7 @@ from pydantic import BaseModel
 import pandas as pd
 
 from app.core.database import get_db
-from app.models.product import Product, Industry, ProductBasePrice, CustomerProductPrice
+from app.models.product import Product, Industry, ProductBasePrice, CustomerProductPrice, IndustryProductionFactor
 
 router = APIRouter()
 
@@ -661,4 +661,89 @@ async def get_product_pricing_history(
             }
             for cp in customer_prices
         ]
+    }
+
+
+# ========================================
+# Industry Production Factors
+# ========================================
+
+class IndustryProductionFactorResponse(BaseModel):
+    id: int
+    industry_id: int
+    industry_code: str
+    industry_name_sl: str
+    industry_name_hr: str
+    production_factor: float
+
+    class Config:
+        from_attributes = True
+
+
+class IndustryProductionFactorUpdate(BaseModel):
+    production_factor: float
+
+
+@router.get("/production-factors", response_model=List[IndustryProductionFactorResponse])
+async def get_production_factors(db: Session = Depends(get_db)):
+    """
+    Get all industry production factors.
+    Returns a 3×2 table: 3 industries with their production factors.
+    """
+    factors = db.query(IndustryProductionFactor).join(Industry).all()
+
+    return [
+        {
+            "id": factor.id,
+            "industry_id": factor.industry_id,
+            "industry_code": factor.industry.code,
+            "industry_name_sl": factor.industry.name_sl,
+            "industry_name_hr": factor.industry.name_hr,
+            "production_factor": factor.production_factor
+        }
+        for factor in factors
+    ]
+
+
+@router.put("/production-factors/{industry_code}", response_model=IndustryProductionFactorResponse)
+async def update_production_factor(
+    industry_code: str,
+    update: IndustryProductionFactorUpdate,
+    db: Session = Depends(get_db)
+):
+    """
+    Update the production factor for a specific industry.
+    The production factor is used to calculate: LC × production_factor = production price threshold.
+    """
+    # Find industry
+    industry = db.query(Industry).filter(Industry.code == industry_code).first()
+    if not industry:
+        raise HTTPException(status_code=404, detail=f"Industry with code '{industry_code}' not found")
+
+    # Find or create production factor
+    factor = db.query(IndustryProductionFactor).filter(
+        IndustryProductionFactor.industry_id == industry.id
+    ).first()
+
+    if not factor:
+        # Create new factor if doesn't exist
+        factor = IndustryProductionFactor(
+            industry_id=industry.id,
+            production_factor=update.production_factor
+        )
+        db.add(factor)
+    else:
+        # Update existing factor
+        factor.production_factor = update.production_factor
+
+    db.commit()
+    db.refresh(factor)
+
+    return {
+        "id": factor.id,
+        "industry_id": factor.industry_id,
+        "industry_code": industry.code,
+        "industry_name_sl": industry.name_sl,
+        "industry_name_hr": industry.name_hr,
+        "production_factor": factor.production_factor
     }

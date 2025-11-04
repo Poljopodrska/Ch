@@ -6,7 +6,7 @@ from app.models.payment import Payment
 from app.models.prediction import Prediction
 from app.models.ml_model import MLModel
 from app.models.upload_history import UploadHistory
-from app.models.product import Product, Industry, ProductBasePrice, CustomerProductPrice
+from app.models.product import Product, Industry, ProductBasePrice, CustomerProductPrice, IndustryProductionFactor
 
 __all__ = [
     "Customer",
@@ -19,4 +19,5 @@ __all__ = [
     "Industry",
     "ProductBasePrice",
     "CustomerProductPrice",
+    "IndustryProductionFactor",
 ]
