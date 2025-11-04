@@ -1,17 +1,19 @@
 // Pricing Module V4 - Price Levels System (LC, C0, Cmin, CP)
 // New pricing policy with 4 price levels instead of overhead breakdown
 const PricingV4 = {
-    VERSION: '4.0.0',
+    VERSION: '4.0.1',
 
     state: {
         expanded: {
             groups: new Set(['fresh', 'processed']),
             subgroups: new Set(),
-            productDetails: new Set() // Track which products show detailed breakdown
+            products: new Set(), // Track which products show customer rows
+            customerDetails: new Set() // Track which customer rows show detailed breakdown
         },
         products: [],
         productGroups: [],
-        pricingData: {},
+        pricingData: {}, // Product base data (LC, C0, Cmin)
+        customerPricing: {}, // Customer-specific pricing (CP, discounts, realized)
         editMode: false,
 
         // Industry factors (controlled quarterly)
@@ -29,7 +31,8 @@ const PricingV4 = {
             console.log('Product structure loaded:', this.state.productGroups.length, 'groups');
             this.loadPricingData();
             console.log('Pricing data loaded:', Object.keys(this.state.pricingData).length, 'products');
-            this.loadSavedPricingData();
+            this.loadCustomerPricing();
+            console.log('Customer pricing loaded:', Object.keys(this.state.customerPricing).length, 'product-customer combinations');
             this.render();
             console.log('Pricing V4 render complete');
         } catch (error) {
@@ -62,8 +65,7 @@ const PricingV4 = {
                         icon: '🐖',
                         products: [
                             { id: 'p004', code: 'SVP-PLEČKA', name: 'Svinjska plečka', nameEn: 'Pork Shoulder', unit: 'kg' },
-                            { id: 'p005', code: 'SVP-FILE', name: 'Svinjski file', nameEn: 'Pork Tenderloin', unit: 'kg' },
-                            { id: 'p006', code: 'SVP-REBRA', name: 'Svinjska rebra', nameEn: 'Pork Ribs', unit: 'kg' }
+                            { id: 'p005', code: 'SVP-FILE', name: 'Svinjski file', nameEn: 'Pork Tenderloin', unit: 'kg' }
                         ]
                     },
                     {
@@ -71,8 +73,7 @@ const PricingV4 = {
                         name: 'Govedina / Beef',
                         icon: '🐄',
                         products: [
-                            { id: 'p007', code: 'GOV-FILE', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' },
-                            { id: 'p008', code: 'GOV-ZREZEK', name: 'Goveji zrezek', nameEn: 'Beef Steak', unit: 'kg' }
+                            { id: 'p006', code: 'GOV-FILE', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' }
                         ]
                     }
                 ]
@@ -87,8 +88,7 @@ const PricingV4 = {
                         name: 'Klobase / Sausages',
                         icon: '🌭',
                         products: [
-                            { id: 'p009', code: 'KLB-KRANJSKA', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' },
-                            { id: 'p010', code: 'KLB-ČEVAPI', name: 'Čevapčiči', nameEn: 'Cevapcici', unit: 'kg' }
+                            { id: 'p007', code: 'KLB-KRANJSKA', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' }
                         ]
                     },
                     {
@@ -96,8 +96,7 @@ const PricingV4 = {
                         name: 'Suhomesnati izdelki / Cured Meats',
                         icon: '🥓',
                         products: [
-                            { id: 'p011', code: 'SUH-PRŠUT', name: 'Pršut', nameEn: 'Prosciutto', unit: 'kg' },
-                            { id: 'p012', code: 'SUH-SALAMA', name: 'Salama', nameEn: 'Salami', unit: 'kg' }
+                            { id: 'p008', code: 'SUH-PRŠUT', name: 'Pršut', nameEn: 'Prosciutto', unit: 'kg' }
                         ]
                     }
                 ]
@@ -114,217 +113,279 @@ const PricingV4 = {
     },
 
     loadPricingData() {
-        // Generate pricing data with price levels for all products
+        // Load base product data (LC, C0, Cmin) - same for all customers
         this.state.products.forEach(product => {
-            const base = this.getBaseData(product.id);
+            const base = this.getBaseProductData(product.id);
 
             // Calculate price levels
-            const lc = base.lc;  // Lastna cena (production cost without OH)
-            const c0 = lc * this.state.industryFactors.ohFactor;  // LC + OH
-            const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);  // C0 + 4.25% profit
-            const strategicCmin = base.strategicCmin || cmin;  // Can be adjusted higher
-            const cp = strategicCmin / (1 - base.totalDiscounts / 100);  // Inflated for discounts
+            const lc = base.lc;
+            const c0 = lc * this.state.industryFactors.ohFactor;
+            const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);
 
             this.state.pricingData[product.id] = {
-                // Base costs
-                lc: lc,                    // Lastna cena (production cost)
-
-                // Price levels
-                c0: c0,                    // Break-even (LC + OH)
-                cmin: cmin,                // Minimum acceptable (C0 + 4.25% profit)
-                strategicCmin: strategicCmin,  // Strategic adjustment
-                cp: cp,                    // Customer price (quoted)
-
-                // Customer-specific data
-                totalDiscounts: base.totalDiscounts,  // Total % of discounts
-                discountBreakdown: base.discountBreakdown || {},
-
-                // Actual realized price (after discounts)
-                realizedPrice: cp * (1 - base.totalDiscounts / 100),
-
-                // Coverage metrics
-                coverage: {
-                    vsC0: 0,      // How well realized price covers C0
-                    vsCmin: 0,    // How well realized price covers Cmin
-                    buffer: 0     // Buffer above Cmin
-                },
-
-                // Customer info (for presentation)
-                customerName: base.customerName || 'Plodine',
-                customerType: base.customerType || 'Trgovska veriga / Retail Chain'
+                lc: lc,
+                c0: c0,
+                cmin: cmin
             };
-
-            // Calculate coverage
-            this.calculateCoverage(product.id);
         });
     },
 
-    getBaseData(productId) {
-        // Real pricing examples from the presentation
-        const baseData = {
-            // POULTRY - Using Chicken Fillet example from presentation
-            'p001': {
-                lc: 5.44,           // Calculated backward: 6.80 / 1.25
-                totalDiscounts: 29,  // 15% invoice + 3% marketing + 11% year-end
-                strategicCmin: 7.25, // Raised from 7.10 to create buffer
-                customerName: 'Plodine',
-                customerType: 'Trgovska veriga / Retail Chain',
-                discountBreakdown: {
-                    invoice: 15,
-                    marketing: 3,
-                    yearEnd: 11
-                }
-            },
-            'p002': {
-                lc: 3.80,
-                totalDiscounts: 25,
-                strategicCmin: 6.20,
-                customerName: 'Kaufland',
-                customerType: 'Hipermarket / Hypermarket',
-                discountBreakdown: { invoice: 12, marketing: 5, yearEnd: 8 }
-            },
-            'p003': {
-                lc: 2.80,
-                totalDiscounts: 22,
-                strategicCmin: 4.60,
-                customerName: 'Spar',
-                customerType: 'Supermarket',
-                discountBreakdown: { invoice: 10, marketing: 4, yearEnd: 8 }
-            },
+    loadCustomerPricing() {
+        // Load customer-specific pricing data
+        const customerData = this.getCustomerPricingData();
 
-            // PORK
-            'p004': {
-                lc: 3.20,
-                totalDiscounts: 27,
-                strategicCmin: 5.30,
-                customerName: 'Lidl',
-                customerType: 'Diskont / Discount',
-                discountBreakdown: { invoice: 15, marketing: 4, yearEnd: 8 }
-            },
-            'p005': {
-                lc: 6.40,
-                totalDiscounts: 28,
-                strategicCmin: 10.80,
-                customerName: 'Plodine',
-                customerType: 'Trgovska veriga / Retail Chain',
-                discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
-            },
-            'p006': {
-                lc: 2.80,
-                totalDiscounts: 24,
-                strategicCmin: 4.80,
-                customerName: 'Konzum',
-                customerType: 'Supermarket',
-                discountBreakdown: { invoice: 12, marketing: 4, yearEnd: 8 }
-            },
+        this.state.customerPricing = {};
 
-            // BEEF
-            'p007': {
-                lc: 12.80,
-                totalDiscounts: 30,
-                strategicCmin: 22.50,
-                customerName: 'Metro',
-                customerType: 'Cash & Carry',
-                discountBreakdown: { invoice: 18, marketing: 4, yearEnd: 8 }
-            },
-            'p008': {
-                lc: 9.60,
-                totalDiscounts: 26,
-                strategicCmin: 16.50,
-                customerName: 'Plodine',
-                customerType: 'Trgovska veriga / Retail Chain',
-                discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
-            },
+        Object.entries(customerData).forEach(([productId, customers]) => {
+            this.state.customerPricing[productId] = {};
 
-            // PROCESSED - SAUSAGES
-            'p009': {
-                lc: 4.80,
-                totalDiscounts: 26,
-                strategicCmin: 8.30,
-                customerName: 'Spar',
-                customerType: 'Supermarket',
-                discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
-            },
-            'p010': {
-                lc: 3.60,
-                totalDiscounts: 23,
-                strategicCmin: 6.00,
-                customerName: 'Kaufland',
-                customerType: 'Hipermarket / Hypermarket',
-                discountBreakdown: { invoice: 12, marketing: 3, yearEnd: 8 }
-            },
+            customers.forEach(custData => {
+                const base = this.state.pricingData[productId];
+                const strategicCmin = custData.strategicCmin;
+                const cp = strategicCmin / (1 - custData.totalDiscounts / 100);
+                const realizedPrice = cp * (1 - custData.totalDiscounts / 100);
 
-            // CURED MEATS
-            'p011': {
-                lc: 16.00,
-                totalDiscounts: 32,
-                strategicCmin: 29.50,
-                customerName: 'Mercator',
-                customerType: 'Trgovska veriga / Retail Chain',
-                discountBreakdown: { invoice: 18, marketing: 5, yearEnd: 9 }
-            },
-            'p012': {
-                lc: 11.20,
-                totalDiscounts: 28,
-                strategicCmin: 19.80,
-                customerName: 'Lidl',
-                customerType: 'Diskont / Discount',
-                discountBreakdown: { invoice: 16, marketing: 4, yearEnd: 8 }
-            }
-        };
+                this.state.customerPricing[productId][custData.customerId] = {
+                    customerId: custData.customerId,
+                    customerName: custData.customerName,
+                    customerType: custData.customerType,
 
-        return baseData[productId] || {
-            lc: 5.0,
-            totalDiscounts: 25,
-            strategicCmin: 8.0,
-            customerName: 'Generic Customer',
-            customerType: 'Retail',
-            discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 5 }
-        };
+                    // Price levels (LC, C0, Cmin inherited from product base)
+                    strategicCmin: strategicCmin,
+                    cp: cp,
+
+                    // Discounts
+                    totalDiscounts: custData.totalDiscounts,
+                    discountBreakdown: custData.discountBreakdown,
+
+                    // Realized price
+                    realizedPrice: realizedPrice,
+
+                    // Coverage
+                    coverage: {
+                        vsC0: (realizedPrice / base.c0) * 100,
+                        vsCmin: (realizedPrice / base.cmin) * 100,
+                        buffer: ((realizedPrice - base.cmin) / base.cmin) * 100
+                    },
+
+                    // Cumulative coverage for visualization
+                    cumulativeCoverage: this.calculateCumulativeCoverage(
+                        base.lc, base.c0, base.cmin, strategicCmin, cp, realizedPrice
+                    )
+                };
+            });
+        });
     },
 
-    calculateCoverage(productId) {
-        const data = this.state.pricingData[productId];
-
-        // Calculate coverage metrics
-        data.coverage.vsC0 = (data.realizedPrice / data.c0) * 100;
-        data.coverage.vsCmin = (data.realizedPrice / data.cmin) * 100;
-        data.coverage.buffer = ((data.realizedPrice - data.cmin) / data.cmin) * 100;
-
-        // Calculate cumulative coverage for visualization
-        // Shows how CP "flows down" through discounts to realized price, covering each level
-        data.cumulativeCoverage = {
-            lc: Math.min(data.lc, data.realizedPrice),
+    calculateCumulativeCoverage(lc, c0, cmin, strategicCmin, cp, realizedPrice) {
+        const coverage = {
+            lc: Math.min(lc, realizedPrice),
             c0: 0,
             cmin: 0,
             buffer: 0,
-            discounts: data.cp - data.realizedPrice  // Amount "lost" to discounts
+            discounts: cp - realizedPrice
         };
 
-        let remaining = data.realizedPrice;
+        let remaining = realizedPrice;
 
-        // First cover LC
-        data.cumulativeCoverage.lc = Math.min(data.lc, remaining);
-        remaining -= data.cumulativeCoverage.lc;
+        // Cover LC
+        coverage.lc = Math.min(lc, remaining);
+        remaining -= coverage.lc;
 
-        // Then cover OH (difference between C0 and LC)
+        // Cover OH (C0 - LC)
         if (remaining > 0) {
-            const ohCost = data.c0 - data.lc;
-            data.cumulativeCoverage.c0 = Math.min(ohCost, remaining);
-            remaining -= data.cumulativeCoverage.c0;
+            const ohCost = c0 - lc;
+            coverage.c0 = Math.min(ohCost, remaining);
+            remaining -= coverage.c0;
         }
 
-        // Then cover minimum profit (difference between Cmin and C0)
+        // Cover min profit (Cmin - C0)
         if (remaining > 0) {
-            const minProfit = data.cmin - data.c0;
-            data.cumulativeCoverage.cmin = Math.min(minProfit, remaining);
-            remaining -= data.cumulativeCoverage.cmin;
+            const minProfit = cmin - c0;
+            coverage.cmin = Math.min(minProfit, remaining);
+            remaining -= coverage.cmin;
         }
 
-        // Anything left is buffer above Cmin
+        // Buffer above Cmin
         if (remaining > 0) {
-            data.cumulativeCoverage.buffer = remaining;
+            coverage.buffer = remaining;
         }
+
+        return coverage;
+    },
+
+    getBaseProductData(productId) {
+        // Base LC costs for products (same for all customers)
+        const baseData = {
+            'p001': { lc: 5.44 },  // Chicken Fillet
+            'p002': { lc: 3.80 },  // Chicken Breast
+            'p003': { lc: 2.80 },  // Chicken Thighs
+            'p004': { lc: 3.20 },  // Pork Shoulder
+            'p005': { lc: 6.40 },  // Pork Tenderloin
+            'p006': { lc: 12.80 }, // Beef Tenderloin
+            'p007': { lc: 4.80 },  // Kranjska Sausage
+            'p008': { lc: 16.00 }  // Prosciutto
+        };
+
+        return baseData[productId] || { lc: 5.0 };
+    },
+
+    getCustomerPricingData() {
+        // Customer-specific pricing (multiple customers per product)
+        return {
+            'p001': [ // Chicken Fillet
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 7.25,
+                    totalDiscounts: 29,
+                    discountBreakdown: { invoice: 15, marketing: 3, yearEnd: 11 }
+                },
+                {
+                    customerId: 'c002',
+                    customerName: 'Lidl',
+                    customerType: 'Diskont / Discount',
+                    strategicCmin: 7.10,
+                    totalDiscounts: 32,
+                    discountBreakdown: { invoice: 18, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c003',
+                    customerName: 'Kaufland',
+                    customerType: 'Hipermarket / Hypermarket',
+                    strategicCmin: 7.50,
+                    totalDiscounts: 28,
+                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
+                }
+            ],
+            'p002': [ // Chicken Breast
+                {
+                    customerId: 'c002',
+                    customerName: 'Lidl',
+                    customerType: 'Diskont / Discount',
+                    strategicCmin: 6.20,
+                    totalDiscounts: 30,
+                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c004',
+                    customerName: 'Spar',
+                    customerType: 'Supermarket',
+                    strategicCmin: 6.50,
+                    totalDiscounts: 25,
+                    discountBreakdown: { invoice: 12, marketing: 5, yearEnd: 8 }
+                }
+            ],
+            'p003': [ // Chicken Thighs
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 4.60,
+                    totalDiscounts: 27,
+                    discountBreakdown: { invoice: 15, marketing: 4, yearEnd: 8 }
+                },
+                {
+                    customerId: 'c005',
+                    customerName: 'Konzum',
+                    customerType: 'Supermarket',
+                    strategicCmin: 4.80,
+                    totalDiscounts: 24,
+                    discountBreakdown: { invoice: 12, marketing: 4, yearEnd: 8 }
+                }
+            ],
+            'p004': [ // Pork Shoulder
+                {
+                    customerId: 'c002',
+                    customerName: 'Lidl',
+                    customerType: 'Diskont / Discount',
+                    strategicCmin: 5.30,
+                    totalDiscounts: 28,
+                    discountBreakdown: { invoice: 16, marketing: 4, yearEnd: 8 }
+                },
+                {
+                    customerId: 'c003',
+                    customerName: 'Kaufland',
+                    customerType: 'Hipermarket / Hypermarket',
+                    strategicCmin: 5.50,
+                    totalDiscounts: 26,
+                    discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
+                }
+            ],
+            'p005': [ // Pork Tenderloin
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 10.80,
+                    totalDiscounts: 29,
+                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c006',
+                    customerName: 'Metro',
+                    customerType: 'Cash & Carry',
+                    strategicCmin: 11.20,
+                    totalDiscounts: 22,
+                    discountBreakdown: { invoice: 10, marketing: 4, yearEnd: 8 }
+                }
+            ],
+            'p006': [ // Beef Tenderloin
+                {
+                    customerId: 'c006',
+                    customerName: 'Metro',
+                    customerType: 'Cash & Carry',
+                    strategicCmin: 22.50,
+                    totalDiscounts: 25,
+                    discountBreakdown: { invoice: 12, marketing: 5, yearEnd: 8 }
+                },
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 23.00,
+                    totalDiscounts: 30,
+                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
+                }
+            ],
+            'p007': [ // Kranjska Sausage
+                {
+                    customerId: 'c004',
+                    customerName: 'Spar',
+                    customerType: 'Supermarket',
+                    strategicCmin: 8.30,
+                    totalDiscounts: 26,
+                    discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
+                },
+                {
+                    customerId: 'c002',
+                    customerName: 'Lidl',
+                    customerType: 'Diskont / Discount',
+                    strategicCmin: 8.00,
+                    totalDiscounts: 29,
+                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 8 }
+                }
+            ],
+            'p008': [ // Prosciutto
+                {
+                    customerId: 'c007',
+                    customerName: 'Mercator',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 29.50,
+                    totalDiscounts: 32,
+                    discountBreakdown: { invoice: 18, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c006',
+                    customerName: 'Metro',
+                    customerType: 'Cash & Carry',
+                    strategicCmin: 30.00,
+                    totalDiscounts: 28,
+                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
+                }
+            ]
+        };
     },
 
     render() {
@@ -458,19 +519,13 @@ const PricingV4 = {
                                 <tr>
                                     <th rowspan="2">Šifra<br>Code</th>
                                     <th rowspan="2">Izdelek<br>Product</th>
-                                    <th rowspan="2">Kupec<br>Customer</th>
-                                    <th colspan="4">Nivoi cijena / Price Levels (€/kg)</th>
-                                    <th rowspan="2">CP<br>Quoted</th>
-                                    <th rowspan="2">Rabati<br>Discounts</th>
-                                    <th rowspan="2">Realized<br>Net</th>
-                                    <th rowspan="2">Pokritje<br>vs Cmin</th>
-                                    <th rowspan="2" style="min-width: 300px;">Vizualizacija toka cijene<br>Price Flow Visualization</th>
+                                    <th colspan="3">Nivoi cijena / Price Levels (€/kg)</th>
+                                    <th rowspan="2">Kupci<br>Customers</th>
                                 </tr>
                                 <tr>
                                     <th class="price-level lc">LC</th>
                                     <th class="price-level c0">C0</th>
                                     <th class="price-level cmin">Cmin</th>
-                                    <th class="price-level strategic">Strategic</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -490,98 +545,118 @@ const PricingV4 = {
 
         products.forEach(product => {
             const pricing = this.state.pricingData[product.id];
-            const coverageClass = pricing.coverage.vsCmin >= 100 ? 'full' :
-                                 pricing.coverage.vsCmin >= 95 ? 'good' :
-                                 pricing.coverage.vsCmin >= 90 ? 'medium' : 'low';
-
-            const isExpanded = this.state.expanded.productDetails.has(product.id);
+            const customers = this.state.customerPricing[product.id] || {};
+            const customerCount = Object.keys(customers).length;
+            const isExpanded = this.state.expanded.products.has(product.id);
 
             html += `
                 <tr class="product-row">
                     <td class="code">
-                        <button class="expand-details-btn"
-                                onclick="PricingV4.toggleProductDetails('${product.id}')"
-                                title="Show detailed breakdown">
-                            <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
-                        </button>
                         ${product.code}
                     </td>
                     <td class="name">
                         <strong>${product.name}</strong>
                         <br><small>${product.nameEn}</small>
                     </td>
-                    <td class="customer">
-                        <strong>${pricing.customerName}</strong>
-                        <br><small>${pricing.customerType}</small>
-                    </td>
                     <td class="price-level lc">€${pricing.lc.toFixed(2)}</td>
                     <td class="price-level c0">€${pricing.c0.toFixed(2)}</td>
                     <td class="price-level cmin">€${pricing.cmin.toFixed(2)}</td>
-                    <td class="price-level strategic">
-                        €${pricing.strategicCmin.toFixed(2)}
-                        ${pricing.strategicCmin > pricing.cmin ?
-                            `<span class="buffer-badge">+${((pricing.strategicCmin - pricing.cmin) / pricing.cmin * 100).toFixed(1)}%</span>` : ''}
-                    </td>
-                    <td class="cp-price">€${pricing.cp.toFixed(2)}</td>
-                    <td class="discounts">
-                        <span class="discount-badge">${pricing.totalDiscounts}%</span>
-                    </td>
-                    <td class="realized">
-                        <strong>€${pricing.realizedPrice.toFixed(2)}</strong>
-                    </td>
-                    <td class="coverage ${coverageClass}">
-                        ${pricing.coverage.vsCmin.toFixed(1)}%
-                    </td>
-                    <td class="visualization">
-                        ${this.renderPriceFlowChart(pricing)}
+                    <td class="customers-cell">
+                        <button class="expand-customers-btn ${isExpanded ? 'expanded' : ''}"
+                                onclick="PricingV4.toggleProduct('${product.id}')"
+                                title="Show customers">
+                            <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
+                            <span class="customer-count">👥 ${customerCount} kupci</span>
+                        </button>
                     </td>
                 </tr>
-                ${isExpanded ? this.renderDetailedBreakdown(product.id) : ''}
+                ${isExpanded ? this.renderCustomerRows(product.id, pricing) : ''}
             `;
         });
 
         return html;
     },
 
-    renderPriceFlowChart(pricing) {
-        const maxWidth = 280; // pixels
+    renderCustomerRows(productId, basePrice) {
+        const customers = this.state.customerPricing[productId] || {};
+        let html = '';
 
-        // Calculate the total span (from 0 to CP)
-        const totalSpan = pricing.cp;
+        Object.values(customers).forEach(custPricing => {
+            const coverageClass = custPricing.coverage.vsCmin >= 100 ? 'full' :
+                                 custPricing.coverage.vsCmin >= 95 ? 'good' :
+                                 custPricing.coverage.vsCmin >= 90 ? 'medium' : 'low';
 
-        // Calculate widths for each component
-        const lcWidth = (pricing.lc / totalSpan) * maxWidth;
-        const ohWidth = ((pricing.c0 - pricing.lc) / totalSpan) * maxWidth;
-        const minProfitWidth = ((pricing.cmin - pricing.c0) / totalSpan) * maxWidth;
-        const bufferWidth = ((pricing.strategicCmin - pricing.cmin) / totalSpan) * maxWidth;
-        const discountWidth = ((pricing.cp - pricing.realizedPrice) / totalSpan) * maxWidth;
+            const detailKey = `${productId}_${custPricing.customerId}`;
+            const isDetailExpanded = this.state.expanded.customerDetails.has(detailKey);
 
-        // What's actually covered
-        const coveredLc = Math.min(pricing.lc, pricing.realizedPrice);
-        const coveredOh = Math.max(0, Math.min(pricing.c0 - pricing.lc, pricing.realizedPrice - pricing.lc));
-        const coveredMinProfit = Math.max(0, Math.min(pricing.cmin - pricing.c0, pricing.realizedPrice - pricing.c0));
-        const coveredBuffer = Math.max(0, Math.min(pricing.strategicCmin - pricing.cmin, pricing.realizedPrice - pricing.cmin));
+            html += `
+                <tr class="customer-row">
+                    <td colspan="2" class="customer-info">
+                        <button class="expand-detail-btn ${isDetailExpanded ? 'expanded' : ''}"
+                                onclick="PricingV4.toggleCustomerDetail('${detailKey}')"
+                                title="Show detailed breakdown">
+                            <span class="expand-icon">${isDetailExpanded ? '▼' : '▶'}</span>
+                        </button>
+                        <strong>👤 ${custPricing.customerName}</strong>
+                        <br><small>${custPricing.customerType}</small>
+                    </td>
+                    <td class="price-level strategic">
+                        €${custPricing.strategicCmin.toFixed(2)}
+                        ${custPricing.strategicCmin > basePrice.cmin ?
+                            `<span class="buffer-badge">+${((custPricing.strategicCmin - basePrice.cmin) / basePrice.cmin * 100).toFixed(1)}%</span>` : ''}
+                    </td>
+                    <td class="cp-price">
+                        €${custPricing.cp.toFixed(2)}
+                        <br><span class="discount-badge">-${custPricing.totalDiscounts}%</span>
+                    </td>
+                    <td class="realized-cell">
+                        <strong>€${custPricing.realizedPrice.toFixed(2)}</strong>
+                        <br><span class="coverage ${coverageClass}">${custPricing.coverage.vsCmin.toFixed(1)}% vs Cmin</span>
+                    </td>
+                    <td class="visualization-cell">
+                        ${this.renderPriceFlowChart(basePrice, custPricing)}
+                    </td>
+                </tr>
+                ${isDetailExpanded ? this.renderDetailedBreakdown(productId, custPricing, basePrice) : ''}
+            `;
+        });
 
-        const lcCoveredWidth = (coveredLc / pricing.lc) * lcWidth;
-        const ohCoveredWidth = ohWidth > 0 ? (coveredOh / (pricing.c0 - pricing.lc)) * ohWidth : 0;
-        const minProfitCoveredWidth = minProfitWidth > 0 ? (coveredMinProfit / (pricing.cmin - pricing.c0)) * minProfitWidth : 0;
-        const bufferCoveredWidth = bufferWidth > 0 ? (coveredBuffer / (pricing.strategicCmin - pricing.cmin)) * bufferWidth : 0;
+        return html;
+    },
+
+    renderPriceFlowChart(basePrice, custPricing) {
+        const maxWidth = 280;
+        const totalSpan = custPricing.cp;
+
+        const lcWidth = (basePrice.lc / totalSpan) * maxWidth;
+        const ohWidth = ((basePrice.c0 - basePrice.lc) / totalSpan) * maxWidth;
+        const minProfitWidth = ((basePrice.cmin - basePrice.c0) / totalSpan) * maxWidth;
+        const bufferWidth = ((custPricing.strategicCmin - basePrice.cmin) / totalSpan) * maxWidth;
+        const discountWidth = ((custPricing.cp - custPricing.realizedPrice) / totalSpan) * maxWidth;
+
+        const coveredLc = Math.min(basePrice.lc, custPricing.realizedPrice);
+        const coveredOh = Math.max(0, Math.min(basePrice.c0 - basePrice.lc, custPricing.realizedPrice - basePrice.lc));
+        const coveredMinProfit = Math.max(0, Math.min(basePrice.cmin - basePrice.c0, custPricing.realizedPrice - basePrice.c0));
+        const coveredBuffer = Math.max(0, Math.min(custPricing.strategicCmin - basePrice.cmin, custPricing.realizedPrice - basePrice.cmin));
+
+        const lcCoveredWidth = (coveredLc / basePrice.lc) * lcWidth;
+        const ohCoveredWidth = ohWidth > 0 ? (coveredOh / (basePrice.c0 - basePrice.lc)) * ohWidth : 0;
+        const minProfitCoveredWidth = minProfitWidth > 0 ? (coveredMinProfit / (basePrice.cmin - basePrice.c0)) * minProfitWidth : 0;
+        const bufferCoveredWidth = bufferWidth > 0 ? (coveredBuffer / (custPricing.strategicCmin - basePrice.cmin)) * bufferWidth : 0;
 
         let html = '<div class="price-flow-chart">';
 
-        // LC segment
         html += `
-            <div class="flow-segment" style="width: ${lcWidth}px;" title="LC: €${pricing.lc.toFixed(2)}">
+            <div class="flow-segment" style="width: ${lcWidth}px;" title="LC: €${basePrice.lc.toFixed(2)}">
                 <div class="segment-background" style="background: #4CAF5030; width: ${lcWidth}px;"></div>
                 <div class="segment-covered" style="background: #4CAF50; width: ${lcCoveredWidth}px;"></div>
                 <span class="segment-label">LC</span>
             </div>
         `;
 
-        // OH segment (C0 - LC)
         if (ohWidth > 0) {
             html += `
-                <div class="flow-segment" style="width: ${ohWidth}px;" title="OH: €${(pricing.c0 - pricing.lc).toFixed(2)}">
+                <div class="flow-segment" style="width: ${ohWidth}px;" title="OH: €${(basePrice.c0 - basePrice.lc).toFixed(2)}">
                     <div class="segment-background" style="background: #2196F330; width: ${ohWidth}px;"></div>
                     <div class="segment-covered" style="background: #2196F3; width: ${ohCoveredWidth}px;"></div>
                     <span class="segment-label">OH</span>
@@ -589,10 +664,9 @@ const PricingV4 = {
             `;
         }
 
-        // Min Profit segment (Cmin - C0)
         if (minProfitWidth > 0) {
             html += `
-                <div class="flow-segment" style="width: ${minProfitWidth}px;" title="Min Profit: €${(pricing.cmin - pricing.c0).toFixed(2)}">
+                <div class="flow-segment" style="width: ${minProfitWidth}px;" title="Min Profit: €${(basePrice.cmin - basePrice.c0).toFixed(2)}">
                     <div class="segment-background" style="background: #FF980030; width: ${minProfitWidth}px;"></div>
                     <div class="segment-covered" style="background: #FF9800; width: ${minProfitCoveredWidth}px;"></div>
                     <span class="segment-label">Min</span>
@@ -600,10 +674,9 @@ const PricingV4 = {
             `;
         }
 
-        // Buffer segment (Strategic - Cmin)
         if (bufferWidth > 0) {
             html += `
-                <div class="flow-segment" style="width: ${bufferWidth}px;" title="Buffer: €${(pricing.strategicCmin - pricing.cmin).toFixed(2)}">
+                <div class="flow-segment" style="width: ${bufferWidth}px;" title="Buffer: €${(custPricing.strategicCmin - basePrice.cmin).toFixed(2)}">
                     <div class="segment-background" style="background: #9C27B030; width: ${bufferWidth}px;"></div>
                     <div class="segment-covered" style="background: #9C27B0; width: ${bufferCoveredWidth}px;"></div>
                     <span class="segment-label">Buf</span>
@@ -611,39 +684,35 @@ const PricingV4 = {
             `;
         }
 
-        // Discount segment (CP - Realized)
         if (discountWidth > 0) {
             html += `
-                <div class="flow-segment discount-segment" style="width: ${discountWidth}px;" title="Discounts: €${(pricing.cp - pricing.realizedPrice).toFixed(2)}">
+                <div class="flow-segment discount-segment" style="width: ${discountWidth}px;" title="Discounts: €${(custPricing.cp - custPricing.realizedPrice).toFixed(2)}">
                     <div class="segment-background" style="background: #F4433630; width: ${discountWidth}px;"></div>
                     <div class="segment-covered" style="background: #F44336; width: ${discountWidth}px;"></div>
-                    <span class="segment-label">-${pricing.totalDiscounts}%</span>
+                    <span class="segment-label">-${custPricing.totalDiscounts}%</span>
                 </div>
             `;
         }
 
         html += '</div>';
-
-        // Add flow indicator
         html += `
             <div class="flow-indicator">
-                <span class="flow-arrow">CP ${pricing.cp.toFixed(2)} →</span>
-                <span class="flow-result">→ ${pricing.realizedPrice.toFixed(2)} Realized</span>
+                <span class="flow-arrow">CP ${custPricing.cp.toFixed(2)} →</span>
+                <span class="flow-result">→ ${custPricing.realizedPrice.toFixed(2)} Realized</span>
             </div>
         `;
 
         return html;
     },
 
-    renderDetailedBreakdown(productId) {
+    renderDetailedBreakdown(productId, custPricing, basePrice) {
         const product = this.state.products.find(p => p.id === productId);
-        const pricing = this.state.pricingData[productId];
 
         return `
             <tr class="detail-row">
-                <td colspan="12">
+                <td colspan="6">
                     <div class="detailed-breakdown">
-                        <h4>📊 Detaljni obračun / Detailed Breakdown: ${product.name}</h4>
+                        <h4>📊 Detaljni obračun / Detailed Breakdown: ${product.name} → ${custPricing.customerName}</h4>
 
                         <div class="breakdown-grid">
                             <div class="breakdown-section">
@@ -651,47 +720,47 @@ const PricingV4 = {
                                 <table class="breakdown-table">
                                     <tr>
                                         <td>LC (Lastna cena):</td>
-                                        <td class="value">€${pricing.lc.toFixed(2)}</td>
+                                        <td class="value">€${basePrice.lc.toFixed(2)}</td>
                                         <td class="note">Production cost without OH</td>
                                     </tr>
                                     <tr>
                                         <td>× OH Factor (${this.state.industryFactors.ohFactor}):</td>
-                                        <td class="value">+€${(pricing.c0 - pricing.lc).toFixed(2)}</td>
+                                        <td class="value">+€${(basePrice.c0 - basePrice.lc).toFixed(2)}</td>
                                         <td class="note">General overheads</td>
                                     </tr>
                                     <tr class="subtotal">
                                         <td><strong>= C0 (Break-even):</strong></td>
-                                        <td class="value"><strong>€${pricing.c0.toFixed(2)}</strong></td>
+                                        <td class="value"><strong>€${basePrice.c0.toFixed(2)}</strong></td>
                                         <td class="note">Covers all costs, no profit</td>
                                     </tr>
                                     <tr>
                                         <td>÷ (1 - ${(this.state.industryFactors.minProfitMargin * 100).toFixed(2)}%):</td>
-                                        <td class="value">+€${(pricing.cmin - pricing.c0).toFixed(2)}</td>
+                                        <td class="value">+€${(basePrice.cmin - basePrice.c0).toFixed(2)}</td>
                                         <td class="note">Minimum 4.25% profit</td>
                                     </tr>
                                     <tr class="subtotal">
                                         <td><strong>= Cmin (Calculated):</strong></td>
-                                        <td class="value"><strong>€${pricing.cmin.toFixed(2)}</strong></td>
+                                        <td class="value"><strong>€${basePrice.cmin.toFixed(2)}</strong></td>
                                         <td class="note">Minimum acceptable price</td>
                                     </tr>
                                     <tr>
                                         <td>Strategic adjustment:</td>
-                                        <td class="value">+€${(pricing.strategicCmin - pricing.cmin).toFixed(2)}</td>
-                                        <td class="note">Buffer for difficult customers</td>
+                                        <td class="value">+€${(custPricing.strategicCmin - basePrice.cmin).toFixed(2)}</td>
+                                        <td class="note">Buffer for this customer</td>
                                     </tr>
                                     <tr class="subtotal">
                                         <td><strong>= Cmin (Strategic):</strong></td>
-                                        <td class="value"><strong>€${pricing.strategicCmin.toFixed(2)}</strong></td>
+                                        <td class="value"><strong>€${custPricing.strategicCmin.toFixed(2)}</strong></td>
                                         <td class="note">Adjusted minimum price</td>
                                     </tr>
                                     <tr>
-                                        <td>÷ (1 - ${pricing.totalDiscounts}%):</td>
-                                        <td class="value">+€${(pricing.cp - pricing.strategicCmin).toFixed(2)}</td>
+                                        <td>÷ (1 - ${custPricing.totalDiscounts}%):</td>
+                                        <td class="value">+€${(custPricing.cp - custPricing.strategicCmin).toFixed(2)}</td>
                                         <td class="note">Inflate for discounts</td>
                                     </tr>
                                     <tr class="total">
                                         <td><strong>= CP (Customer Price):</strong></td>
-                                        <td class="value"><strong>€${pricing.cp.toFixed(2)}</strong></td>
+                                        <td class="value"><strong>€${custPricing.cp.toFixed(2)}</strong></td>
                                         <td class="note">Quoted price</td>
                                     </tr>
                                 </table>
@@ -700,21 +769,21 @@ const PricingV4 = {
                             <div class="breakdown-section">
                                 <h5>📉 Rabati / Discounts</h5>
                                 <table class="breakdown-table">
-                                    ${Object.entries(pricing.discountBreakdown).map(([key, value]) => `
+                                    ${Object.entries(custPricing.discountBreakdown).map(([key, value]) => `
                                         <tr>
                                             <td>${this.getDiscountLabel(key)}:</td>
                                             <td class="value">${value}%</td>
-                                            <td class="note">€${(pricing.cp * value / 100).toFixed(2)}</td>
+                                            <td class="note">€${(custPricing.cp * value / 100).toFixed(2)}</td>
                                         </tr>
                                     `).join('')}
                                     <tr class="subtotal">
                                         <td><strong>Total rabati:</strong></td>
-                                        <td class="value"><strong>${pricing.totalDiscounts}%</strong></td>
-                                        <td class="note"><strong>€${(pricing.cp - pricing.realizedPrice).toFixed(2)}</strong></td>
+                                        <td class="value"><strong>${custPricing.totalDiscounts}%</strong></td>
+                                        <td class="note"><strong>€${(custPricing.cp - custPricing.realizedPrice).toFixed(2)}</strong></td>
                                     </tr>
                                     <tr class="total">
                                         <td><strong>Realized Price:</strong></td>
-                                        <td class="value" colspan="2"><strong>€${pricing.realizedPrice.toFixed(2)}</strong></td>
+                                        <td class="value" colspan="2"><strong>€${custPricing.realizedPrice.toFixed(2)}</strong></td>
                                     </tr>
                                 </table>
                             </div>
@@ -724,29 +793,29 @@ const PricingV4 = {
                                 <table class="breakdown-table">
                                     <tr>
                                         <td>Coverage vs C0:</td>
-                                        <td class="value ${pricing.coverage.vsC0 >= 100 ? 'good' : 'bad'}">
-                                            ${pricing.coverage.vsC0.toFixed(1)}%
+                                        <td class="value ${custPricing.coverage.vsC0 >= 100 ? 'good' : 'bad'}">
+                                            ${custPricing.coverage.vsC0.toFixed(1)}%
                                         </td>
-                                        <td class="note">${pricing.coverage.vsC0 >= 100 ? '✓ Covers break-even' : '✗ Below break-even'}</td>
+                                        <td class="note">${custPricing.coverage.vsC0 >= 100 ? '✓ Covers break-even' : '✗ Below break-even'}</td>
                                     </tr>
                                     <tr>
                                         <td>Coverage vs Cmin:</td>
-                                        <td class="value ${pricing.coverage.vsCmin >= 100 ? 'good' : 'bad'}">
-                                            ${pricing.coverage.vsCmin.toFixed(1)}%
+                                        <td class="value ${custPricing.coverage.vsCmin >= 100 ? 'good' : 'bad'}">
+                                            ${custPricing.coverage.vsCmin.toFixed(1)}%
                                         </td>
-                                        <td class="note">${pricing.coverage.vsCmin >= 100 ? '✓ Meets minimum' : '✗ Below minimum'}</td>
+                                        <td class="note">${custPricing.coverage.vsCmin >= 100 ? '✓ Meets minimum' : '✗ Below minimum'}</td>
                                     </tr>
                                     <tr>
                                         <td>Buffer above Cmin:</td>
-                                        <td class="value ${pricing.coverage.buffer >= 0 ? 'good' : 'bad'}">
-                                            ${pricing.coverage.buffer > 0 ? '+' : ''}${pricing.coverage.buffer.toFixed(1)}%
+                                        <td class="value ${custPricing.coverage.buffer >= 0 ? 'good' : 'bad'}">
+                                            ${custPricing.coverage.buffer > 0 ? '+' : ''}${custPricing.coverage.buffer.toFixed(1)}%
                                         </td>
-                                        <td class="note">€${(pricing.realizedPrice - pricing.cmin).toFixed(2)}</td>
+                                        <td class="note">€${(custPricing.realizedPrice - basePrice.cmin).toFixed(2)}</td>
                                     </tr>
                                 </table>
 
                                 <div class="coverage-status">
-                                    ${pricing.coverage.vsCmin >= 100 ?
+                                    ${custPricing.coverage.vsCmin >= 100 ?
                                         '<div class="status-good">✓ Cijena je prihvatljiva / Price is acceptable</div>' :
                                         '<div class="status-bad">⚠ Potrebno odobrenje voditelja industrije / Requires Industry Manager approval</div>'}
                                 </div>
@@ -773,10 +842,17 @@ const PricingV4 = {
     },
 
     renderSummary() {
-        const allPricing = Object.values(this.state.pricingData);
-        const avgCoverage = allPricing.reduce((sum, p) => sum + p.coverage.vsCmin, 0) / allPricing.length;
-        const fullCoverage = allPricing.filter(p => p.coverage.vsCmin >= 100).length;
-        const needsApproval = allPricing.filter(p => p.coverage.vsCmin < 100).length;
+        // Collect all customer pricing records
+        const allCustomerPricing = [];
+        Object.values(this.state.customerPricing).forEach(customers => {
+            Object.values(customers).forEach(custPricing => {
+                allCustomerPricing.push(custPricing);
+            });
+        });
+
+        const avgCoverage = allCustomerPricing.reduce((sum, p) => sum + p.coverage.vsCmin, 0) / allCustomerPricing.length;
+        const fullCoverage = allCustomerPricing.filter(p => p.coverage.vsCmin >= 100).length;
+        const needsApproval = allCustomerPricing.filter(p => p.coverage.vsCmin < 100).length;
 
         return `
             <div class="summary-card">
@@ -785,6 +861,10 @@ const PricingV4 = {
                     <div class="stat">
                         <span class="stat-label">Broj artikala / Products:</span>
                         <span class="stat-value">${this.state.products.length}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Kombinacije kupac-artikl / Customer-Product combinations:</span>
+                        <span class="stat-value">${allCustomerPricing.length}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Prosječno pokritje Cmin / Avg Cmin Coverage:</span>
@@ -832,11 +912,20 @@ const PricingV4 = {
         this.render();
     },
 
-    toggleProductDetails(productId) {
-        if (this.state.expanded.productDetails.has(productId)) {
-            this.state.expanded.productDetails.delete(productId);
+    toggleProduct(productId) {
+        if (this.state.expanded.products.has(productId)) {
+            this.state.expanded.products.delete(productId);
         } else {
-            this.state.expanded.productDetails.add(productId);
+            this.state.expanded.products.add(productId);
+        }
+        this.render();
+    },
+
+    toggleCustomerDetail(detailKey) {
+        if (this.state.expanded.customerDetails.has(detailKey)) {
+            this.state.expanded.customerDetails.delete(detailKey);
+        } else {
+            this.state.expanded.customerDetails.add(detailKey);
         }
         this.render();
     },
@@ -846,6 +935,9 @@ const PricingV4 = {
             this.state.expanded.groups.add(group.id);
             group.subgroups.forEach(subgroup => {
                 this.state.expanded.subgroups.add(subgroup.id);
+                subgroup.products.forEach(product => {
+                    this.state.expanded.products.add(product.id);
+                });
             });
         });
         this.render();
@@ -854,7 +946,8 @@ const PricingV4 = {
     collapseAll() {
         this.state.expanded.groups.clear();
         this.state.expanded.subgroups.clear();
-        this.state.expanded.productDetails.clear();
+        this.state.expanded.products.clear();
+        this.state.expanded.customerDetails.clear();
         this.render();
     },
 
@@ -876,27 +969,6 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
 ⚠️ VAŽNO: Transferna cijena Delamaris ZG ↔ Pivka d.d. je NEBITNA!
           Važna je marža od početka do kraja, ne mjesto gdje se ostvarila.`);
-    },
-
-    savePricingData() {
-        localStorage.setItem('ch_pricing_data_v4', JSON.stringify(this.state.pricingData));
-        console.log('Pricing data V4 saved');
-    },
-
-    loadSavedPricingData() {
-        const saved = localStorage.getItem('ch_pricing_data_v4');
-        if (saved) {
-            try {
-                const data = JSON.parse(saved);
-                Object.assign(this.state.pricingData, data);
-                this.state.products.forEach(product => {
-                    this.calculateCoverage(product.id);
-                });
-                console.log('Pricing data V4 loaded from storage');
-            } catch (e) {
-                console.error('Error loading saved pricing data V4:', e);
-            }
-        }
     },
 
     getGroupProductCount(group) {
@@ -1077,7 +1149,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .subgroup-content.expanded {
-                    max-height: 5000px;
+                    max-height: 10000px;
                     transition: max-height 0.5s ease-in;
                     overflow-x: auto;
                 }
@@ -1086,13 +1158,14 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     width: 20px;
                     font-size: 12px;
                     color: #666;
+                    display: inline-block;
                 }
 
                 .pricing-table {
                     width: 100%;
                     border-collapse: collapse;
                     margin-top: 10px;
-                    min-width: 1400px;
+                    min-width: 1000px;
                     font-size: 13px;
                 }
 
@@ -1117,7 +1190,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 .price-level.lc { background: #4CAF5020; }
                 .price-level.c0 { background: #2196F320; }
                 .price-level.cmin { background: #FF980020; }
-                .price-level.strategic { background: #9C27B020; }
+                .price-level.strategic { background: #9C27B020; text-align: right; }
 
                 .pricing-table td {
                     padding: 10px 8px;
@@ -1138,41 +1211,100 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     color: #2196f3;
                 }
 
-                .expand-details-btn {
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    padding: 2px 5px;
-                    margin-right: 5px;
-                    font-size: 12px;
-                }
-
                 .product-row .name small {
                     color: #888;
                     font-style: italic;
                 }
 
-                .product-row .customer {
-                    font-size: 12px;
+                .customers-cell {
+                    text-align: center;
                 }
 
-                .product-row .customer strong {
+                .expand-customers-btn {
+                    background: #e3f2fd;
+                    border: 1px solid #2196f3;
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #1976d2;
+                    transition: all 0.2s;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+
+                .expand-customers-btn:hover {
+                    background: #bbdefb;
+                }
+
+                .expand-customers-btn.expanded {
+                    background: #2196f3;
+                    color: white;
+                }
+
+                .customer-row {
+                    background: #f8f9fa;
+                    border-left: 3px solid #2196f3;
+                }
+
+                .customer-row:hover {
+                    background: #eceff1;
+                }
+
+                .customer-info {
+                    padding-left: 40px !important;
+                    position: relative;
+                }
+
+                .expand-detail-btn {
+                    position: absolute;
+                    left: 10px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: none;
+                    border: 1px solid #ccc;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    font-size: 10px;
+                    padding: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                }
+
+                .expand-detail-btn:hover {
+                    background: #e3f2fd;
+                    border-color: #2196f3;
+                }
+
+                .expand-detail-btn.expanded {
+                    background: #2196f3;
+                    border-color: #2196f3;
+                    color: white;
+                }
+
+                .customer-info strong {
                     color: #1976d2;
                 }
 
-                .product-row .price-level,
-                .product-row .cp-price,
-                .product-row .realized {
+                .cp-price {
                     text-align: right;
+                    color: #9C27B0;
                     font-weight: 600;
                 }
 
-                .cp-price {
-                    color: #9C27B0;
+                .realized-cell {
+                    text-align: right;
                 }
 
-                .realized {
+                .realized-cell strong {
                     color: #2e7d32;
+                    font-size: 14px;
                 }
 
                 .buffer-badge {
@@ -1195,21 +1327,21 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     font-weight: 600;
                 }
 
-                .discounts {
-                    text-align: center;
-                }
-
                 .coverage {
-                    text-align: center;
+                    font-size: 11px;
                     font-weight: bold;
-                    padding: 6px;
-                    border-radius: 4px;
+                    padding: 3px 6px;
+                    border-radius: 3px;
                 }
 
                 .coverage.full { background: #4CAF50; color: white; }
                 .coverage.good { background: #8BC34A; color: white; }
                 .coverage.medium { background: #FFC107; color: #333; }
                 .coverage.low { background: #FF5722; color: white; }
+
+                .visualization-cell {
+                    min-width: 300px;
+                }
 
                 /* Price Flow Chart */
                 .price-flow-chart {
