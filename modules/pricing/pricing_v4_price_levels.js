@@ -776,10 +776,6 @@ const PricingV4 = {
                     ${this.renderPricingHierarchy()}
                 </div>
 
-                <div class="pricing-summary">
-                    ${this.renderSummary()}
-                </div>
-
                 <!-- Upload Modal -->
                 <div id="upload-modal" class="upload-modal" style="display: none;">
                     <div class="modal-content">
@@ -926,12 +922,6 @@ const PricingV4 = {
 
     renderPricingHierarchy() {
         let html = '';
-
-        // Calculate top-level summary
-        const topSummary = this.calculateTopLevelSummary();
-
-        // Add top-level summary card
-        html += this.renderTopLevelSummary(topSummary);
 
         // Render each industry
         this.state.productGroups.forEach(group => {
