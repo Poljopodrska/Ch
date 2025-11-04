@@ -1558,6 +1558,17 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         }
     },
 
+    // Helper function to parse European number format (comma as decimal separator)
+    parseEuropeanNumber(value) {
+        if (value === null || value === undefined || value === '') {
+            return 0;
+        }
+        // Convert to string and replace comma with period
+        const stringValue = value.toString().trim().replace(',', '.');
+        const parsed = parseFloat(stringValue);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+
     validateAndLoadData(izdelkiData, ceneKupciData) {
         try {
             // Validate Izdelki data
@@ -1590,7 +1601,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             const validIndustries = ['Sveže meso', 'Mesni izdelki in pečeno meso', 'Delamaris'];
 
             izdelkiData.forEach((row, index) => {
-                if (!row.aktiven || row.aktiven.toString().toUpperCase() !== 'TRUE') {
+                const aktivenValue = row.aktiven ? row.aktiven.toString().toUpperCase().trim() : '';
+                if (!aktivenValue || (aktivenValue !== 'TRUE' && aktivenValue !== 'DA')) {
                     return; // Skip inactive products
                 }
 
@@ -1609,7 +1621,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     name: row.naziv.toString().trim(),
                     nameEn: row.naziv.toString().trim(), // Use same name for now
                     unit: row.enota.toString().trim(),
-                    lc: parseFloat(row.lc)
+                    lc: this.parseEuropeanNumber(row.lc)
                 });
             });
 
@@ -1660,7 +1672,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             });
 
             ceneKupciData.forEach((row, index) => {
-                if (!row.aktiven || row.aktiven.toString().toUpperCase() !== 'TRUE') {
+                const aktivenValue = row.aktiven ? row.aktiven.toString().toUpperCase().trim() : '';
+                if (!aktivenValue || (aktivenValue !== 'TRUE' && aktivenValue !== 'DA')) {
                     return; // Skip inactive
                 }
 
@@ -1677,8 +1690,11 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 const customerId = row.kupec_id.toString().trim();
-                const strategicCmin = parseFloat(row.strategic_cmin);
-                const totalDiscounts = parseFloat(row.popust_faktura) + parseFloat(row.popust_marketing) + parseFloat(row.popust_letni);
+                const strategicCmin = this.parseEuropeanNumber(row.strategic_cmin);
+                const discountInvoice = this.parseEuropeanNumber(row.popust_faktura);
+                const discountMarketing = this.parseEuropeanNumber(row.popust_marketing);
+                const discountYearEnd = this.parseEuropeanNumber(row.popust_letni);
+                const totalDiscounts = discountInvoice + discountMarketing + discountYearEnd;
                 const cp = strategicCmin / (1 - totalDiscounts / 100);
                 const realizedPrice = cp * (1 - totalDiscounts / 100);
                 const base = this.state.pricingData[productId];
@@ -1691,9 +1707,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     cp: cp,
                     totalDiscounts: totalDiscounts,
                     discountBreakdown: {
-                        invoice: parseFloat(row.popust_faktura),
-                        marketing: parseFloat(row.popust_marketing),
-                        yearEnd: parseFloat(row.popust_letni)
+                        invoice: discountInvoice,
+                        marketing: discountMarketing,
+                        yearEnd: discountYearEnd
                     },
                     realizedPrice: realizedPrice,
                     coverage: {
