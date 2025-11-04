@@ -325,32 +325,44 @@ const PricingV4 = {
     },
 
     loadProductStructure() {
-        // Initialize empty industry structure - will be populated from database/Excel
+        // Initialize industry structure with test products
         this.state.productGroups = [
             {
                 id: 'fresh-meat',
                 nameSl: 'Sveže meso',
                 nameHr: 'Svježe meso',
                 icon: '🐔',
-                products: []
+                products: [
+                    { id: 'p1', code: '2143', name: 'Piščančja klobasa debrecinka 320 g - IK', nameEn: 'Piščančja klobasa debrecinka 320 g - IK', unit: 'kg', lc: 1.76 },
+                    { id: 'p2', code: '641', name: 'File pišč. - gastro', nameEn: 'File pišč. - gastro', unit: 'kg', lc: 4.0536 },
+                    { id: 'p3', code: '93', name: 'Bedra gastro -IK', nameEn: 'Bedra gastro -IK', unit: 'kg', lc: 1.9604 },
+                    { id: 'p4', code: '252', name: 'Nabodala pišč. 400 g - IK', nameEn: 'Nabodala pišč. 400 g - IK', unit: 'kos', lc: 1.7914 },
+                    { id: 'p5', code: '367', name: 'Čevapčiči pišč. 400 g -Ik', nameEn: 'Čevapčiči pišč. 400 g -Ik', unit: 'kos', lc: 1.0556 }
+                ]
             },
             {
                 id: 'meat-products',
                 nameSl: 'Mesni izdelki in pečeno meso',
                 nameHr: 'Mesni proizvodi i pečeno meso',
                 icon: '🌭',
-                products: []
+                products: [
+                    { id: 'p6', code: '825', name: 'Pečene pileće trakice zabatka', nameEn: 'Pečene pileće trakice zabatka', unit: 'kg', lc: 3.173 },
+                    { id: 'p7', code: '1485', name: 'suha salama narezek 100 g', nameEn: 'suha salama narezek 100 g', unit: 'kos', lc: 1.1413 }
+                ]
             },
             {
                 id: 'delamaris',
                 nameSl: 'Delamaris',
                 nameHr: 'Delamaris',
                 icon: '🐟',
-                products: []
+                products: [
+                    { id: 'p8', code: '36851', name: 'Makrelen Provencale 125g, GER/si/de/at/it', nameEn: 'Makrelen Provencale 125g, GER/si/de/at/it', unit: 'kos', lc: 0.7738 },
+                    { id: 'p9', code: '36875', name: 'Makrelenfilets in Olivenöl 125g, GER/de/at', nameEn: 'Makrelenfilets in Olivenöl 125g, GER/de/at', unit: 'kos', lc: 1.3687 }
+                ]
             }
         ];
 
-        // Flatten products list (will be empty until data is loaded)
+        // Flatten products list
         this.state.products = [];
         this.state.productGroups.forEach(group => {
             this.state.products.push(...group.products);
@@ -363,8 +375,20 @@ const PricingV4 = {
     },
 
     loadPricingData() {
-        // Initialize empty pricing data - will be populated from Excel upload
+        // Calculate base pricing for each product
         this.state.pricingData = {};
+
+        this.state.products.forEach(product => {
+            const lc = product.lc;
+            const c0 = lc * this.state.industryFactors.ohFactor;  // LC × 1.25
+            const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);  // C0 / (1 - 0.08)
+
+            this.state.pricingData[product.id] = {
+                lc: lc,
+                c0: c0,
+                cmin: cmin
+            };
+        });
     },
 
     loadCustomerPricing() {
