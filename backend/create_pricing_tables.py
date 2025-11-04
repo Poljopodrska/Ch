@@ -47,7 +47,7 @@ def seed_industries():
             "code": "meat-products",
             "name_sl": "Mesni izdelki in pečeno meso",
             "name_hr": "Mesni proizvodi i pečeno meso",
-            "icon": "🥩"
+            "icon": "🌭"
         },
         {
             "code": "delamaris",
