@@ -1567,7 +1567,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         const stringValue = value.toString().trim().replace(',', '.');
         const parsed = parseFloat(stringValue);
         return isNaN(parsed) ? 0 : parsed;
-    }
+    },
 
     validateAndLoadData(izdelkiData, ceneKupciData) {
         try {
