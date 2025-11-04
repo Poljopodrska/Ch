@@ -5,8 +5,7 @@ const PricingV4 = {
 
     state: {
         expanded: {
-            groups: new Set(['fresh', 'processed']),
-            subgroups: new Set(),
+            groups: new Set(['fresh-meat', 'meat-products', 'delamaris']),
             products: new Set(), // Track which products show customer rows
             customerDetails: new Set() // Track which customer rows show detailed breakdown
         },
@@ -42,63 +41,40 @@ const PricingV4 = {
     },
 
     loadProductStructure() {
-        // Define 2-level product group hierarchy with real meat products
+        // Define 3 industries (Industrije) with products directly under each
         this.state.productGroups = [
             {
-                id: 'fresh',
-                name: 'Sveži izdelki / Fresh Products',
+                id: 'fresh-meat',
+                name: 'Sveže meso',
+                nameEn: 'Fresh Meat',
                 icon: '🥩',
-                subgroups: [
-                    {
-                        id: 'poultry',
-                        name: 'Perutnina / Poultry',
-                        icon: '🐔',
-                        products: [
-                            { id: 'p001', code: 'PIŠ-FILE', name: 'Piščančji file', nameEn: 'Chicken Fillet', unit: 'kg' },
-                            { id: 'p002', code: 'PIŠ-PRSI', name: 'Piščančje prsi', nameEn: 'Chicken Breast', unit: 'kg' },
-                            { id: 'p003', code: 'PIŠ-BEDRA', name: 'Piščančja bedra', nameEn: 'Chicken Thighs', unit: 'kg' }
-                        ]
-                    },
-                    {
-                        id: 'pork',
-                        name: 'Svinjina / Pork',
-                        icon: '🐖',
-                        products: [
-                            { id: 'p004', code: 'SVP-PLEČKA', name: 'Svinjska plečka', nameEn: 'Pork Shoulder', unit: 'kg' },
-                            { id: 'p005', code: 'SVP-FILE', name: 'Svinjski file', nameEn: 'Pork Tenderloin', unit: 'kg' }
-                        ]
-                    },
-                    {
-                        id: 'beef',
-                        name: 'Govedina / Beef',
-                        icon: '🐄',
-                        products: [
-                            { id: 'p006', code: 'GOV-FILE', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' }
-                        ]
-                    }
+                products: [
+                    { id: 'p001', code: 'PIŠ-FILE', name: 'Piščančji file', nameEn: 'Chicken Fillet', unit: 'kg' },
+                    { id: 'p002', code: 'PIŠ-PRSI', name: 'Piščančje prsi', nameEn: 'Chicken Breast', unit: 'kg' },
+                    { id: 'p003', code: 'PIŠ-BEDRA', name: 'Piščančja bedra', nameEn: 'Chicken Thighs', unit: 'kg' },
+                    { id: 'p004', code: 'SVP-PLEČKA', name: 'Svinjska plečka', nameEn: 'Pork Shoulder', unit: 'kg' },
+                    { id: 'p005', code: 'SVP-FILE', name: 'Svinjski file', nameEn: 'Pork Tenderloin', unit: 'kg' },
+                    { id: 'p006', code: 'GOV-FILE', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' }
                 ]
             },
             {
-                id: 'processed',
-                name: 'Predelani izdelki / Processed Products',
+                id: 'meat-products',
+                name: 'Mesni izdelki in pečeno meso',
+                nameEn: 'Meat Products and Roasted Meat',
                 icon: '🌭',
-                subgroups: [
-                    {
-                        id: 'sausages',
-                        name: 'Klobase / Sausages',
-                        icon: '🌭',
-                        products: [
-                            { id: 'p007', code: 'KLB-KRANJSKA', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' }
-                        ]
-                    },
-                    {
-                        id: 'cured',
-                        name: 'Suhomesnati izdelki / Cured Meats',
-                        icon: '🥓',
-                        products: [
-                            { id: 'p008', code: 'SUH-PRŠUT', name: 'Pršut', nameEn: 'Prosciutto', unit: 'kg' }
-                        ]
-                    }
+                products: [
+                    { id: 'p007', code: 'KLB-KRANJSKA', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' },
+                    { id: 'p008', code: 'SUH-PRŠUT', name: 'Pršut', nameEn: 'Prosciutto', unit: 'kg' }
+                ]
+            },
+            {
+                id: 'delamaris',
+                name: 'Delamaris',
+                nameEn: 'Delamaris',
+                icon: '🐟',
+                products: [
+                    { id: 'p009', code: 'DEL-TUNA', name: 'Tuna v oljčnem olju', nameEn: 'Tuna in Olive Oil', unit: 'pcs' },
+                    { id: 'p010', code: 'DEL-SARDINE', name: 'Sardine', nameEn: 'Sardines', unit: 'pcs' }
                 ]
             }
         ];
@@ -106,9 +82,7 @@ const PricingV4 = {
         // Flatten products list
         this.state.products = [];
         this.state.productGroups.forEach(group => {
-            group.subgroups.forEach(subgroup => {
-                this.state.products.push(...subgroup.products);
-            });
+            this.state.products.push(...group.products);
         });
     },
 
@@ -224,7 +198,9 @@ const PricingV4 = {
             'p005': { lc: 6.40 },  // Pork Tenderloin
             'p006': { lc: 12.80 }, // Beef Tenderloin
             'p007': { lc: 4.80 },  // Kranjska Sausage
-            'p008': { lc: 16.00 }  // Prosciutto
+            'p008': { lc: 16.00 }, // Prosciutto
+            'p009': { lc: 0.80 },  // Tuna in Olive Oil
+            'p010': { lc: 0.65 }   // Sardines
         };
 
         return baseData[productId] || { lc: 5.0 };
@@ -384,6 +360,42 @@ const PricingV4 = {
                     totalDiscounts: 28,
                     discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
                 }
+            ],
+            'p009': [ // Tuna in Olive Oil
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 1.35,
+                    totalDiscounts: 30,
+                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c004',
+                    customerName: 'Spar',
+                    customerType: 'Supermarket',
+                    strategicCmin: 1.40,
+                    totalDiscounts: 27,
+                    discountBreakdown: { invoice: 14, marketing: 5, yearEnd: 8 }
+                }
+            ],
+            'p010': [ // Sardines
+                {
+                    customerId: 'c001',
+                    customerName: 'Plodine',
+                    customerType: 'Trgovska veriga / Retail Chain',
+                    strategicCmin: 1.10,
+                    totalDiscounts: 29,
+                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 9 }
+                },
+                {
+                    customerId: 'c005',
+                    customerName: 'Konzum',
+                    customerType: 'Supermarket',
+                    strategicCmin: 1.15,
+                    totalDiscounts: 26,
+                    discountBreakdown: { invoice: 13, marketing: 5, yearEnd: 8 }
+                }
             ]
         };
     },
@@ -485,41 +497,16 @@ const PricingV4 = {
                         <span class="expand-icon">${isGroupExpanded ? '▼' : '▶'}</span>
                         <span class="group-icon">${group.icon}</span>
                         <span class="group-name">${group.name}</span>
-                        <span class="group-count">(${this.getGroupProductCount(group)} izdelkov)</span>
+                        <span class="group-count">(${group.products.length} izdelkov)</span>
                     </div>
 
                     <div class="group-content ${isGroupExpanded ? 'expanded' : 'collapsed'}">
-                        ${this.renderSubgroups(group)}
-                    </div>
-                </div>
-            `;
-        });
-
-        return html;
-    },
-
-    renderSubgroups(group) {
-        let html = '';
-
-        group.subgroups.forEach(subgroup => {
-            const isSubgroupExpanded = this.state.expanded.subgroups.has(subgroup.id);
-
-            html += `
-                <div class="subgroup-container">
-                    <div class="subgroup-header" onclick="PricingV4.toggleSubgroup('${subgroup.id}')">
-                        <span class="expand-icon">${isSubgroupExpanded ? '▼' : '▶'}</span>
-                        <span class="subgroup-icon">${subgroup.icon}</span>
-                        <span class="subgroup-name">${subgroup.name}</span>
-                        <span class="subgroup-count">(${subgroup.products.length})</span>
-                    </div>
-
-                    <div class="subgroup-content ${isSubgroupExpanded ? 'expanded' : 'collapsed'}">
                         <table class="pricing-table">
                             <thead>
                                 <tr>
                                     <th rowspan="2">Šifra<br>Code</th>
                                     <th rowspan="2">Izdelek<br>Product</th>
-                                    <th colspan="3">Nivoi cijena / Price Levels (€/kg)</th>
+                                    <th colspan="3">Nivoi cijena / Price Levels (€)</th>
                                     <th rowspan="2">Kupci<br>Customers</th>
                                 </tr>
                                 <tr>
@@ -529,7 +516,7 @@ const PricingV4 = {
                                 </tr>
                             </thead>
                             <tbody>
-                                ${this.renderProducts(subgroup.products)}
+                                ${this.renderProducts(group.products)}
                             </tbody>
                         </table>
                     </div>
@@ -650,7 +637,6 @@ const PricingV4 = {
             <div class="flow-segment" style="width: ${lcWidth}px;" title="LC: €${basePrice.lc.toFixed(2)}">
                 <div class="segment-background" style="background: #4CAF5030; width: ${lcWidth}px;"></div>
                 <div class="segment-covered" style="background: #4CAF50; width: ${lcCoveredWidth}px;"></div>
-                <span class="segment-label">LC</span>
             </div>
         `;
 
@@ -659,7 +645,6 @@ const PricingV4 = {
                 <div class="flow-segment" style="width: ${ohWidth}px;" title="OH: €${(basePrice.c0 - basePrice.lc).toFixed(2)}">
                     <div class="segment-background" style="background: #2196F330; width: ${ohWidth}px;"></div>
                     <div class="segment-covered" style="background: #2196F3; width: ${ohCoveredWidth}px;"></div>
-                    <span class="segment-label">OH</span>
                 </div>
             `;
         }
@@ -669,7 +654,6 @@ const PricingV4 = {
                 <div class="flow-segment" style="width: ${minProfitWidth}px;" title="Min Profit: €${(basePrice.cmin - basePrice.c0).toFixed(2)}">
                     <div class="segment-background" style="background: #FF980030; width: ${minProfitWidth}px;"></div>
                     <div class="segment-covered" style="background: #FF9800; width: ${minProfitCoveredWidth}px;"></div>
-                    <span class="segment-label">Min</span>
                 </div>
             `;
         }
@@ -679,7 +663,6 @@ const PricingV4 = {
                 <div class="flow-segment" style="width: ${bufferWidth}px;" title="Buffer: €${(custPricing.strategicCmin - basePrice.cmin).toFixed(2)}">
                     <div class="segment-background" style="background: #9C27B030; width: ${bufferWidth}px;"></div>
                     <div class="segment-covered" style="background: #9C27B0; width: ${bufferCoveredWidth}px;"></div>
-                    <span class="segment-label">Buf</span>
                 </div>
             `;
         }
@@ -689,7 +672,6 @@ const PricingV4 = {
                 <div class="flow-segment discount-segment" style="width: ${discountWidth}px;" title="Discounts: €${(custPricing.cp - custPricing.realizedPrice).toFixed(2)}">
                     <div class="segment-background" style="background: #F4433630; width: ${discountWidth}px;"></div>
                     <div class="segment-covered" style="background: #F44336; width: ${discountWidth}px;"></div>
-                    <span class="segment-label">-${custPricing.totalDiscounts}%</span>
                 </div>
             `;
         }
@@ -891,23 +873,8 @@ const PricingV4 = {
     toggleGroup(groupId) {
         if (this.state.expanded.groups.has(groupId)) {
             this.state.expanded.groups.delete(groupId);
-            const group = this.state.productGroups.find(g => g.id === groupId);
-            if (group) {
-                group.subgroups.forEach(sg => {
-                    this.state.expanded.subgroups.delete(sg.id);
-                });
-            }
         } else {
             this.state.expanded.groups.add(groupId);
-        }
-        this.render();
-    },
-
-    toggleSubgroup(subgroupId) {
-        if (this.state.expanded.subgroups.has(subgroupId)) {
-            this.state.expanded.subgroups.delete(subgroupId);
-        } else {
-            this.state.expanded.subgroups.add(subgroupId);
         }
         this.render();
     },
@@ -933,11 +900,8 @@ const PricingV4 = {
     expandAll() {
         this.state.productGroups.forEach(group => {
             this.state.expanded.groups.add(group.id);
-            group.subgroups.forEach(subgroup => {
-                this.state.expanded.subgroups.add(subgroup.id);
-                subgroup.products.forEach(product => {
-                    this.state.expanded.products.add(product.id);
-                });
+            group.products.forEach(product => {
+                this.state.expanded.products.add(product.id);
             });
         });
         this.render();
@@ -945,7 +909,6 @@ const PricingV4 = {
 
     collapseAll() {
         this.state.expanded.groups.clear();
-        this.state.expanded.subgroups.clear();
         this.state.expanded.products.clear();
         this.state.expanded.customerDetails.clear();
         this.render();
@@ -972,7 +935,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
     },
 
     getGroupProductCount(group) {
-        return group.subgroups.reduce((total, sg) => total + sg.products.length, 0);
+        return group.products.length;
     },
 
     getStyles() {
