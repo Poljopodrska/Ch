@@ -6,7 +6,7 @@ const PricingV4 = {
     state: {
         language: localStorage.getItem('pricingLanguage') || 'sl', // 'sl' or 'hr'
         expanded: {
-            groups: new Set(['fresh-meat', 'meat-products', 'delamaris']),
+            groups: new Set(), // Start with all industries collapsed
             products: new Set(), // Track which products show customer rows
             customerDetails: new Set() // Track which customer rows show detailed breakdown
         },
@@ -345,7 +345,7 @@ const PricingV4 = {
                 id: 'meat-products',
                 nameSl: this.t.sl.meatProducts,
                 nameHr: this.t.hr.meatProducts,
-                icon: '🥩',
+                icon: '🌭',
                 products: [
                     { id: 'p007', code: 'KLB-KRANJSKA', nameSl: this.t.sl.carniolan, nameHr: this.t.hr.carniolan, unit: this.getText('kg') },
                     { id: 'p008', code: 'SUH-PRŠUT', nameSl: this.t.sl.prosciutto, nameHr: this.t.hr.prosciutto, unit: this.getText('kg') }
@@ -927,7 +927,6 @@ const PricingV4 = {
         this.state.productGroups.forEach(group => {
             const isGroupExpanded = this.state.expanded.groups.has(group.id);
             const productCountText = this.state.language === 'sl' ? 'izdelkov' : 'proizvoda';
-            const industrySummary = this.calculateIndustrySummary(group);
 
             html += `
                 <div class="group-container">
@@ -939,9 +938,6 @@ const PricingV4 = {
                     </div>
 
                     <div class="group-content ${isGroupExpanded ? 'expanded' : 'collapsed'}">
-                        <!-- Industry Summary Row -->
-                        ${this.renderIndustrySummaryRow(industrySummary, group)}
-
                         <!-- Products Table -->
                         <table class="pricing-table">
                             <thead>
