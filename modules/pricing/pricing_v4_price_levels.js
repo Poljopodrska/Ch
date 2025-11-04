@@ -1,9 +1,10 @@
 // Pricing Module V4 - Price Levels System (LC, C0, Cmin, CP)
 // New pricing policy with 4 price levels instead of overhead breakdown
 const PricingV4 = {
-    VERSION: '4.0.1',
+    VERSION: '4.0.2',
 
     state: {
+        language: localStorage.getItem('pricingLanguage') || 'sl', // 'sl' or 'hr'
         expanded: {
             groups: new Set(['fresh-meat', 'meat-products', 'delamaris']),
             products: new Set(), // Track which products show customer rows
@@ -20,6 +21,260 @@ const PricingV4 = {
             ohFactor: 1.25,      // Overhead factor (LC * 1.25 = C0)
             minProfitMargin: 0.0425,  // 4.25% minimum profit
             competitorAvg: 0.0625     // 6.25% competitor average
+        }
+    },
+
+    // Translations
+    t: {
+        sl: {
+            // Header
+            title: 'Nova cjenovna politika',
+            subtitle: 'Sistem cjenovnih nivoa: LC → C0 → Cmin → CP',
+            uploadData: 'Naloži podatke',
+            expandAll: 'Razširi vse',
+            collapseAll: 'Skrči vse',
+            policyInfo: 'Informacije o politiki',
+
+            // Price levels
+            priceLevels: 'Nivoi cijena',
+            lcLabel: 'LC - Lastna cena',
+            lcDesc: 'Stroški proizvodnje brez režij',
+            c0Label: 'C0 - Prag pokritja',
+            c0Desc: 'Pokriva proizvodnju + režije',
+            cminLabel: 'Cmin - Minimalna cijena',
+            cminDesc: 'Minimalna s 4.25% dobiti',
+            bufferLabel: 'Buffer - Rezerva',
+            bufferDesc: 'Rezerva nad Cmin',
+            discountsLabel: 'Rabati',
+            discountsDesc: 'Razlika CP → Realizirano',
+
+            // Table headers
+            code: 'Šifra',
+            product: 'Izdelek',
+            customers: 'Kupci',
+            customer: 'Kupec',
+            strategicCmin: 'Strateški Cmin',
+            cp: 'CP',
+            realized: 'Realizirano',
+            visualization: 'Vizualizacija',
+
+            // Customer table
+            showCustomers: 'Prikaži kupce',
+            showDetails: 'Prikaži podrobnosti',
+            vsCmin: 'vs Cmin',
+
+            // Detailed breakdown
+            detailedBreakdown: 'Detaljni obračun',
+            priceCalculation: 'Kalkulacija cijena',
+            productionCost: 'Stroški proizvodnje brez režij',
+            ohFactor: 'Faktor režij',
+            generalOverheads: 'Splošne režije',
+            breakEven: 'Prag pokritja',
+            coversAllCosts: 'Pokriva vse stroške, brez dobička',
+            minProfit: 'Minimalni dobiček 4.25%',
+            minAcceptable: 'Minimalna sprejemljiva cijena',
+            strategicAdjustment: 'Strateška prilagoditev',
+            bufferForCustomer: 'Rezerva za tega kupca',
+            adjustedMin: 'Prilagojena minimalna cijena',
+            inflateForDiscounts: 'Povečanje za rabate',
+            quotedPrice: 'Ponudbena cijena',
+            customerPrice: 'CP (Ponudbena cijena)',
+            discounts: 'Rabati',
+            totalDiscounts: 'Skupaj rabati',
+            realizedPrice: 'Realizirana cijena',
+            afterDiscounts: 'Po rabatoih',
+
+            // Discount types
+            invoiceDiscount: 'Fakturni rabat',
+            marketingDiscount: 'Marketing rabat',
+            yearEndDiscount: 'Letni rabat',
+
+            // Coverage analysis
+            coverageAnalysis: 'Analiza pokritja',
+            coverageVsC0: 'Pokritje vs C0',
+            coverageVsCmin: 'Pokritje vs Cmin',
+            bufferAboveCmin: 'Rezerva nad Cmin',
+            approvalRequired: 'Zahtevano odobritev',
+            needsApproval: 'Potrebna odobritev',
+            belowC0Warning: 'Cena pod C0 - ne pokriva stroškov',
+            belowCminWarning: 'Cena pod Cmin - ne ustvarja minimalnega dobička',
+            aboveCminGood: 'Cena nad Cmin - sprejemljivo',
+
+            // Upload modal
+            uploadTitle: 'Naloži Excel podatke',
+            excelFormatRequired: 'Zahtevan Excel format',
+            sheet1: 'List 1',
+            products: 'Izdelki',
+            sheet2: 'List 2',
+            customerPricing: 'Cene_Kupci',
+            industrijaOptions: 'Industrija možnosti',
+            selectFile: 'Izberite Excel datoteko',
+            cancel: 'Prekliči',
+            processData: 'Obdelaj podatke',
+            fileSelected: 'Datoteka izbrana',
+            processing: 'Obdelava...',
+            success: 'Uspešno',
+            error: 'Napaka',
+
+            // Industries
+            freshMeat: 'Sveže meso',
+            meatProducts: 'Mesni izdelki in pečeno meso',
+            delamaris: 'Delamaris',
+
+            // Product names (Slovenian)
+            chickenFillet: 'Piščančji file',
+            chickenBreast: 'Piščančje prsi',
+            chickenThighs: 'Piščančja bedra',
+            porkShoulder: 'Svinjska plečka',
+            porkTenderloin: 'Svinjski file',
+            beefTenderloin: 'Goveji file',
+            carniolan: 'Kranjska klobasa',
+            prosciutto: 'Pršut',
+            tunaOlive: 'Tuna v oljčnem olju',
+            sardines: 'Sardine',
+
+            // Summary
+            summary: 'Povzetek',
+            totalProducts: 'Skupaj izdelkov',
+            avgCoverage: 'Povprečno pokritje',
+            fullCoverage: 'Polno pokritje',
+            needsApprovalCount: 'Potrebna odobritev',
+
+            // Units
+            kg: 'kg',
+            pcs: 'kos'
+        },
+        hr: {
+            // Header
+            title: 'Nova cijenovna politika',
+            subtitle: 'Sustav cjenovnih razina: LC → C0 → Cmin → CP',
+            uploadData: 'Učitaj podatke',
+            expandAll: 'Proširi sve',
+            collapseAll: 'Sažmi sve',
+            policyInfo: 'Informacije o politici',
+
+            // Price levels
+            priceLevels: 'Razine cijena',
+            lcLabel: 'LC - Vlastita cijena',
+            lcDesc: 'Troškovi proizvodnje bez režija',
+            c0Label: 'C0 - Prag pokrića',
+            c0Desc: 'Pokriva proizvodnju + režije',
+            cminLabel: 'Cmin - Minimalna cijena',
+            cminDesc: 'Minimalna sa 4.25% dobiti',
+            bufferLabel: 'Buffer - Rezerva',
+            bufferDesc: 'Rezerva iznad Cmin',
+            discountsLabel: 'Rabati',
+            discountsDesc: 'Razlika CP → Realizirano',
+
+            // Table headers
+            code: 'Šifra',
+            product: 'Proizvod',
+            customers: 'Kupci',
+            customer: 'Kupac',
+            strategicCmin: 'Strateški Cmin',
+            cp: 'CP',
+            realized: 'Realizirano',
+            visualization: 'Vizualizacija',
+
+            // Customer table
+            showCustomers: 'Prikaži kupce',
+            showDetails: 'Prikaži detalje',
+            vsCmin: 'vs Cmin',
+
+            // Detailed breakdown
+            detailedBreakdown: 'Detaljan obračun',
+            priceCalculation: 'Kalkulacija cijena',
+            productionCost: 'Troškovi proizvodnje bez režija',
+            ohFactor: 'Faktor režija',
+            generalOverheads: 'Opće režije',
+            breakEven: 'Prag pokrića',
+            coversAllCosts: 'Pokriva sve troškove, bez dobiti',
+            minProfit: 'Minimalna dobit 4.25%',
+            minAcceptable: 'Minimalna prihvatljiva cijena',
+            strategicAdjustment: 'Strateško prilagođavanje',
+            bufferForCustomer: 'Rezerva za ovog kupca',
+            adjustedMin: 'Prilagođena minimalna cijena',
+            inflateForDiscounts: 'Povećanje za rabate',
+            quotedPrice: 'Ponudbena cijena',
+            customerPrice: 'CP (Ponudbena cijena)',
+            discounts: 'Rabati',
+            totalDiscounts: 'Ukupno rabati',
+            realizedPrice: 'Realizirana cijena',
+            afterDiscounts: 'Nakon rabata',
+
+            // Discount types
+            invoiceDiscount: 'Fakturni rabat',
+            marketingDiscount: 'Marketing rabat',
+            yearEndDiscount: 'Godišnji rabat',
+
+            // Coverage analysis
+            coverageAnalysis: 'Analiza pokrića',
+            coverageVsC0: 'Pokriće vs C0',
+            coverageVsCmin: 'Pokriće vs Cmin',
+            bufferAboveCmin: 'Rezerva iznad Cmin',
+            approvalRequired: 'Potrebno odobrenje',
+            needsApproval: 'Potrebno odobrenje',
+            belowC0Warning: 'Cijena ispod C0 - ne pokriva troškove',
+            belowCminWarning: 'Cijena ispod Cmin - ne stvara minimalnu dobit',
+            aboveCminGood: 'Cijena iznad Cmin - prihvatljivo',
+
+            // Upload modal
+            uploadTitle: 'Učitaj Excel podatke',
+            excelFormatRequired: 'Potreban Excel format',
+            sheet1: 'List 1',
+            products: 'Proizvodi',
+            sheet2: 'List 2',
+            customerPricing: 'Cijene_Kupci',
+            industrijaOptions: 'Industrija opcije',
+            selectFile: 'Odaberite Excel datoteku',
+            cancel: 'Otkaži',
+            processData: 'Obradi podatke',
+            fileSelected: 'Datoteka odabrana',
+            processing: 'Obrada...',
+            success: 'Uspješno',
+            error: 'Greška',
+
+            // Industries
+            freshMeat: 'Svježe meso',
+            meatProducts: 'Mesni proizvodi i pečeno meso',
+            delamaris: 'Delamaris',
+
+            // Product names (Croatian)
+            chickenFillet: 'Pileći file',
+            chickenBreast: 'Pileća prsa',
+            chickenThighs: 'Pileća bedra',
+            porkShoulder: 'Svinjska pleća',
+            porkTenderloin: 'Svinjski file',
+            beefTenderloin: 'Goveđi file',
+            carniolan: 'Kranjska kobasica',
+            prosciutto: 'Pršut',
+            tunaOlive: 'Tuna u maslinovom ulju',
+            sardines: 'Srdele',
+
+            // Summary
+            summary: 'Sažetak',
+            totalProducts: 'Ukupno proizvoda',
+            avgCoverage: 'Prosječno pokriće',
+            fullCoverage: 'Potpuno pokriće',
+            needsApprovalCount: 'Potrebno odobrenje',
+
+            // Units
+            kg: 'kg',
+            pcs: 'kom'
+        }
+    },
+
+    // Get translation
+    getText(key) {
+        return this.t[this.state.language][key] || key;
+    },
+
+    // Switch language
+    switchLanguage(lang) {
+        if (lang === 'sl' || lang === 'hr') {
+            this.state.language = lang;
+            localStorage.setItem('pricingLanguage', lang);
+            this.render(); // Re-render with new language
         }
     },
 
@@ -45,36 +300,36 @@ const PricingV4 = {
         this.state.productGroups = [
             {
                 id: 'fresh-meat',
-                name: 'Sveže meso',
-                nameEn: 'Fresh Meat',
+                nameSl: this.getText('freshMeat'),
+                nameHr: this.t.hr.freshMeat,
                 icon: '🥩',
                 products: [
-                    { id: 'p001', code: 'PIŠ-FILE', name: 'Piščančji file', nameEn: 'Chicken Fillet', unit: 'kg' },
-                    { id: 'p002', code: 'PIŠ-PRSI', name: 'Piščančje prsi', nameEn: 'Chicken Breast', unit: 'kg' },
-                    { id: 'p003', code: 'PIŠ-BEDRA', name: 'Piščančja bedra', nameEn: 'Chicken Thighs', unit: 'kg' },
-                    { id: 'p004', code: 'SVP-PLEČKA', name: 'Svinjska plečka', nameEn: 'Pork Shoulder', unit: 'kg' },
-                    { id: 'p005', code: 'SVP-FILE', name: 'Svinjski file', nameEn: 'Pork Tenderloin', unit: 'kg' },
-                    { id: 'p006', code: 'GOV-FILE', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' }
+                    { id: 'p001', code: 'PIŠ-FILE', nameSl: this.t.sl.chickenFillet, nameHr: this.t.hr.chickenFillet, unit: this.getText('kg') },
+                    { id: 'p002', code: 'PIŠ-PRSI', nameSl: this.t.sl.chickenBreast, nameHr: this.t.hr.chickenBreast, unit: this.getText('kg') },
+                    { id: 'p003', code: 'PIŠ-BEDRA', nameSl: this.t.sl.chickenThighs, nameHr: this.t.hr.chickenThighs, unit: this.getText('kg') },
+                    { id: 'p004', code: 'SVP-PLEČKA', nameSl: this.t.sl.porkShoulder, nameHr: this.t.hr.porkShoulder, unit: this.getText('kg') },
+                    { id: 'p005', code: 'SVP-FILE', nameSl: this.t.sl.porkTenderloin, nameHr: this.t.hr.porkTenderloin, unit: this.getText('kg') },
+                    { id: 'p006', code: 'GOV-FILE', nameSl: this.t.sl.beefTenderloin, nameHr: this.t.hr.beefTenderloin, unit: this.getText('kg') }
                 ]
             },
             {
                 id: 'meat-products',
-                name: 'Mesni izdelki in pečeno meso',
-                nameEn: 'Meat Products and Roasted Meat',
+                nameSl: this.t.sl.meatProducts,
+                nameHr: this.t.hr.meatProducts,
                 icon: '🌭',
                 products: [
-                    { id: 'p007', code: 'KLB-KRANJSKA', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' },
-                    { id: 'p008', code: 'SUH-PRŠUT', name: 'Pršut', nameEn: 'Prosciutto', unit: 'kg' }
+                    { id: 'p007', code: 'KLB-KRANJSKA', nameSl: this.t.sl.carniolan, nameHr: this.t.hr.carniolan, unit: this.getText('kg') },
+                    { id: 'p008', code: 'SUH-PRŠUT', nameSl: this.t.sl.prosciutto, nameHr: this.t.hr.prosciutto, unit: this.getText('kg') }
                 ]
             },
             {
                 id: 'delamaris',
-                name: 'Delamaris',
-                nameEn: 'Delamaris',
+                nameSl: this.t.sl.delamaris,
+                nameHr: this.t.hr.delamaris,
                 icon: '🐟',
                 products: [
-                    { id: 'p009', code: 'DEL-TUNA', name: 'Tuna v oljčnem olju', nameEn: 'Tuna in Olive Oil', unit: 'pcs' },
-                    { id: 'p010', code: 'DEL-SARDINE', name: 'Sardine', nameEn: 'Sardines', unit: 'pcs' }
+                    { id: 'p009', code: 'DEL-TUNA', nameSl: this.t.sl.tunaOlive, nameHr: this.t.hr.tunaOlive, unit: this.getText('pcs') },
+                    { id: 'p010', code: 'DEL-SARDINE', nameSl: this.t.sl.sardines, nameHr: this.t.hr.sardines, unit: this.getText('pcs') }
                 ]
             }
         ];
@@ -84,6 +339,11 @@ const PricingV4 = {
         this.state.productGroups.forEach(group => {
             this.state.products.push(...group.products);
         });
+    },
+
+    // Get product or group name based on current language
+    getName(item) {
+        return this.state.language === 'sl' ? item.nameSl : item.nameHr;
     },
 
     loadPricingData() {
@@ -413,58 +673,68 @@ const PricingV4 = {
             <div class="pricing-v4-container">
                 <div class="pricing-header">
                     <div>
-                        <h1>💰 Nova cjenovna politika / New Pricing Policy</h1>
+                        <h1>💰 ${this.getText('title')}</h1>
                         <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
-                            Sistem cjenovnih nivoa: LC → C0 → Cmin → CP
+                            ${this.getText('subtitle')}
                         </p>
                     </div>
                     <div class="header-controls">
+                        <button class="language-btn ${this.state.language === 'sl' ? 'active' : ''}"
+                                onclick="PricingV4.switchLanguage('sl')"
+                                title="Slovenščina">
+                            🇸🇮
+                        </button>
+                        <button class="language-btn ${this.state.language === 'hr' ? 'active' : ''}"
+                                onclick="PricingV4.switchLanguage('hr')"
+                                title="Hrvatski">
+                            🇭🇷
+                        </button>
                         <button class="btn-upload" onclick="PricingV4.showUploadModal()">
-                            📤 Upload Data
+                            📤 ${this.getText('uploadData')}
                         </button>
                         <button class="btn-expand-all" onclick="PricingV4.expandAll()">
-                            📂 Expand All
+                            📂 ${this.getText('expandAll')}
                         </button>
                         <button class="btn-collapse-all" onclick="PricingV4.collapseAll()">
-                            📁 Collapse All
+                            📁 ${this.getText('collapseAll')}
                         </button>
                         <button class="btn-info" onclick="PricingV4.showPolicyInfo()">
-                            ℹ️ Policy Info
+                            ℹ️ ${this.getText('policyInfo')}
                         </button>
                     </div>
                 </div>
 
                 <div class="pricing-legend">
-                    <h3>📊 Nivoi cijena / Price Levels:</h3>
+                    <h3>📊 ${this.getText('priceLevels')}:</h3>
                     <div class="legend-items">
                         <div class="legend-item">
                             <span class="legend-color" style="background: #4CAF50;"></span>
                             <div class="legend-text">
-                                <strong>LC</strong> - Lastna cena (Production cost without OH)
+                                <strong>${this.getText('lcLabel')}</strong> - ${this.getText('lcDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background: #2196F3;"></span>
                             <div class="legend-text">
-                                <strong>C0</strong> - Pokriva proizvodnju + OH (Break-even)
+                                <strong>${this.getText('c0Label')}</strong> - ${this.getText('c0Desc')}
                             </div>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background: #FF9800;"></span>
                             <div class="legend-text">
-                                <strong>Cmin</strong> - Minimalna cijena s 4.25% dobiti (Minimum acceptable)
+                                <strong>${this.getText('cminLabel')}</strong> - ${this.getText('cminDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background: #9C27B0;"></span>
                             <div class="legend-text">
-                                <strong>Buffer</strong> - Rezerva iznad Cmin (Strategic buffer)
+                                <strong>${this.getText('bufferLabel')}</strong> - ${this.getText('bufferDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
                             <span class="legend-color" style="background: #F44336;"></span>
                             <div class="legend-text">
-                                <strong>Rabati</strong> - Razlika CP → Realized (Discounts)
+                                <strong>${this.getText('discountsLabel')}</strong> - ${this.getText('discountsDesc')}
                             </div>
                         </div>
                     </div>
@@ -482,14 +752,14 @@ const PricingV4 = {
                 <div id="upload-modal" class="upload-modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>📤 Upload Excel Data</h2>
+                            <h2>📤 ${this.getText('uploadTitle')}</h2>
                             <button class="modal-close" onclick="PricingV4.closeUploadModal()">✕</button>
                         </div>
                         <div class="modal-body">
                             <div class="upload-info">
-                                <h3>📋 Excel Format Required:</h3>
+                                <h3>📋 ${this.getText('excelFormatRequired')}:</h3>
                                 <div class="format-section">
-                                    <h4>Sheet 1: "Izdelki" (Products)</h4>
+                                    <h4>${this.getText('sheet1')}: "Izdelki" (${this.getText('products')})</h4>
                                     <table class="format-table">
                                         <tr>
                                             <th>šifra</th>
@@ -501,17 +771,17 @@ const PricingV4 = {
                                         </tr>
                                         <tr>
                                             <td>PIŠ-FILE</td>
-                                            <td>Piščančji file</td>
+                                            <td>${this.getName({nameSl: this.t.sl.chickenFillet, nameHr: this.t.hr.chickenFillet})}</td>
                                             <td>kg</td>
-                                            <td>Sveže meso</td>
+                                            <td>${this.getName({nameSl: this.t.sl.freshMeat, nameHr: this.t.hr.freshMeat})}</td>
                                             <td>5.44</td>
                                             <td>TRUE</td>
                                         </tr>
                                     </table>
-                                    <p class="format-note"><strong>Industrija options:</strong> Sveže meso, Mesni izdelki in pečeno meso, Delamaris</p>
+                                    <p class="format-note"><strong>${this.getText('industrijaOptions')}:</strong> ${this.getName({nameSl: this.t.sl.freshMeat, nameHr: this.t.hr.freshMeat})}, ${this.getName({nameSl: this.t.sl.meatProducts, nameHr: this.t.hr.meatProducts})}, ${this.getText('delamaris')}</p>
                                 </div>
                                 <div class="format-section">
-                                    <h4>Sheet 2: "Cene_Kupci" (Customer Pricing)</h4>
+                                    <h4>${this.getText('sheet2')}: "Cene_Kupci" (${this.getText('customerPricing')})</h4>
                                     <table class="format-table">
                                         <tr>
                                             <th>šifra</th>
@@ -541,15 +811,15 @@ const PricingV4 = {
                             <div class="upload-area">
                                 <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;" onchange="PricingV4.handleFileSelect(event)">
                                 <button class="btn-select-file" onclick="document.getElementById('excel-file-input').click()">
-                                    📁 Select Excel File
+                                    📁 ${this.getText('selectFile')}
                                 </button>
                                 <div id="file-name" class="file-name"></div>
                                 <div id="upload-status" class="upload-status"></div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn-cancel" onclick="PricingV4.closeUploadModal()">Cancel</button>
-                            <button class="btn-process" id="process-btn" onclick="PricingV4.processExcelFile()" disabled>Process Data</button>
+                            <button class="btn-cancel" onclick="PricingV4.closeUploadModal()">${this.getText('cancel')}</button>
+                            <button class="btn-process" id="process-btn" onclick="PricingV4.processExcelFile()" disabled>${this.getText('processData')}</button>
                         </div>
                     </div>
                 </div>
@@ -569,24 +839,25 @@ const PricingV4 = {
 
         this.state.productGroups.forEach(group => {
             const isGroupExpanded = this.state.expanded.groups.has(group.id);
+            const productCountText = this.state.language === 'sl' ? 'izdelkov' : 'proizvoda';
 
             html += `
                 <div class="group-container">
                     <div class="group-header" onclick="PricingV4.toggleGroup('${group.id}')">
                         <span class="expand-icon">${isGroupExpanded ? '▼' : '▶'}</span>
                         <span class="group-icon">${group.icon}</span>
-                        <span class="group-name">${group.name}</span>
-                        <span class="group-count">(${group.products.length} izdelkov)</span>
+                        <span class="group-name">${this.getName(group)}</span>
+                        <span class="group-count">(${group.products.length} ${productCountText})</span>
                     </div>
 
                     <div class="group-content ${isGroupExpanded ? 'expanded' : 'collapsed'}">
                         <table class="pricing-table">
                             <thead>
                                 <tr>
-                                    <th rowspan="2">Šifra<br>Code</th>
-                                    <th rowspan="2">Izdelek<br>Product</th>
-                                    <th colspan="3">Nivoi cijena / Price Levels (€)</th>
-                                    <th rowspan="2">Kupci<br>Customers</th>
+                                    <th rowspan="2">${this.getText('code')}</th>
+                                    <th rowspan="2">${this.getText('product')}</th>
+                                    <th colspan="3">${this.getText('priceLevels')} (€)</th>
+                                    <th rowspan="2">${this.getText('customers')}</th>
                                 </tr>
                                 <tr>
                                     <th class="price-level lc">LC</th>
@@ -608,6 +879,7 @@ const PricingV4 = {
 
     renderProducts(products) {
         let html = '';
+        const customersText = this.state.language === 'sl' ? 'kupci' : 'kupci';
 
         products.forEach(product => {
             const pricing = this.state.pricingData[product.id];
@@ -621,8 +893,7 @@ const PricingV4 = {
                         ${product.code}
                     </td>
                     <td class="name">
-                        <strong>${product.name}</strong>
-                        <br><small>${product.nameEn}</small>
+                        <strong>${this.getName(product)}</strong>
                     </td>
                     <td class="price-level lc">€${pricing.lc.toFixed(2)}</td>
                     <td class="price-level c0">€${pricing.c0.toFixed(2)}</td>
@@ -630,9 +901,9 @@ const PricingV4 = {
                     <td class="customers-cell">
                         <button class="expand-customers-btn ${isExpanded ? 'expanded' : ''}"
                                 onclick="PricingV4.toggleProduct('${product.id}')"
-                                title="Show customers">
+                                title="${this.getText('showCustomers')}">
                             <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
-                            <span class="customer-count">👥 ${customerCount} kupci</span>
+                            <span class="customer-count">👥 ${customerCount} ${customersText}</span>
                         </button>
                     </td>
                 </tr>
@@ -660,7 +931,7 @@ const PricingV4 = {
                     <td colspan="2" class="customer-info">
                         <button class="expand-detail-btn ${isDetailExpanded ? 'expanded' : ''}"
                                 onclick="PricingV4.toggleCustomerDetail('${detailKey}')"
-                                title="Show detailed breakdown">
+                                title="${this.getText('showDetails')}">
                             <span class="expand-icon">${isDetailExpanded ? '▼' : '▶'}</span>
                         </button>
                         <strong>👤 ${custPricing.customerName}</strong>
@@ -677,7 +948,7 @@ const PricingV4 = {
                     </td>
                     <td class="realized-cell">
                         <strong>€${custPricing.realizedPrice.toFixed(2)}</strong>
-                        <br><span class="coverage ${coverageClass}">${custPricing.coverage.vsCmin.toFixed(1)}% vs Cmin</span>
+                        <br><span class="coverage ${coverageClass}">${custPricing.coverage.vsCmin.toFixed(1)}% ${this.getText('vsCmin')}</span>
                     </td>
                     <td class="visualization-cell">
                         ${this.renderPriceFlowChart(basePrice, custPricing)}
@@ -773,62 +1044,62 @@ const PricingV4 = {
             <tr class="detail-row">
                 <td colspan="6">
                     <div class="detailed-breakdown">
-                        <h4>📊 Detaljni obračun / Detailed Breakdown: ${product.name} → ${custPricing.customerName}</h4>
+                        <h4>📊 ${this.getText('detailedBreakdown')}: ${this.getName(product)} → ${custPricing.customerName}</h4>
 
                         <div class="breakdown-grid">
                             <div class="breakdown-section">
-                                <h5>💶 Kalkulacija cijena / Price Calculation</h5>
+                                <h5>💶 ${this.getText('priceCalculation')}</h5>
                                 <table class="breakdown-table">
                                     <tr>
-                                        <td>LC (Lastna cena):</td>
+                                        <td>LC (${this.getText('lcLabel').split(' - ')[1]}):</td>
                                         <td class="value">€${basePrice.lc.toFixed(2)}</td>
-                                        <td class="note">Production cost without OH</td>
+                                        <td class="note">${this.getText('productionCost')}</td>
                                     </tr>
                                     <tr>
-                                        <td>× OH Factor (${this.state.industryFactors.ohFactor}):</td>
+                                        <td>× ${this.getText('ohFactor')} (${this.state.industryFactors.ohFactor}):</td>
                                         <td class="value">+€${(basePrice.c0 - basePrice.lc).toFixed(2)}</td>
-                                        <td class="note">General overheads</td>
+                                        <td class="note">${this.getText('generalOverheads')}</td>
                                     </tr>
                                     <tr class="subtotal">
-                                        <td><strong>= C0 (Break-even):</strong></td>
+                                        <td><strong>= C0 (${this.getText('breakEven')}):</strong></td>
                                         <td class="value"><strong>€${basePrice.c0.toFixed(2)}</strong></td>
-                                        <td class="note">Covers all costs, no profit</td>
+                                        <td class="note">${this.getText('coversAllCosts')}</td>
                                     </tr>
                                     <tr>
                                         <td>÷ (1 - ${(this.state.industryFactors.minProfitMargin * 100).toFixed(2)}%):</td>
                                         <td class="value">+€${(basePrice.cmin - basePrice.c0).toFixed(2)}</td>
-                                        <td class="note">Minimum 4.25% profit</td>
+                                        <td class="note">${this.getText('minProfit')}</td>
                                     </tr>
                                     <tr class="subtotal">
-                                        <td><strong>= Cmin (Calculated):</strong></td>
+                                        <td><strong>= Cmin:</strong></td>
                                         <td class="value"><strong>€${basePrice.cmin.toFixed(2)}</strong></td>
-                                        <td class="note">Minimum acceptable price</td>
+                                        <td class="note">${this.getText('minAcceptable')}</td>
                                     </tr>
                                     <tr>
-                                        <td>Strategic adjustment:</td>
+                                        <td>${this.getText('strategicAdjustment')}:</td>
                                         <td class="value">+€${(custPricing.strategicCmin - basePrice.cmin).toFixed(2)}</td>
-                                        <td class="note">Buffer for this customer</td>
+                                        <td class="note">${this.getText('bufferForCustomer')}</td>
                                     </tr>
                                     <tr class="subtotal">
-                                        <td><strong>= Cmin (Strategic):</strong></td>
+                                        <td><strong>= Cmin (${this.getText('strategicCmin')}):</strong></td>
                                         <td class="value"><strong>€${custPricing.strategicCmin.toFixed(2)}</strong></td>
-                                        <td class="note">Adjusted minimum price</td>
+                                        <td class="note">${this.getText('adjustedMin')}</td>
                                     </tr>
                                     <tr>
                                         <td>÷ (1 - ${custPricing.totalDiscounts}%):</td>
                                         <td class="value">+€${(custPricing.cp - custPricing.strategicCmin).toFixed(2)}</td>
-                                        <td class="note">Inflate for discounts</td>
+                                        <td class="note">${this.getText('inflateForDiscounts')}</td>
                                     </tr>
                                     <tr class="total">
-                                        <td><strong>= CP (Customer Price):</strong></td>
+                                        <td><strong>= ${this.getText('customerPrice')}:</strong></td>
                                         <td class="value"><strong>€${custPricing.cp.toFixed(2)}</strong></td>
-                                        <td class="note">Quoted price</td>
+                                        <td class="note">${this.getText('quotedPrice')}</td>
                                     </tr>
                                 </table>
                             </div>
 
                             <div class="breakdown-section">
-                                <h5>📉 Rabati / Discounts</h5>
+                                <h5>📉 ${this.getText('discounts')}</h5>
                                 <table class="breakdown-table">
                                     ${Object.entries(custPricing.discountBreakdown).map(([key, value]) => `
                                         <tr>
@@ -838,29 +1109,29 @@ const PricingV4 = {
                                         </tr>
                                     `).join('')}
                                     <tr class="subtotal">
-                                        <td><strong>Total rabati:</strong></td>
+                                        <td><strong>${this.getText('totalDiscounts')}:</strong></td>
                                         <td class="value"><strong>${custPricing.totalDiscounts}%</strong></td>
                                         <td class="note"><strong>€${(custPricing.cp - custPricing.realizedPrice).toFixed(2)}</strong></td>
                                     </tr>
                                     <tr class="total">
-                                        <td><strong>Realized Price:</strong></td>
+                                        <td><strong>${this.getText('realizedPrice')}:</strong></td>
                                         <td class="value" colspan="2"><strong>€${custPricing.realizedPrice.toFixed(2)}</strong></td>
                                     </tr>
                                 </table>
                             </div>
 
                             <div class="breakdown-section">
-                                <h5>✅ Pokritje / Coverage Analysis</h5>
+                                <h5>✅ ${this.getText('coverageAnalysis')}</h5>
                                 <table class="breakdown-table">
                                     <tr>
-                                        <td>Coverage vs C0:</td>
+                                        <td>${this.getText('coverageVsC0')}:</td>
                                         <td class="value ${custPricing.coverage.vsC0 >= 100 ? 'good' : 'bad'}">
                                             ${custPricing.coverage.vsC0.toFixed(1)}%
                                         </td>
-                                        <td class="note">${custPricing.coverage.vsC0 >= 100 ? '✓ Covers break-even' : '✗ Below break-even'}</td>
+                                        <td class="note">${custPricing.coverage.vsC0 >= 100 ? '✓' : '✗'}</td>
                                     </tr>
                                     <tr>
-                                        <td>Coverage vs Cmin:</td>
+                                        <td>${this.getText('coverageVsCmin')}:</td>
                                         <td class="value ${custPricing.coverage.vsCmin >= 100 ? 'good' : 'bad'}">
                                             ${custPricing.coverage.vsCmin.toFixed(1)}%
                                         </td>
@@ -1352,6 +1623,19 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 .header-controls button:hover {
                     background: rgba(255,255,255,0.3);
                     transform: translateY(-2px);
+                }
+
+                .language-btn {
+                    padding: 8px 12px !important;
+                    font-size: 20px !important;
+                    min-width: 45px;
+                    border: 2px solid rgba(255,255,255,0.3) !important;
+                }
+
+                .language-btn.active {
+                    background: rgba(255,255,255,0.4) !important;
+                    border-color: rgba(255,255,255,0.8) !important;
+                    box-shadow: 0 0 10px rgba(255,255,255,0.3);
                 }
 
                 .pricing-legend {
