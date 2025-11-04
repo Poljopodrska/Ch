@@ -325,45 +325,32 @@ const PricingV4 = {
     },
 
     loadProductStructure() {
-        // Define 3 industries (Industrije) with products directly under each
+        // Initialize empty industry structure - will be populated from database/Excel
         this.state.productGroups = [
             {
                 id: 'fresh-meat',
-                nameSl: this.getText('freshMeat'),
-                nameHr: this.t.hr.freshMeat,
+                nameSl: 'Sveže meso',
+                nameHr: 'Svježe meso',
                 icon: '🐔',
-                products: [
-                    { id: 'p001', code: 'PIŠ-FILE', nameSl: this.t.sl.chickenFillet, nameHr: this.t.hr.chickenFillet, unit: this.getText('kg') },
-                    { id: 'p002', code: 'PIŠ-PRSI', nameSl: this.t.sl.chickenBreast, nameHr: this.t.hr.chickenBreast, unit: this.getText('kg') },
-                    { id: 'p003', code: 'PIŠ-BEDRA', nameSl: this.t.sl.chickenThighs, nameHr: this.t.hr.chickenThighs, unit: this.getText('kg') },
-                    { id: 'p004', code: 'SVP-PLEČKA', nameSl: this.t.sl.porkShoulder, nameHr: this.t.hr.porkShoulder, unit: this.getText('kg') },
-                    { id: 'p005', code: 'SVP-FILE', nameSl: this.t.sl.porkTenderloin, nameHr: this.t.hr.porkTenderloin, unit: this.getText('kg') },
-                    { id: 'p006', code: 'GOV-FILE', nameSl: this.t.sl.beefTenderloin, nameHr: this.t.hr.beefTenderloin, unit: this.getText('kg') }
-                ]
+                products: []
             },
             {
                 id: 'meat-products',
-                nameSl: this.t.sl.meatProducts,
-                nameHr: this.t.hr.meatProducts,
+                nameSl: 'Mesni izdelki in pečeno meso',
+                nameHr: 'Mesni proizvodi i pečeno meso',
                 icon: '🌭',
-                products: [
-                    { id: 'p007', code: 'KLB-KRANJSKA', nameSl: this.t.sl.carniolan, nameHr: this.t.hr.carniolan, unit: this.getText('kg') },
-                    { id: 'p008', code: 'SUH-PRŠUT', nameSl: this.t.sl.prosciutto, nameHr: this.t.hr.prosciutto, unit: this.getText('kg') }
-                ]
+                products: []
             },
             {
                 id: 'delamaris',
-                nameSl: this.t.sl.delamaris,
-                nameHr: this.t.hr.delamaris,
+                nameSl: 'Delamaris',
+                nameHr: 'Delamaris',
                 icon: '🐟',
-                products: [
-                    { id: 'p009', code: 'DEL-TUNA', nameSl: this.t.sl.tunaOlive, nameHr: this.t.hr.tunaOlive, unit: this.getText('pcs') },
-                    { id: 'p010', code: 'DEL-SARDINE', nameSl: this.t.sl.sardines, nameHr: this.t.hr.sardines, unit: this.getText('pcs') }
-                ]
+                products: []
             }
         ];
 
-        // Flatten products list
+        // Flatten products list (will be empty until data is loaded)
         this.state.products = [];
         this.state.productGroups.forEach(group => {
             this.state.products.push(...group.products);
@@ -376,68 +363,13 @@ const PricingV4 = {
     },
 
     loadPricingData() {
-        // Load base product data (LC, C0, Cmin) - same for all customers
-        this.state.products.forEach(product => {
-            const base = this.getBaseProductData(product.id);
-
-            // Calculate price levels
-            const lc = base.lc;
-            const c0 = lc * this.state.industryFactors.ohFactor;
-            const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);
-
-            this.state.pricingData[product.id] = {
-                lc: lc,
-                c0: c0,
-                cmin: cmin
-            };
-        });
+        // Initialize empty pricing data - will be populated from Excel upload
+        this.state.pricingData = {};
     },
 
     loadCustomerPricing() {
-        // Load customer-specific pricing data
-        const customerData = this.getCustomerPricingData();
-
+        // Initialize empty customer pricing - will be populated from Excel upload
         this.state.customerPricing = {};
-
-        Object.entries(customerData).forEach(([productId, customers]) => {
-            this.state.customerPricing[productId] = {};
-
-            customers.forEach(custData => {
-                const base = this.state.pricingData[productId];
-                const strategicCmin = custData.strategicCmin;
-                const cp = strategicCmin / (1 - custData.totalDiscounts / 100);
-                const realizedPrice = cp * (1 - custData.totalDiscounts / 100);
-
-                this.state.customerPricing[productId][custData.customerId] = {
-                    customerId: custData.customerId,
-                    customerName: custData.customerName,
-                    customerType: custData.customerType,
-
-                    // Price levels (LC, C0, Cmin inherited from product base)
-                    strategicCmin: strategicCmin,
-                    cp: cp,
-
-                    // Discounts
-                    totalDiscounts: custData.totalDiscounts,
-                    discountBreakdown: custData.discountBreakdown,
-
-                    // Realized price
-                    realizedPrice: realizedPrice,
-
-                    // Coverage
-                    coverage: {
-                        vsC0: (realizedPrice / base.c0) * 100,
-                        vsCmin: (realizedPrice / base.cmin) * 100,
-                        buffer: ((realizedPrice - base.cmin) / base.cmin) * 100
-                    },
-
-                    // Cumulative coverage for visualization
-                    cumulativeCoverage: this.calculateCumulativeCoverage(
-                        base.lc, base.c0, base.cmin, strategicCmin, cp, realizedPrice
-                    )
-                };
-            });
-        });
     },
 
     calculateCumulativeCoverage(lc, c0, cmin, strategicCmin, cp, realizedPrice) {
@@ -475,218 +407,6 @@ const PricingV4 = {
         }
 
         return coverage;
-    },
-
-    getBaseProductData(productId) {
-        // Base LC costs for products (same for all customers)
-        const baseData = {
-            'p001': { lc: 5.44 },  // Chicken Fillet
-            'p002': { lc: 3.80 },  // Chicken Breast
-            'p003': { lc: 2.80 },  // Chicken Thighs
-            'p004': { lc: 3.20 },  // Pork Shoulder
-            'p005': { lc: 6.40 },  // Pork Tenderloin
-            'p006': { lc: 12.80 }, // Beef Tenderloin
-            'p007': { lc: 4.80 },  // Kranjska Sausage
-            'p008': { lc: 16.00 }, // Prosciutto
-            'p009': { lc: 0.80 },  // Tuna in Olive Oil
-            'p010': { lc: 0.65 }   // Sardines
-        };
-
-        return baseData[productId] || { lc: 5.0 };
-    },
-
-    getCustomerPricingData() {
-        // Customer-specific pricing (multiple customers per product)
-        return {
-            'p001': [ // Chicken Fillet
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 7.25,
-                    totalDiscounts: 29,
-                    discountBreakdown: { invoice: 15, marketing: 3, yearEnd: 11 }
-                },
-                {
-                    customerId: 'c002',
-                    customerName: 'Lidl',
-                    customerType: 'Diskont / Discount',
-                    strategicCmin: 7.10,
-                    totalDiscounts: 32,
-                    discountBreakdown: { invoice: 18, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c003',
-                    customerName: 'Kaufland',
-                    customerType: 'Hipermarket / Hypermarket',
-                    strategicCmin: 7.50,
-                    totalDiscounts: 28,
-                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
-                }
-            ],
-            'p002': [ // Chicken Breast
-                {
-                    customerId: 'c002',
-                    customerName: 'Lidl',
-                    customerType: 'Diskont / Discount',
-                    strategicCmin: 6.20,
-                    totalDiscounts: 30,
-                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c004',
-                    customerName: 'Spar',
-                    customerType: 'Supermarket',
-                    strategicCmin: 6.50,
-                    totalDiscounts: 25,
-                    discountBreakdown: { invoice: 12, marketing: 5, yearEnd: 8 }
-                }
-            ],
-            'p003': [ // Chicken Thighs
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 4.60,
-                    totalDiscounts: 27,
-                    discountBreakdown: { invoice: 15, marketing: 4, yearEnd: 8 }
-                },
-                {
-                    customerId: 'c005',
-                    customerName: 'Konzum',
-                    customerType: 'Supermarket',
-                    strategicCmin: 4.80,
-                    totalDiscounts: 24,
-                    discountBreakdown: { invoice: 12, marketing: 4, yearEnd: 8 }
-                }
-            ],
-            'p004': [ // Pork Shoulder
-                {
-                    customerId: 'c002',
-                    customerName: 'Lidl',
-                    customerType: 'Diskont / Discount',
-                    strategicCmin: 5.30,
-                    totalDiscounts: 28,
-                    discountBreakdown: { invoice: 16, marketing: 4, yearEnd: 8 }
-                },
-                {
-                    customerId: 'c003',
-                    customerName: 'Kaufland',
-                    customerType: 'Hipermarket / Hypermarket',
-                    strategicCmin: 5.50,
-                    totalDiscounts: 26,
-                    discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
-                }
-            ],
-            'p005': [ // Pork Tenderloin
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 10.80,
-                    totalDiscounts: 29,
-                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c006',
-                    customerName: 'Metro',
-                    customerType: 'Cash & Carry',
-                    strategicCmin: 11.20,
-                    totalDiscounts: 22,
-                    discountBreakdown: { invoice: 10, marketing: 4, yearEnd: 8 }
-                }
-            ],
-            'p006': [ // Beef Tenderloin
-                {
-                    customerId: 'c006',
-                    customerName: 'Metro',
-                    customerType: 'Cash & Carry',
-                    strategicCmin: 22.50,
-                    totalDiscounts: 25,
-                    discountBreakdown: { invoice: 12, marketing: 5, yearEnd: 8 }
-                },
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 23.00,
-                    totalDiscounts: 30,
-                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
-                }
-            ],
-            'p007': [ // Kranjska Sausage
-                {
-                    customerId: 'c004',
-                    customerName: 'Spar',
-                    customerType: 'Supermarket',
-                    strategicCmin: 8.30,
-                    totalDiscounts: 26,
-                    discountBreakdown: { invoice: 14, marketing: 4, yearEnd: 8 }
-                },
-                {
-                    customerId: 'c002',
-                    customerName: 'Lidl',
-                    customerType: 'Diskont / Discount',
-                    strategicCmin: 8.00,
-                    totalDiscounts: 29,
-                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 8 }
-                }
-            ],
-            'p008': [ // Prosciutto
-                {
-                    customerId: 'c007',
-                    customerName: 'Mercator',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 29.50,
-                    totalDiscounts: 32,
-                    discountBreakdown: { invoice: 18, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c006',
-                    customerName: 'Metro',
-                    customerType: 'Cash & Carry',
-                    strategicCmin: 30.00,
-                    totalDiscounts: 28,
-                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 8 }
-                }
-            ],
-            'p009': [ // Tuna in Olive Oil
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 1.35,
-                    totalDiscounts: 30,
-                    discountBreakdown: { invoice: 16, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c004',
-                    customerName: 'Spar',
-                    customerType: 'Supermarket',
-                    strategicCmin: 1.40,
-                    totalDiscounts: 27,
-                    discountBreakdown: { invoice: 14, marketing: 5, yearEnd: 8 }
-                }
-            ],
-            'p010': [ // Sardines
-                {
-                    customerId: 'c001',
-                    customerName: 'Plodine',
-                    customerType: 'Trgovska veriga / Retail Chain',
-                    strategicCmin: 1.10,
-                    totalDiscounts: 29,
-                    discountBreakdown: { invoice: 15, marketing: 5, yearEnd: 9 }
-                },
-                {
-                    customerId: 'c005',
-                    customerName: 'Konzum',
-                    customerType: 'Supermarket',
-                    strategicCmin: 1.15,
-                    totalDiscounts: 26,
-                    discountBreakdown: { invoice: 13, marketing: 5, yearEnd: 8 }
-                }
-            ]
-        };
     },
 
     render() {
