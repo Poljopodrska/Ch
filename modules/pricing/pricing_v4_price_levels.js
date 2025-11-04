@@ -1510,26 +1510,20 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                     console.log('Available sheets in Excel:', workbook.SheetNames);
 
-                    // Validate required sheets
-                    if (!workbook.SheetNames.includes('Izdelki')) {
-                        throw new Error(`Sheet "Izdelki" not found in Excel file. Available sheets: ${workbook.SheetNames.join(', ')}`);
-                    }
-                    if (!workbook.SheetNames.includes('Cene_Kupci')) {
-                        throw new Error(`Sheet "Cene_Kupci" not found in Excel file. Available sheets: ${workbook.SheetNames.join(', ')}`);
+                    // Use first sheet only
+                    if (workbook.SheetNames.length === 0) {
+                        throw new Error('No sheets found in Excel file');
                     }
 
-                    // Parse sheets
-                    const izdelkiSheet = workbook.Sheets['Izdelki'];
-                    const ceneKupciSheet = workbook.Sheets['Cene_Kupci'];
+                    // Read first sheet
+                    const firstSheetName = workbook.SheetNames[0];
+                    const firstSheet = workbook.Sheets[firstSheetName];
+                    const izdelkiData = XLSX.utils.sheet_to_json(firstSheet);
 
-                    const izdelkiData = XLSX.utils.sheet_to_json(izdelkiSheet);
-                    const ceneKupciData = XLSX.utils.sheet_to_json(ceneKupciSheet);
+                    console.log('Excel data from first sheet:', izdelkiData);
 
-                    console.log('Izdelki data:', izdelkiData);
-                    console.log('Cene_Kupci data:', ceneKupciData);
-
-                    // Validate and load data
-                    const result = this.validateAndLoadData(izdelkiData, ceneKupciData);
+                    // Validate and load data (no customer pricing for now)
+                    const result = this.validateAndLoadData(izdelkiData, []);
 
                     if (result.success) {
                         statusDiv.innerHTML = `<div class="success">✅ Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
@@ -1585,17 +1579,15 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 return { success: false, error: `Missing columns in Izdelki: ${missingCols.join(', ')}` };
             }
 
-            // Validate Cene_Kupci data
-            const requiredCeneCols = ['šifra', 'kupec_id', 'kupec_naziv', 'kupec_tip', 'strategic_cmin',
-                                       'popust_faktura', 'popust_marketing', 'popust_letni', 'aktiven'];
-            if (ceneKupciData.length === 0) {
-                return { success: false, error: 'No data found in Cene_Kupci sheet' };
-            }
-
-            const firstCeneRow = ceneKupciData[0];
-            const missingCeneCols = requiredCeneCols.filter(col => !(col in firstCeneRow));
-            if (missingCeneCols.length > 0) {
-                return { success: false, error: `Missing columns in Cene_Kupci: ${missingCeneCols.join(', ')}` };
+            // Validate Cene_Kupci data (optional for now)
+            if (ceneKupciData.length > 0) {
+                const requiredCeneCols = ['šifra', 'kupec_id', 'kupec_naziv', 'kupec_tip', 'strategic_cmin',
+                                           'popust_faktura', 'popust_marketing', 'popust_letni', 'aktiven'];
+                const firstCeneRow = ceneKupciData[0];
+                const missingCeneCols = requiredCeneCols.filter(col => !(col in firstCeneRow));
+                if (missingCeneCols.length > 0) {
+                    return { success: false, error: `Missing columns in Cene_Kupci: ${missingCeneCols.join(', ')}` };
+                }
             }
 
             // Build new data structure
