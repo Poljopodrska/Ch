@@ -272,53 +272,53 @@ const ChApp = {
         }
     },
     
-    // Pricing view - V2 with 2-level product hierarchy
+    // Pricing view - V4 with Price Levels (LC, C0, Cmin, CP)
     async getPricingView() {
-        console.log('Loading Pricing V2 module with product hierarchy...');
-        
+        console.log('Loading Pricing V4 module with price levels...');
+
         // Create container for pricing module
         const html = `
             <div id="pricing-container">
-                <!-- Pricing V2 will be loaded here -->
+                <!-- Pricing V4 will be loaded here -->
             </div>
         `;
-        
-        // Load the pricing V2 module after DOM is ready
+
+        // Load the pricing V4 module after DOM is ready
         setTimeout(async () => {
             try {
-                // Check if PricingV3 is already loaded
-                if (typeof PricingV3 !== 'undefined') {
-                    console.log('PricingV3 already loaded, initializing...');
-                    PricingV3.init();
-                    console.log('Pricing V3 initialized');
+                // Check if PricingV4 is already loaded
+                if (typeof PricingV4 !== 'undefined') {
+                    console.log('PricingV4 already loaded, initializing...');
+                    PricingV4.init();
+                    console.log('Pricing V4 initialized');
                     return;
                 }
-                
+
                 // Check if script is already loading
-                const existingScript = document.querySelector('script[src="modules/pricing/pricing_v3.js"]');
+                const existingScript = document.querySelector('script[src="modules/pricing/pricing_v4_price_levels.js"]');
                 if (existingScript) {
-                    console.log('Pricing V3 script already in DOM, waiting for load...');
+                    console.log('Pricing V4 script already in DOM, waiting for load...');
                     return;
                 }
-                
-                // Load pricing_v3.js module (with cost breakdown)
+
+                // Load pricing_v4_price_levels.js module (with price level system)
                 const script = document.createElement('script');
-                script.src = 'modules/pricing/pricing_v3.js';
+                script.src = 'modules/pricing/pricing_v4_price_levels.js';
                 script.onload = () => {
-                    console.log('Pricing V3 script loaded');
-                    if (typeof PricingV3 !== 'undefined') {
+                    console.log('Pricing V4 script loaded');
+                    if (typeof PricingV4 !== 'undefined') {
+                        PricingV4.init();
+                        console.log('Pricing V4 initialized');
+                    } else if (typeof PricingV3 !== 'undefined') {
+                        // Fallback to V3
                         PricingV3.init();
-                        console.log('Pricing V3 initialized');
-                    } else if (typeof PricingV2 !== 'undefined') {
-                        // Fallback to V2
-                        PricingV2.init();
-                        console.log('Pricing V2 initialized (fallback)');
+                        console.log('Pricing V3 initialized (fallback)');
                     } else {
-                        console.error('PricingV3 not found after loading script');
+                        console.error('PricingV4 not found after loading script');
                     }
                 };
                 script.onerror = (e) => {
-                    console.error('Failed to load pricing_v2.js:', e);
+                    console.error('Failed to load pricing_v4_price_levels.js:', e);
                 };
                 document.head.appendChild(script);
             } catch (error) {

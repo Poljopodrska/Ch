@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Pricing V4 - Price Levels System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .test-header h1 {
+            margin: 0;
+        }
+        .test-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-header">
+        <h1>🧪 Test: Pricing V4 - Nova cjenovna politika</h1>
+        <p>Testing the new price levels system: LC → C0 → Cmin → CP</p>
+    </div>
+
+    <div class="test-info">
+        <strong>ℹ️ Test Information:</strong><br>
+        This page tests the new Pricing V4 module with the price level system.<br>
+        <strong>Price Levels:</strong> LC (production cost) → C0 (break-even) → Cmin (minimum with 4.25% profit) → CP (quoted price with discounts)<br>
+        <strong>Example:</strong> Chicken Fillet for Plodine with 29% total discounts (15% invoice + 3% marketing + 11% year-end)
+    </div>
+
+    <div id="pricing-container">
+        <!-- Pricing V4 module will be loaded here -->
+    </div>
+
+    <script src="modules/pricing/pricing_v4_price_levels.js"></script>
+    <script>
+        console.log('Starting Pricing V4 test...');
+
+        // Wait for DOM to be fully loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing Pricing V4...');
+
+            if (typeof PricingV4 !== 'undefined') {
+                PricingV4.init();
+                console.log('✓ Pricing V4 initialized successfully');
+            } else {
+                console.error('✗ PricingV4 not found!');
+            }
+        });
+    </script>
+</body>
+</html>
