@@ -959,12 +959,16 @@ const PricingV4 = {
                                     <th rowspan="2">${this.getText('code')}</th>
                                     <th rowspan="2">${this.getText('product')}</th>
                                     <th colspan="3">${this.getText('priceLevels')} (€)</th>
+                                    <th colspan="3" class="status-columns-header">${this.state.language === 'sl' ? 'Status' : 'Status'}</th>
                                     <th rowspan="2">${this.getText('customers')}</th>
                                 </tr>
                                 <tr>
                                     <th class="price-level lc">LC</th>
                                     <th class="price-level c0">C0</th>
                                     <th class="price-level cmin">Cmin</th>
+                                    <th class="status-header-small">${this.getText('aboveProduction')}</th>
+                                    <th class="status-header-small">${this.getText('aboveC0')}</th>
+                                    <th class="status-header-small">${this.getText('aboveCmin')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1199,6 +1203,34 @@ const PricingV4 = {
             const customerCount = Object.keys(customers).length;
             const isExpanded = this.state.expanded.products.has(product.id);
 
+            // Get the industry for this product to determine production factor
+            let industryId = 'fresh-meat'; // default
+            this.state.productGroups.forEach(group => {
+                if (group.products.find(p => p.id === product.id)) {
+                    industryId = group.id;
+                }
+            });
+            const productionFactor = this.state.industryProductionFactors[industryId] || 1.20;
+            const productionPrice = pricing.lc * productionFactor;
+
+            // Calculate aggregate status across all customers
+            let allAboveProduction = true;
+            let allAboveC0 = true;
+            let allAboveCmin = true;
+            let hasCustomers = false;
+
+            Object.values(customers).forEach(custPricing => {
+                hasCustomers = true;
+                if (custPricing.realizedPrice < productionPrice) allAboveProduction = false;
+                if (custPricing.realizedPrice < pricing.c0) allAboveC0 = false;
+                if (custPricing.realizedPrice < pricing.cmin) allAboveCmin = false;
+            });
+
+            // If no customers, show neutral status
+            const productionStatus = !hasCustomers ? 'neutral' : (allAboveProduction ? 'pass' : 'fail');
+            const c0Status = !hasCustomers ? 'neutral' : (allAboveC0 ? 'pass' : 'fail');
+            const cminStatus = !hasCustomers ? 'neutral' : (allAboveCmin ? 'pass' : 'fail');
+
             html += `
                 <tr class="product-row">
                     <td class="code">
@@ -1210,6 +1242,15 @@ const PricingV4 = {
                     <td class="price-level lc">€${pricing.lc.toFixed(2)}</td>
                     <td class="price-level c0">€${pricing.c0.toFixed(2)}</td>
                     <td class="price-level cmin">€${pricing.cmin.toFixed(2)}</td>
+                    <td class="status-check-product ${productionStatus}">
+                        <span class="status-icon">${!hasCustomers ? '—' : (allAboveProduction ? '✓' : '✗')}</span>
+                    </td>
+                    <td class="status-check-product ${c0Status}">
+                        <span class="status-icon">${!hasCustomers ? '—' : (allAboveC0 ? '✓' : '✗')}</span>
+                    </td>
+                    <td class="status-check-product ${cminStatus}">
+                        <span class="status-icon">${!hasCustomers ? '—' : (allAboveCmin ? '✓' : '✗')}</span>
+                    </td>
                     <td class="customers-cell">
                         <button class="expand-customers-btn ${isExpanded ? 'expanded' : ''}"
                                 onclick="PricingV4.toggleProduct('${product.id}')"
@@ -2198,6 +2239,20 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     border: 1px solid #37474f;
                 }
 
+                .status-columns-header {
+                    text-align: center !important;
+                    background: #455a64 !important;
+                }
+
+                .status-header-small {
+                    font-size: 9px !important;
+                    text-align: center !important;
+                    padding: 6px 4px !important;
+                    white-space: normal !important;
+                    line-height: 1.2;
+                    max-width: 60px;
+                }
+
                 .price-level {
                     text-align: center !important;
                     min-width: 70px;
@@ -2330,6 +2385,34 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 .status-icon {
                     font-weight: bold;
                     font-size: 22px;
+                }
+
+                /* Product-level status columns */
+                .status-check-product {
+                    text-align: center;
+                    font-size: 18px;
+                    padding: 10px 4px;
+                    min-width: 50px;
+                }
+
+                .status-check-product.pass {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                }
+
+                .status-check-product.fail {
+                    background: #ffebee;
+                    color: #c62828;
+                }
+
+                .status-check-product.neutral {
+                    background: #f5f5f5;
+                    color: #9e9e9e;
+                }
+
+                .status-check-product .status-icon {
+                    font-weight: bold;
+                    font-size: 20px;
                 }
 
                 .expand-detail-btn {
