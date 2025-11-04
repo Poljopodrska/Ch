@@ -333,11 +333,11 @@ const PricingV4 = {
                 nameHr: 'Svježe meso',
                 icon: '🐔',
                 products: [
-                    { id: 'p1', code: '2143', name: 'Piščančja klobasa debrecinka 320 g - IK', nameEn: 'Piščančja klobasa debrecinka 320 g - IK', unit: 'kg', lc: 1.76 },
-                    { id: 'p2', code: '641', name: 'File pišč. - gastro', nameEn: 'File pišč. - gastro', unit: 'kg', lc: 4.0536 },
-                    { id: 'p3', code: '93', name: 'Bedra gastro -IK', nameEn: 'Bedra gastro -IK', unit: 'kg', lc: 1.9604 },
-                    { id: 'p4', code: '252', name: 'Nabodala pišč. 400 g - IK', nameEn: 'Nabodala pišč. 400 g - IK', unit: 'kos', lc: 1.7914 },
-                    { id: 'p5', code: '367', name: 'Čevapčiči pišč. 400 g -Ik', nameEn: 'Čevapčiči pišč. 400 g -Ik', unit: 'kos', lc: 1.0556 }
+                    { id: 'p1', code: '2143', nameSl: 'Piščančja klobasa debrecinka 320 g - IK', nameHr: 'Pileća kobasica debrecinka 320 g - IK', unit: 'kg', lc: 1.76 },
+                    { id: 'p2', code: '641', nameSl: 'Pileči file - gastro', nameHr: 'Pileći file - gastro', unit: 'kg', lc: 4.0536 },
+                    { id: 'p3', code: '93', nameSl: 'Pileča bedra gastro - IK', nameHr: 'Pileća bedra gastro - IK', unit: 'kg', lc: 1.9604 },
+                    { id: 'p4', code: '252', nameSl: 'Pileča nabodala 400 g - IK', nameHr: 'Pileća nabodala 400 g - IK', unit: 'kos', lc: 1.7914 },
+                    { id: 'p5', code: '367', nameSl: 'Pileči čevapčiči 400 g - IK', nameHr: 'Pileći ćevapi 400 g - IK', unit: 'kos', lc: 1.0556 }
                 ]
             },
             {
@@ -346,8 +346,8 @@ const PricingV4 = {
                 nameHr: 'Mesni proizvodi i pečeno meso',
                 icon: '🌭',
                 products: [
-                    { id: 'p6', code: '825', name: 'Pečene pileće trakice zabatka', nameEn: 'Pečene pileće trakice zabatka', unit: 'kg', lc: 3.173 },
-                    { id: 'p7', code: '1485', name: 'suha salama narezek 100 g', nameEn: 'suha salama narezek 100 g', unit: 'kos', lc: 1.1413 }
+                    { id: 'p6', code: '825', nameSl: 'Pečene pileće trakice zabatka', nameHr: 'Pečene pileće trakice zabatka', unit: 'kg', lc: 3.173 },
+                    { id: 'p7', code: '1485', nameSl: 'Suha salama narezek 100 g', nameHr: 'Suha salama narezak 100 g', unit: 'kos', lc: 1.1413 }
                 ]
             },
             {
@@ -356,8 +356,8 @@ const PricingV4 = {
                 nameHr: 'Delamaris',
                 icon: '🐟',
                 products: [
-                    { id: 'p8', code: '36851', name: 'Makrelen Provencale 125g, GER/si/de/at/it', nameEn: 'Makrelen Provencale 125g, GER/si/de/at/it', unit: 'kos', lc: 0.7738 },
-                    { id: 'p9', code: '36875', name: 'Makrelenfilets in Olivenöl 125g, GER/de/at', nameEn: 'Makrelenfilets in Olivenöl 125g, GER/de/at', unit: 'kos', lc: 1.3687 }
+                    { id: 'p8', code: '36851', nameSl: 'Makrela Provencale 125g', nameHr: 'Skuša Provencale 125g', unit: 'kos', lc: 0.7738 },
+                    { id: 'p9', code: '36875', nameSl: 'Makrelin file v olivnem olju 125g', nameHr: 'Fileti skuše u maslinovom ulju 125g', unit: 'kos', lc: 1.3687 }
                 ]
             }
         ];
@@ -392,8 +392,69 @@ const PricingV4 = {
     },
 
     loadCustomerPricing() {
-        // Initialize empty customer pricing - will be populated from Excel upload
-        this.state.customerPricing = {};
+        // Customer pricing data with Croatian retail chains
+        this.state.customerPricing = {
+            'p1': { // Piščančja klobasa debrecinka
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 2.15, cp: 2.45, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 2.16, coverage: {} },
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 2.18, cp: 2.50, totalDiscounts: 13, discountBreakdown: { invoice: 6, marketing: 4, yearEnd: 3 }, realizedPrice: 2.18, coverage: {} },
+                'c3': { customerId: 'c3', customerName: 'Kaufland', customerType: 'Hypermarket', strategicCmin: 2.05, cp: 2.35, totalDiscounts: 15, discountBreakdown: { invoice: 7, marketing: 5, yearEnd: 3 }, realizedPrice: 2.00, coverage: {} }
+            },
+            'p2': { // Pileči file
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 5.25, cp: 5.85, totalDiscounts: 10, discountBreakdown: { invoice: 4, marketing: 3, yearEnd: 3 }, realizedPrice: 5.27, coverage: {} },
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 5.35, cp: 5.95, totalDiscounts: 11, discountBreakdown: { invoice: 5, marketing: 3, yearEnd: 3 }, realizedPrice: 5.30, coverage: {} },
+                'c4': { customerId: 'c4', customerName: 'Lidl', customerType: 'Discount Store', strategicCmin: 5.10, cp: 5.65, totalDiscounts: 14, discountBreakdown: { invoice: 7, marketing: 4, yearEnd: 3 }, realizedPrice: 4.86, coverage: {} }
+            },
+            'p3': { // Pileča bedra
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 2.50, cp: 2.80, totalDiscounts: 11, discountBreakdown: { invoice: 5, marketing: 3, yearEnd: 3 }, realizedPrice: 2.49, coverage: {} },
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 2.55, cp: 2.85, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 2.51, coverage: {} },
+                'c3': { customerId: 'c3', customerName: 'Kaufland', customerType: 'Hypermarket', strategicCmin: 2.40, cp: 2.70, totalDiscounts: 13, discountBreakdown: { invoice: 6, marketing: 4, yearEnd: 3 }, realizedPrice: 2.35, coverage: {} }
+            },
+            'p4': { // Pileča nabodala
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 2.25, cp: 2.55, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 2.24, coverage: {} },
+                'c5': { customerId: 'c5', customerName: 'Spar', customerType: 'Supermarket', strategicCmin: 2.30, cp: 2.60, totalDiscounts: 10, discountBreakdown: { invoice: 4, marketing: 3, yearEnd: 3 }, realizedPrice: 2.34, coverage: {} }
+            },
+            'p5': { // Pileči čevapčiči
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 1.35, cp: 1.55, totalDiscounts: 13, discountBreakdown: { invoice: 6, marketing: 4, yearEnd: 3 }, realizedPrice: 1.35, coverage: {} },
+                'c3': { customerId: 'c3', customerName: 'Kaufland', customerType: 'Hypermarket', strategicCmin: 1.30, cp: 1.50, totalDiscounts: 14, discountBreakdown: { invoice: 7, marketing: 4, yearEnd: 3 }, realizedPrice: 1.29, coverage: {} },
+                'c4': { customerId: 'c4', customerName: 'Lidl', customerType: 'Discount Store', strategicCmin: 1.25, cp: 1.45, totalDiscounts: 15, discountBreakdown: { invoice: 7, marketing: 5, yearEnd: 3 }, realizedPrice: 1.23, coverage: {} }
+            },
+            'p6': { // Pečene pileće trakice
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 4.15, cp: 4.65, totalDiscounts: 11, discountBreakdown: { invoice: 5, marketing: 3, yearEnd: 3 }, realizedPrice: 4.14, coverage: {} },
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 4.25, cp: 4.75, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 4.18, coverage: {} }
+            },
+            'p7': { // Suha salama
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 1.50, cp: 1.70, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 1.50, coverage: {} },
+                'c5': { customerId: 'c5', customerName: 'Spar', customerType: 'Supermarket', strategicCmin: 1.55, cp: 1.75, totalDiscounts: 10, discountBreakdown: { invoice: 4, marketing: 3, yearEnd: 3 }, realizedPrice: 1.58, coverage: {} },
+                'c3': { customerId: 'c3', customerName: 'Kaufland', customerType: 'Hypermarket', strategicCmin: 1.45, cp: 1.65, totalDiscounts: 13, discountBreakdown: { invoice: 6, marketing: 4, yearEnd: 3 }, realizedPrice: 1.44, coverage: {} }
+            },
+            'p8': { // Makrela Provencale
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 1.05, cp: 1.20, totalDiscounts: 13, discountBreakdown: { invoice: 6, marketing: 4, yearEnd: 3 }, realizedPrice: 1.04, coverage: {} },
+                'c2': { customerId: 'c2', customerName: 'Plodine', customerType: 'Retail Chain', strategicCmin: 1.08, cp: 1.23, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 1.08, coverage: {} },
+                'c4': { customerId: 'c4', customerName: 'Lidl', customerType: 'Discount Store', strategicCmin: 0.98, cp: 1.12, totalDiscounts: 15, discountBreakdown: { invoice: 7, marketing: 5, yearEnd: 3 }, realizedPrice: 0.95, coverage: {} }
+            },
+            'p9': { // Makrelin file
+                'c1': { customerId: 'c1', customerName: 'Konzum', customerType: 'Retail Chain', strategicCmin: 1.85, cp: 2.10, totalDiscounts: 12, discountBreakdown: { invoice: 5, marketing: 4, yearEnd: 3 }, realizedPrice: 1.85, coverage: {} },
+                'c3': { customerId: 'c3', customerName: 'Kaufland', customerType: 'Hypermarket', strategicCmin: 1.78, cp: 2.00, totalDiscounts: 14, discountBreakdown: { invoice: 7, marketing: 4, yearEnd: 3 }, realizedPrice: 1.72, coverage: {} },
+                'c5': { customerId: 'c5', customerName: 'Spar', customerType: 'Supermarket', strategicCmin: 1.90, cp: 2.15, totalDiscounts: 10, discountBreakdown: { invoice: 4, marketing: 3, yearEnd: 3 }, realizedPrice: 1.94, coverage: {} }
+            }
+        };
+
+        // Calculate coverage for each customer pricing
+        Object.keys(this.state.customerPricing).forEach(productId => {
+            const basePrice = this.state.pricingData[productId];
+            Object.keys(this.state.customerPricing[productId]).forEach(customerId => {
+                const custPricing = this.state.customerPricing[productId][customerId];
+                custPricing.coverage = {
+                    vsC0: (custPricing.realizedPrice / basePrice.c0) * 100,
+                    vsCmin: (custPricing.realizedPrice / basePrice.cmin) * 100,
+                    buffer: ((custPricing.realizedPrice - basePrice.cmin) / basePrice.cmin) * 100
+                };
+                custPricing.cumulativeCoverage = this.calculateCumulativeCoverage(
+                    basePrice.lc, basePrice.c0, basePrice.cmin,
+                    custPricing.strategicCmin, custPricing.cp, custPricing.realizedPrice
+                );
+            });
+        });
     },
 
     calculateCumulativeCoverage(lc, c0, cmin, strategicCmin, cp, realizedPrice) {
