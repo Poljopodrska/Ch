@@ -419,6 +419,9 @@ const PricingV4 = {
                         </p>
                     </div>
                     <div class="header-controls">
+                        <button class="btn-upload" onclick="PricingV4.showUploadModal()">
+                            📤 Upload Data
+                        </button>
                         <button class="btn-expand-all" onclick="PricingV4.expandAll()">
                             📂 Expand All
                         </button>
@@ -473,6 +476,82 @@ const PricingV4 = {
 
                 <div class="pricing-summary">
                     ${this.renderSummary()}
+                </div>
+
+                <!-- Upload Modal -->
+                <div id="upload-modal" class="upload-modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>📤 Upload Excel Data</h2>
+                            <button class="modal-close" onclick="PricingV4.closeUploadModal()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="upload-info">
+                                <h3>📋 Excel Format Required:</h3>
+                                <div class="format-section">
+                                    <h4>Sheet 1: "Izdelki" (Products)</h4>
+                                    <table class="format-table">
+                                        <tr>
+                                            <th>šifra</th>
+                                            <th>naziv</th>
+                                            <th>enota</th>
+                                            <th>industrija</th>
+                                            <th>lc</th>
+                                            <th>aktiven</th>
+                                        </tr>
+                                        <tr>
+                                            <td>PIŠ-FILE</td>
+                                            <td>Piščančji file</td>
+                                            <td>kg</td>
+                                            <td>Sveže meso</td>
+                                            <td>5.44</td>
+                                            <td>TRUE</td>
+                                        </tr>
+                                    </table>
+                                    <p class="format-note"><strong>Industrija options:</strong> Sveže meso, Mesni izdelki in pečeno meso, Delamaris</p>
+                                </div>
+                                <div class="format-section">
+                                    <h4>Sheet 2: "Cene_Kupci" (Customer Pricing)</h4>
+                                    <table class="format-table">
+                                        <tr>
+                                            <th>šifra</th>
+                                            <th>kupec_id</th>
+                                            <th>kupec_naziv</th>
+                                            <th>kupec_tip</th>
+                                            <th>strategic_cmin</th>
+                                            <th>popust_faktura</th>
+                                            <th>popust_marketing</th>
+                                            <th>popust_letni</th>
+                                            <th>aktiven</th>
+                                        </tr>
+                                        <tr>
+                                            <td>PIŠ-FILE</td>
+                                            <td>c001</td>
+                                            <td>Plodine</td>
+                                            <td>Trgovska veriga</td>
+                                            <td>7.25</td>
+                                            <td>15</td>
+                                            <td>3</td>
+                                            <td>11</td>
+                                            <td>TRUE</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="upload-area">
+                                <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;" onchange="PricingV4.handleFileSelect(event)">
+                                <button class="btn-select-file" onclick="document.getElementById('excel-file-input').click()">
+                                    📁 Select Excel File
+                                </button>
+                                <div id="file-name" class="file-name"></div>
+                                <div id="upload-status" class="upload-status"></div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-cancel" onclick="PricingV4.closeUploadModal()">Cancel</button>
+                            <button class="btn-process" id="process-btn" onclick="PricingV4.processExcelFile()" disabled>Process Data</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -936,6 +1015,293 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
     getGroupProductCount(group) {
         return group.products.length;
+    },
+
+    // Excel Upload Functions
+    showUploadModal() {
+        const modal = document.getElementById('upload-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    },
+
+    closeUploadModal() {
+        const modal = document.getElementById('upload-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            // Reset file input
+            document.getElementById('excel-file-input').value = '';
+            document.getElementById('file-name').textContent = '';
+            document.getElementById('upload-status').innerHTML = '';
+            document.getElementById('process-btn').disabled = true;
+            this.state.uploadedFile = null;
+        }
+    },
+
+    handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const fileNameDiv = document.getElementById('file-name');
+        const statusDiv = document.getElementById('upload-status');
+        const processBtn = document.getElementById('process-btn');
+
+        // Check file extension
+        const fileName = file.name;
+        const fileExt = fileName.split('.').pop().toLowerCase();
+
+        if (fileExt !== 'xlsx' && fileExt !== 'xls') {
+            statusDiv.innerHTML = '<div class="error">❌ Please select an Excel file (.xlsx or .xls)</div>';
+            processBtn.disabled = true;
+            return;
+        }
+
+        fileNameDiv.textContent = `Selected: ${fileName}`;
+        statusDiv.innerHTML = '<div class="info">✓ File selected. Click "Process Data" to load.</div>';
+        processBtn.disabled = false;
+
+        // Store file for processing
+        this.state.uploadedFile = file;
+    },
+
+    async processExcelFile() {
+        if (!this.state.uploadedFile) {
+            alert('No file selected');
+            return;
+        }
+
+        const statusDiv = document.getElementById('upload-status');
+        statusDiv.innerHTML = '<div class="processing">⏳ Processing Excel file...</div>';
+
+        try {
+            // Check if XLSX library is available
+            if (typeof XLSX === 'undefined') {
+                throw new Error('XLSX library not loaded. Please include SheetJS library.');
+            }
+
+            const file = this.state.uploadedFile;
+            const reader = new FileReader();
+
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+
+                    // Validate required sheets
+                    if (!workbook.SheetNames.includes('Izdelki')) {
+                        throw new Error('Sheet "Izdelki" not found in Excel file');
+                    }
+                    if (!workbook.SheetNames.includes('Cene_Kupci')) {
+                        throw new Error('Sheet "Cene_Kupci" not found in Excel file');
+                    }
+
+                    // Parse sheets
+                    const izdelkiSheet = workbook.Sheets['Izdelki'];
+                    const ceneKupciSheet = workbook.Sheets['Cene_Kupci'];
+
+                    const izdelkiData = XLSX.utils.sheet_to_json(izdelkiSheet);
+                    const ceneKupciData = XLSX.utils.sheet_to_json(ceneKupciSheet);
+
+                    console.log('Izdelki data:', izdelkiData);
+                    console.log('Cene_Kupci data:', ceneKupciData);
+
+                    // Validate and load data
+                    const result = this.validateAndLoadData(izdelkiData, ceneKupciData);
+
+                    if (result.success) {
+                        statusDiv.innerHTML = `<div class="success">✅ Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
+                        setTimeout(() => {
+                            this.closeUploadModal();
+                            this.render();
+                        }, 2000);
+                    } else {
+                        statusDiv.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+                    }
+
+                } catch (error) {
+                    console.error('Error parsing Excel:', error);
+                    statusDiv.innerHTML = `<div class="error">❌ Error parsing Excel: ${error.message}</div>`;
+                }
+            };
+
+            reader.onerror = (error) => {
+                console.error('Error reading file:', error);
+                statusDiv.innerHTML = '<div class="error">❌ Error reading file</div>';
+            };
+
+            reader.readAsArrayBuffer(file);
+
+        } catch (error) {
+            console.error('Error processing file:', error);
+            statusDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+        }
+    },
+
+    validateAndLoadData(izdelkiData, ceneKupciData) {
+        try {
+            // Validate Izdelki data
+            const requiredIzdelkiCols = ['šifra', 'naziv', 'enota', 'industrija', 'lc', 'aktiven'];
+            if (izdelkiData.length === 0) {
+                return { success: false, error: 'No data found in Izdelki sheet' };
+            }
+
+            const firstRow = izdelkiData[0];
+            const missingCols = requiredIzdelkiCols.filter(col => !(col in firstRow));
+            if (missingCols.length > 0) {
+                return { success: false, error: `Missing columns in Izdelki: ${missingCols.join(', ')}` };
+            }
+
+            // Validate Cene_Kupci data
+            const requiredCeneCols = ['šifra', 'kupec_id', 'kupec_naziv', 'kupec_tip', 'strategic_cmin',
+                                       'popust_faktura', 'popust_marketing', 'popust_letni', 'aktiven'];
+            if (ceneKupciData.length === 0) {
+                return { success: false, error: 'No data found in Cene_Kupci sheet' };
+            }
+
+            const firstCeneRow = ceneKupciData[0];
+            const missingCeneCols = requiredCeneCols.filter(col => !(col in firstCeneRow));
+            if (missingCeneCols.length > 0) {
+                return { success: false, error: `Missing columns in Cene_Kupci: ${missingCeneCols.join(', ')}` };
+            }
+
+            // Build new data structure
+            const newProductGroups = {};
+            const validIndustries = ['Sveže meso', 'Mesni izdelki in pečeno meso', 'Delamaris'];
+
+            izdelkiData.forEach((row, index) => {
+                if (!row.aktiven || row.aktiven.toString().toUpperCase() !== 'TRUE') {
+                    return; // Skip inactive products
+                }
+
+                const industrija = row.industrija.trim();
+                if (!validIndustries.includes(industrija)) {
+                    throw new Error(`Invalid industrija at row ${index + 2}: "${industrija}". Must be one of: ${validIndustries.join(', ')}`);
+                }
+
+                if (!newProductGroups[industrija]) {
+                    newProductGroups[industrija] = [];
+                }
+
+                newProductGroups[industrija].push({
+                    id: `p${index + 1}`,
+                    code: row.šifra.toString().trim(),
+                    name: row.naziv.toString().trim(),
+                    nameEn: row.naziv.toString().trim(), // Use same name for now
+                    unit: row.enota.toString().trim(),
+                    lc: parseFloat(row.lc)
+                });
+            });
+
+            // Build product groups structure
+            const industryMapping = {
+                'Sveže meso': { id: 'fresh-meat', icon: '🥩', nameEn: 'Fresh Meat' },
+                'Mesni izdelki in pečeno meso': { id: 'meat-products', icon: '🌭', nameEn: 'Meat Products and Roasted Meat' },
+                'Delamaris': { id: 'delamaris', icon: '🐟', nameEn: 'Delamaris' }
+            };
+
+            this.state.productGroups = [];
+            Object.entries(newProductGroups).forEach(([industrija, products]) => {
+                const mapping = industryMapping[industrija];
+                this.state.productGroups.push({
+                    id: mapping.id,
+                    name: industrija,
+                    nameEn: mapping.nameEn,
+                    icon: mapping.icon,
+                    products: products
+                });
+            });
+
+            // Flatten products
+            this.state.products = [];
+            this.state.productGroups.forEach(group => {
+                this.state.products.push(...group.products);
+            });
+
+            // Load base pricing data (C0, Cmin calculations)
+            this.state.pricingData = {};
+            this.state.products.forEach(product => {
+                const lc = product.lc;
+                const c0 = lc * this.state.industryFactors.ohFactor;
+                const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);
+
+                this.state.pricingData[product.id] = {
+                    lc: lc,
+                    c0: c0,
+                    cmin: cmin
+                };
+            });
+
+            // Load customer pricing
+            this.state.customerPricing = {};
+            const productCodeMap = {};
+            this.state.products.forEach(p => {
+                productCodeMap[p.code] = p.id;
+            });
+
+            ceneKupciData.forEach((row, index) => {
+                if (!row.aktiven || row.aktiven.toString().toUpperCase() !== 'TRUE') {
+                    return; // Skip inactive
+                }
+
+                const productCode = row.šifra.toString().trim();
+                const productId = productCodeMap[productCode];
+
+                if (!productId) {
+                    console.warn(`Product code "${productCode}" in Cene_Kupci row ${index + 2} not found in Izdelki sheet`);
+                    return;
+                }
+
+                if (!this.state.customerPricing[productId]) {
+                    this.state.customerPricing[productId] = {};
+                }
+
+                const customerId = row.kupec_id.toString().trim();
+                const strategicCmin = parseFloat(row.strategic_cmin);
+                const totalDiscounts = parseFloat(row.popust_faktura) + parseFloat(row.popust_marketing) + parseFloat(row.popust_letni);
+                const cp = strategicCmin / (1 - totalDiscounts / 100);
+                const realizedPrice = cp * (1 - totalDiscounts / 100);
+                const base = this.state.pricingData[productId];
+
+                this.state.customerPricing[productId][customerId] = {
+                    customerId: customerId,
+                    customerName: row.kupec_naziv.toString().trim(),
+                    customerType: row.kupec_tip.toString().trim(),
+                    strategicCmin: strategicCmin,
+                    cp: cp,
+                    totalDiscounts: totalDiscounts,
+                    discountBreakdown: {
+                        invoice: parseFloat(row.popust_faktura),
+                        marketing: parseFloat(row.popust_marketing),
+                        yearEnd: parseFloat(row.popust_letni)
+                    },
+                    realizedPrice: realizedPrice,
+                    coverage: {
+                        vsC0: (realizedPrice / base.c0) * 100,
+                        vsCmin: (realizedPrice / base.cmin) * 100,
+                        buffer: ((realizedPrice - base.cmin) / base.cmin) * 100
+                    },
+                    cumulativeCoverage: this.calculateCumulativeCoverage(
+                        base.lc, base.c0, base.cmin, strategicCmin, cp, realizedPrice
+                    )
+                };
+            });
+
+            // Count results
+            let customerPricingCount = 0;
+            Object.values(this.state.customerPricing).forEach(customers => {
+                customerPricingCount += Object.keys(customers).length;
+            });
+
+            return {
+                success: true,
+                productsCount: this.state.products.length,
+                customerPricingCount: customerPricingCount
+            };
+
+        } catch (error) {
+            console.error('Validation error:', error);
+            return { success: false, error: error.message };
+        }
     },
 
     getStyles() {
@@ -1539,6 +1905,283 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .group-content.collapsed,
                 .subgroup-content.collapsed {
+                    display: none;
+                }
+
+                /* Excel Upload Modal */
+                .upload-modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 10000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: auto;
+                    background-color: rgba(0,0,0,0.5);
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .modal-content {
+                    background: white;
+                    margin: auto;
+                    padding: 0;
+                    border-radius: 10px;
+                    width: 90%;
+                    max-width: 900px;
+                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                    animation: modalFadeIn 0.3s;
+                }
+
+                @keyframes modalFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(-50px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .modal-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 20px 25px;
+                    border-radius: 10px 10px 0 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .modal-header h2 {
+                    margin: 0;
+                    font-size: 22px;
+                }
+
+                .close-modal {
+                    color: white;
+                    font-size: 28px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    line-height: 1;
+                    transition: transform 0.2s;
+                }
+
+                .close-modal:hover {
+                    transform: scale(1.2);
+                }
+
+                .modal-body {
+                    padding: 25px;
+                    max-height: 70vh;
+                    overflow-y: auto;
+                }
+
+                .modal-section {
+                    margin-bottom: 25px;
+                }
+
+                .modal-section h3 {
+                    margin: 0 0 15px 0;
+                    color: #2c3e50;
+                    font-size: 18px;
+                    border-bottom: 2px solid #e0e0e0;
+                    padding-bottom: 10px;
+                }
+
+                .format-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                    font-size: 13px;
+                    background: white;
+                }
+
+                .format-table th,
+                .format-table td {
+                    border: 1px solid #ddd;
+                    padding: 10px;
+                    text-align: left;
+                }
+
+                .format-table th {
+                    background: #f8f9fa;
+                    font-weight: 600;
+                    color: #333;
+                }
+
+                .format-table tr:nth-child(even) {
+                    background: #fafafa;
+                }
+
+                .format-table code {
+                    background: #e3f2fd;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    font-family: 'Courier New', monospace;
+                    font-size: 12px;
+                }
+
+                .info-box {
+                    background: #e3f2fd;
+                    border-left: 4px solid #2196f3;
+                    padding: 15px;
+                    margin: 15px 0;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                }
+
+                .info-box strong {
+                    color: #1976d2;
+                }
+
+                .warning-box {
+                    background: #fff3cd;
+                    border-left: 4px solid #ffc107;
+                    padding: 15px;
+                    margin: 15px 0;
+                    border-radius: 4px;
+                    font-size: 13px;
+                    line-height: 1.6;
+                }
+
+                .upload-area {
+                    background: #f8f9fa;
+                    border: 2px dashed #2196f3;
+                    border-radius: 8px;
+                    padding: 30px;
+                    text-align: center;
+                    margin: 20px 0;
+                }
+
+                .btn-upload,
+                .btn-select-file,
+                .btn-process,
+                .btn-cancel {
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.3s;
+                }
+
+                .btn-upload {
+                    background: rgba(255,255,255,0.2);
+                    color: white;
+                }
+
+                .btn-upload:hover {
+                    background: rgba(255,255,255,0.3);
+                    transform: translateY(-2px);
+                }
+
+                .btn-select-file {
+                    background: #2196f3;
+                    color: white;
+                    margin: 10px 0;
+                }
+
+                .btn-select-file:hover {
+                    background: #1976d2;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(33,150,243,0.4);
+                }
+
+                .btn-process {
+                    background: #4CAF50;
+                    color: white;
+                }
+
+                .btn-process:hover {
+                    background: #45a049;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+                }
+
+                .btn-process:disabled {
+                    background: #ccc;
+                    cursor: not-allowed;
+                    transform: none;
+                }
+
+                .btn-cancel {
+                    background: #f44336;
+                    color: white;
+                }
+
+                .btn-cancel:hover {
+                    background: #d32f2f;
+                    transform: translateY(-2px);
+                }
+
+                .modal-footer {
+                    padding: 20px 25px;
+                    background: #f8f9fa;
+                    border-radius: 0 0 10px 10px;
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 10px;
+                }
+
+                .file-name {
+                    margin: 15px 0;
+                    padding: 10px;
+                    background: #e8f5e9;
+                    border-radius: 4px;
+                    display: none;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .file-name.show {
+                    display: flex;
+                }
+
+                .upload-status {
+                    margin: 15px 0;
+                    padding: 12px;
+                    border-radius: 4px;
+                    display: none;
+                    font-size: 14px;
+                }
+
+                .upload-status.show {
+                    display: block;
+                }
+
+                .upload-status.success {
+                    background: #c8e6c9;
+                    color: #2e7d32;
+                    border-left: 4px solid #4CAF50;
+                }
+
+                .upload-status.error {
+                    background: #ffcdd2;
+                    color: #c62828;
+                    border-left: 4px solid #f44336;
+                }
+
+                .upload-status.info {
+                    background: #e3f2fd;
+                    color: #1976d2;
+                    border-left: 4px solid #2196f3;
+                }
+
+                .upload-status.processing {
+                    background: #fff3cd;
+                    color: #f57c00;
+                    border-left: 4px solid #ffc107;
+                }
+
+                #excel-file-input {
                     display: none;
                 }
             </style>

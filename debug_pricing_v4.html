@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Pricing V4</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+        #console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .error { color: #f48771; }
+        .success { color: #4ec9b0; }
+        .info { color: #569cd6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Pricing V4 Debug Console</h1>
+    <div id="console-output">
+        <div class="info">Starting debug...</div>
+    </div>
+
+    <div id="pricing-container">
+        <!-- Pricing V4 module will be loaded here -->
+    </div>
+
+    <!-- SheetJS XLSX Library for Excel file parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // Override console to show in page
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+
+        console.log = function(...args) {
+            originalLog(...args);
+            consoleOutput.innerHTML += `<div class="info">[LOG] ${args.join(' ')}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.error = function(...args) {
+            originalError(...args);
+            consoleOutput.innerHTML += `<div class="error">[ERROR] ${args.join(' ')}</div>`;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+
+        console.log('1. Starting to load pricing_v4_price_levels.js...');
+
+        // Load the script
+        const script = document.createElement('script');
+        script.src = 'modules/pricing/pricing_v4_price_levels.js';
+
+        script.onload = () => {
+            console.log('2. Script loaded successfully');
+            console.log('3. Checking if PricingV4 exists:', typeof PricingV4);
+
+            if (typeof PricingV4 !== 'undefined') {
+                console.log('4. PricingV4 found! Version:', PricingV4.VERSION);
+                console.log('5. Initializing PricingV4...');
+
+                try {
+                    PricingV4.init();
+                    console.log('6. ✅ PricingV4 initialized successfully!');
+                } catch (error) {
+                    console.error('6. ❌ Error during initialization:', error.message);
+                    console.error('Stack:', error.stack);
+                }
+            } else {
+                console.error('4. ❌ PricingV4 not found after script load!');
+            }
+        };
+
+        script.onerror = (e) => {
+            console.error('2. ❌ Failed to load script:', e);
+        };
+
+        console.log('Adding script to document head...');
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>
