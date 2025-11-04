@@ -828,9 +828,17 @@ const PricingV4 = {
     renderPricingHierarchy() {
         let html = '';
 
+        // Calculate top-level summary
+        const topSummary = this.calculateTopLevelSummary();
+
+        // Add top-level summary card
+        html += this.renderTopLevelSummary(topSummary);
+
+        // Render each industry
         this.state.productGroups.forEach(group => {
             const isGroupExpanded = this.state.expanded.groups.has(group.id);
             const productCountText = this.state.language === 'sl' ? 'izdelkov' : 'proizvoda';
+            const industrySummary = this.calculateIndustrySummary(group);
 
             html += `
                 <div class="group-container">
@@ -842,6 +850,10 @@ const PricingV4 = {
                     </div>
 
                     <div class="group-content ${isGroupExpanded ? 'expanded' : 'collapsed'}">
+                        <!-- Industry Summary Row -->
+                        ${this.renderIndustrySummaryRow(industrySummary, group)}
+
+                        <!-- Products Table -->
                         <table class="pricing-table">
                             <thead>
                                 <tr>
@@ -866,6 +878,216 @@ const PricingV4 = {
         });
 
         return html;
+    },
+
+    calculateTopLevelSummary() {
+        let totalProducts = 0;
+        let totalCustomerCombinations = 0;
+        let totalLC = 0;
+        let totalC0 = 0;
+        let totalCmin = 0;
+        let totalCP = 0;
+        let totalRealized = 0;
+        let fullCoverageCount = 0;
+        let belowCminCount = 0;
+
+        this.state.productGroups.forEach(group => {
+            group.products.forEach(product => {
+                totalProducts++;
+                const pricing = this.state.pricingData[product.id];
+                const customers = this.state.customerPricing[product.id] || {};
+                const customerCount = Object.keys(customers).length;
+
+                totalCustomerCombinations += customerCount;
+                totalLC += pricing.lc * customerCount;
+                totalC0 += pricing.c0 * customerCount;
+                totalCmin += pricing.cmin * customerCount;
+
+                Object.values(customers).forEach(custPricing => {
+                    totalCP += custPricing.cp;
+                    totalRealized += custPricing.realizedPrice;
+
+                    if (custPricing.coverage.vsCmin >= 100) {
+                        fullCoverageCount++;
+                    } else {
+                        belowCminCount++;
+                    }
+                });
+            });
+        });
+
+        const avgCoverage = totalCustomerCombinations > 0
+            ? (totalRealized / totalCmin) * 100
+            : 0;
+
+        return {
+            totalProducts,
+            totalCustomerCombinations,
+            avgLC: totalLC / totalCustomerCombinations,
+            avgC0: totalC0 / totalCustomerCombinations,
+            avgCmin: totalCmin / totalCustomerCombinations,
+            avgCP: totalCP / totalCustomerCombinations,
+            avgRealized: totalRealized / totalCustomerCombinations,
+            avgCoverage,
+            fullCoverageCount,
+            belowCminCount
+        };
+    },
+
+    calculateIndustrySummary(group) {
+        let totalCustomers = 0;
+        let totalLC = 0;
+        let totalC0 = 0;
+        let totalCmin = 0;
+        let totalCP = 0;
+        let totalRealized = 0;
+        let fullCoverageCount = 0;
+        let belowCminCount = 0;
+
+        group.products.forEach(product => {
+            const pricing = this.state.pricingData[product.id];
+            const customers = this.state.customerPricing[product.id] || {};
+            const customerCount = Object.keys(customers).length;
+
+            totalCustomers += customerCount;
+            totalLC += pricing.lc * customerCount;
+            totalC0 += pricing.c0 * customerCount;
+            totalCmin += pricing.cmin * customerCount;
+
+            Object.values(customers).forEach(custPricing => {
+                totalCP += custPricing.cp;
+                totalRealized += custPricing.realizedPrice;
+
+                if (custPricing.coverage.vsCmin >= 100) {
+                    fullCoverageCount++;
+                } else {
+                    belowCminCount++;
+                }
+            });
+        });
+
+        const avgCoverage = totalCustomers > 0
+            ? (totalRealized / totalCmin) * 100
+            : 0;
+
+        return {
+            totalProducts: group.products.length,
+            totalCustomers,
+            avgLC: totalLC / totalCustomers,
+            avgC0: totalC0 / totalCustomers,
+            avgCmin: totalCmin / totalCustomers,
+            avgCP: totalCP / totalCustomers,
+            avgRealized: totalRealized / totalCustomers,
+            avgCoverage,
+            fullCoverageCount,
+            belowCminCount
+        };
+    },
+
+    renderTopLevelSummary(summary) {
+        const summaryText = this.state.language === 'sl' ? 'Skupni pregled' : 'Ukupni pregled';
+        const industriesText = this.state.language === 'sl' ? 'industrije' : 'industrije';
+        const productsText = this.state.language === 'sl' ? 'izdelkov' : 'proizvoda';
+        const customersText = this.state.language === 'sl' ? 'kupcev' : 'kupaca';
+        const avgCoverageText = this.state.language === 'sl' ? 'Povprečno pokritje' : 'Prosječno pokriće';
+        const fullCoverageText = this.state.language === 'sl' ? 'Polno pokritje' : 'Potpuno pokriće';
+        const needsApprovalText = this.state.language === 'sl' ? 'Potrebna odobritev' : 'Potrebno odobrenje';
+
+        return `
+            <div class="top-level-summary">
+                <h3>📊 ${summaryText}</h3>
+                <div class="summary-grid">
+                    <div class="summary-metric">
+                        <div class="metric-label">${this.state.productGroups.length} ${industriesText}</div>
+                        <div class="metric-value">${summary.totalProducts} ${productsText}</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="metric-label">${customersText}</div>
+                        <div class="metric-value">${summary.totalCustomerCombinations}</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="metric-label">${avgCoverageText}</div>
+                        <div class="metric-value ${summary.avgCoverage >= 100 ? 'good' : 'warning'}">
+                            ${summary.avgCoverage.toFixed(1)}%
+                        </div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="metric-label">✅ ${fullCoverageText}</div>
+                        <div class="metric-value good">${summary.fullCoverageCount}</div>
+                    </div>
+                    <div class="summary-metric">
+                        <div class="metric-label">⚠️ ${needsApprovalText}</div>
+                        <div class="metric-value ${summary.belowCminCount > 0 ? 'warning' : 'good'}">
+                            ${summary.belowCminCount}
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-pricing">
+                    <div class="pricing-flow-summary">
+                        <span class="flow-item">LC: €${summary.avgLC.toFixed(2)}</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-item">C0: €${summary.avgC0.toFixed(2)}</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-item">Cmin: €${summary.avgCmin.toFixed(2)}</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-item">CP: €${summary.avgCP.toFixed(2)}</span>
+                        <span class="flow-arrow">→</span>
+                        <span class="flow-item realized">€${summary.avgRealized.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    },
+
+    renderIndustrySummaryRow(summary, group) {
+        const summaryText = this.state.language === 'sl' ? 'Pregled industrije' : 'Pregled industrije';
+
+        return `
+            <div class="industry-summary-row">
+                <div class="industry-summary-header">
+                    <h4>${group.icon} ${summaryText}: ${this.getName(group)}</h4>
+                </div>
+                <div class="industry-summary-content">
+                    <div class="summary-stats-row">
+                        <div class="stat-item">
+                            <span class="stat-label">${this.getText('products')}:</span>
+                            <span class="stat-value">${summary.totalProducts}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">${this.getText('customers')}:</span>
+                            <span class="stat-value">${summary.totalCustomers}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">${this.getText('coverageVsCmin')}:</span>
+                            <span class="stat-value ${summary.avgCoverage >= 100 ? 'good' : 'warning'}">
+                                ${summary.avgCoverage.toFixed(1)}%
+                            </span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">✅:</span>
+                            <span class="stat-value good">${summary.fullCoverageCount}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">⚠️:</span>
+                            <span class="stat-value ${summary.belowCminCount > 0 ? 'warning' : 'good'}">
+                                ${summary.belowCminCount}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="industry-pricing-flow">
+                        <span class="price-tag lc">LC: €${summary.avgLC.toFixed(2)}</span>
+                        <span class="arrow">→</span>
+                        <span class="price-tag c0">C0: €${summary.avgC0.toFixed(2)}</span>
+                        <span class="arrow">→</span>
+                        <span class="price-tag cmin">Cmin: €${summary.avgCmin.toFixed(2)}</span>
+                        <span class="arrow">→</span>
+                        <span class="price-tag cp">CP: €${summary.avgCP.toFixed(2)}</span>
+                        <span class="arrow">→</span>
+                        <span class="price-tag realized">€${summary.avgRealized.toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
     },
 
     renderProducts(products) {
@@ -2454,6 +2676,197 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     background: #fff3cd;
                     color: #f57c00;
                     border-left: 4px solid #ffc107;
+                }
+
+                /* Top-level summary styling */
+                .top-level-summary {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 24px;
+                    border-radius: 12px;
+                    margin-bottom: 24px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+
+                .top-level-summary h3 {
+                    margin: 0 0 20px 0;
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+
+                .summary-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin-bottom: 20px;
+                }
+
+                .summary-metric {
+                    background: rgba(255, 255, 255, 0.15);
+                    padding: 16px;
+                    border-radius: 8px;
+                    backdrop-filter: blur(10px);
+                }
+
+                .summary-metric .metric-label {
+                    font-size: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    opacity: 0.9;
+                    margin-bottom: 8px;
+                    display: block;
+                }
+
+                .summary-metric .metric-value {
+                    font-size: 28px;
+                    font-weight: 700;
+                    display: block;
+                }
+
+                .summary-pricing {
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 16px;
+                    border-radius: 8px;
+                    backdrop-filter: blur(10px);
+                }
+
+                .pricing-flow-summary {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+
+                .pricing-flow-summary .flow-item {
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 8px 16px;
+                    border-radius: 6px;
+                    font-weight: 600;
+                    font-size: 14px;
+                }
+
+                .pricing-flow-summary .flow-item.realized {
+                    background: rgba(76, 175, 80, 0.3);
+                    font-size: 16px;
+                    padding: 10px 20px;
+                }
+
+                .pricing-flow-summary .flow-arrow {
+                    font-size: 18px;
+                    opacity: 0.7;
+                }
+
+                /* Industry summary styling */
+                .industry-summary-row {
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                    padding: 20px;
+                    border: 2px solid #e9ecef;
+                }
+
+                .industry-summary-header {
+                    margin-bottom: 16px;
+                }
+
+                .industry-summary-header h4 {
+                    margin: 0;
+                    font-size: 20px;
+                    font-weight: 600;
+                    color: #495057;
+                }
+
+                .industry-summary-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+
+                .summary-stats-row {
+                    display: flex;
+                    gap: 24px;
+                    flex-wrap: wrap;
+                }
+
+                .stat-item {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 8px;
+                }
+
+                .stat-item .stat-label {
+                    font-size: 13px;
+                    color: #6c757d;
+                    font-weight: 500;
+                }
+
+                .stat-item .stat-value {
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: #212529;
+                }
+
+                .stat-item .stat-value.good {
+                    color: #28a745;
+                }
+
+                .stat-item .stat-value.warning {
+                    color: #ffc107;
+                }
+
+                .stat-item .stat-value.danger {
+                    color: #dc3545;
+                }
+
+                .industry-pricing-flow {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px;
+                    background: white;
+                    border-radius: 6px;
+                    flex-wrap: wrap;
+                }
+
+                .industry-pricing-flow .price-tag {
+                    padding: 6px 12px;
+                    border-radius: 4px;
+                    font-weight: 600;
+                    font-size: 13px;
+                    white-space: nowrap;
+                }
+
+                .industry-pricing-flow .price-tag.lc {
+                    background: #e3f2fd;
+                    color: #1976d2;
+                }
+
+                .industry-pricing-flow .price-tag.c0 {
+                    background: #fff3e0;
+                    color: #f57c00;
+                }
+
+                .industry-pricing-flow .price-tag.cmin {
+                    background: #fce4ec;
+                    color: #c2185b;
+                }
+
+                .industry-pricing-flow .price-tag.cp {
+                    background: #f3e5f5;
+                    color: #7b1fa2;
+                }
+
+                .industry-pricing-flow .price-tag.realized {
+                    background: #e8f5e9;
+                    color: #2e7d32;
+                    font-size: 15px;
+                    font-weight: 700;
+                }
+
+                .industry-pricing-flow .arrow {
+                    color: #adb5bd;
+                    font-size: 16px;
                 }
 
                 #excel-file-input {
