@@ -41,6 +41,7 @@ const PricingV4 = {
             expandAll: 'Razširi vse',
             collapseAll: 'Skrči vse',
             policyInfo: 'Informacije o politiki',
+            editFactors: 'Uredi faktorje industrije',
 
             // Price levels
             priceLevels: 'Nivoi cijena',
@@ -58,6 +59,7 @@ const PricingV4 = {
             // Table headers
             code: 'Šifra',
             product: 'Izdelek',
+            industry: 'Industrija',
             customers: 'Kupci',
             customer: 'Kupec',
             strategicCmin: 'Strateški Cmin',
@@ -162,6 +164,7 @@ const PricingV4 = {
             expandAll: 'Proširi sve',
             collapseAll: 'Sažmi sve',
             policyInfo: 'Informacije o politici',
+            editFactors: 'Uredi faktore industrije',
 
             // Price levels
             priceLevels: 'Razine cijena',
@@ -179,6 +182,7 @@ const PricingV4 = {
             // Table headers
             code: 'Šifra',
             product: 'Proizvod',
+            industry: 'Industrija',
             customers: 'Kupci',
             customer: 'Kupac',
             strategicCmin: 'Strateški Cmin',
@@ -294,6 +298,18 @@ const PricingV4 = {
     init() {
         try {
             console.log(`Pricing Module V${this.VERSION} initializing...`);
+
+            // Load industry production factors from localStorage
+            const savedFactors = localStorage.getItem('industryProductionFactors');
+            if (savedFactors) {
+                try {
+                    this.state.industryProductionFactors = JSON.parse(savedFactors);
+                    console.log('Loaded production factors from localStorage:', this.state.industryProductionFactors);
+                } catch (e) {
+                    console.error('Error parsing saved factors, using defaults:', e);
+                }
+            }
+
             this.loadProductStructure();
             console.log('Product structure loaded:', this.state.productGroups.length, 'groups');
             this.loadPricingData();
@@ -714,6 +730,9 @@ const PricingV4 = {
                         <button class="btn-info" onclick="PricingV4.showPolicyInfo()">
                             ℹ️ ${this.getText('policyInfo')}
                         </button>
+                        <button class="btn-edit-factors" onclick="PricingV4.showFactorsModal()">
+                            ⚙️ ${this.getText('editFactors')}
+                        </button>
                     </div>
                 </div>
 
@@ -824,6 +843,76 @@ const PricingV4 = {
                         <div class="modal-footer">
                             <button class="btn-cancel" onclick="PricingV4.closeUploadModal()">${this.getText('cancel')}</button>
                             <button class="btn-process" id="process-btn" onclick="PricingV4.processExcelFile()" disabled>${this.getText('processData')}</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Industry Production Factors Modal -->
+                <div id="factors-modal" class="upload-modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>⚙️ ${this.getText('editFactors')}</h2>
+                            <button class="modal-close" onclick="PricingV4.closeFactorsModal()">✕</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="factors-info">
+                                <p style="margin-bottom: 20px; color: #666;">
+                                    ${this.state.language === 'sl'
+                                        ? 'Faktor proizvodnje določa prag: Realizirana cijena mora biti ≥ (LC × Faktor)'
+                                        : 'Faktor proizvodnje određuje prag: Realizirana cijena mora biti ≥ (LC × Faktor)'}
+                                </p>
+                            </div>
+                            <table class="factors-table">
+                                <thead>
+                                    <tr>
+                                        <th>${this.getText('industry')}</th>
+                                        <th>${this.state.language === 'sl' ? 'Faktor proizvodnje' : 'Faktor proizvodnje'}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>🐔 ${this.state.language === 'sl' ? 'Sveže meso' : 'Svježe meso'}</td>
+                                        <td>
+                                            <input type="number"
+                                                   id="factor-fresh-meat"
+                                                   class="factor-input"
+                                                   value="${this.state.industryProductionFactors['fresh-meat']}"
+                                                   step="0.01"
+                                                   min="1.00"
+                                                   max="2.00">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>🥩 ${this.state.language === 'sl' ? 'Mesni izdelki in pečeno meso' : 'Mesni proizvodi i pečeno meso'}</td>
+                                        <td>
+                                            <input type="number"
+                                                   id="factor-meat-products"
+                                                   class="factor-input"
+                                                   value="${this.state.industryProductionFactors['meat-products']}"
+                                                   step="0.01"
+                                                   min="1.00"
+                                                   max="2.00">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>🐟 Delamaris</td>
+                                        <td>
+                                            <input type="number"
+                                                   id="factor-delamaris"
+                                                   class="factor-input"
+                                                   value="${this.state.industryProductionFactors['delamaris']}"
+                                                   step="0.01"
+                                                   min="1.00"
+                                                   max="2.00">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div id="factors-status" class="upload-status"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn-cancel" onclick="PricingV4.closeFactorsModal()">${this.getText('cancel')}</button>
+                            <button class="btn-process" onclick="PricingV4.saveProductionFactors()">${this.getText('save') || 'Spremi / Shrani'}</button>
                         </div>
                     </div>
                 </div>
@@ -1561,6 +1650,68 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             document.getElementById('upload-status').innerHTML = '';
             document.getElementById('process-btn').disabled = true;
             this.state.uploadedFile = null;
+        }
+    },
+
+    showFactorsModal() {
+        const modal = document.getElementById('factors-modal');
+        if (modal) {
+            // Update input values with current factors
+            document.getElementById('factor-fresh-meat').value = this.state.industryProductionFactors['fresh-meat'];
+            document.getElementById('factor-meat-products').value = this.state.industryProductionFactors['meat-products'];
+            document.getElementById('factor-delamaris').value = this.state.industryProductionFactors['delamaris'];
+            document.getElementById('factors-status').innerHTML = '';
+            modal.style.display = 'flex';
+        }
+    },
+
+    closeFactorsModal() {
+        const modal = document.getElementById('factors-modal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.getElementById('factors-status').innerHTML = '';
+        }
+    },
+
+    saveProductionFactors() {
+        const statusDiv = document.getElementById('factors-status');
+
+        try {
+            // Get values from inputs
+            const freshMeat = parseFloat(document.getElementById('factor-fresh-meat').value);
+            const meatProducts = parseFloat(document.getElementById('factor-meat-products').value);
+            const delamaris = parseFloat(document.getElementById('factor-delamaris').value);
+
+            // Validate
+            if (isNaN(freshMeat) || isNaN(meatProducts) || isNaN(delamaris)) {
+                statusDiv.innerHTML = '<div class="error">❌ Invalid factor values</div>';
+                return;
+            }
+
+            if (freshMeat < 1.0 || freshMeat > 2.0 || meatProducts < 1.0 || meatProducts > 2.0 || delamaris < 1.0 || delamaris > 2.0) {
+                statusDiv.innerHTML = '<div class="error">❌ Factors must be between 1.00 and 2.00</div>';
+                return;
+            }
+
+            // Update state
+            this.state.industryProductionFactors['fresh-meat'] = freshMeat;
+            this.state.industryProductionFactors['meat-products'] = meatProducts;
+            this.state.industryProductionFactors['delamaris'] = delamaris;
+
+            // Save to localStorage
+            localStorage.setItem('industryProductionFactors', JSON.stringify(this.state.industryProductionFactors));
+
+            statusDiv.innerHTML = '<div class="success">✅ Factors updated successfully!</div>';
+
+            // Close modal and re-render after short delay
+            setTimeout(() => {
+                this.closeFactorsModal();
+                this.render();
+            }, 1500);
+
+        } catch (error) {
+            console.error('Error saving factors:', error);
+            statusDiv.innerHTML = '<div class="error">❌ Error saving factors</div>';
         }
     },
 
@@ -2726,6 +2877,78 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     display: flex;
                     justify-content: flex-end;
                     gap: 10px;
+                }
+
+                /* Factors table styling */
+                .factors-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+
+                .factors-table thead {
+                    background: #37474f;
+                    color: white;
+                }
+
+                .factors-table th {
+                    padding: 12px;
+                    text-align: left;
+                    font-weight: 600;
+                }
+
+                .factors-table tbody tr {
+                    border-bottom: 1px solid #e0e0e0;
+                }
+
+                .factors-table tbody tr:hover {
+                    background: #f5f5f5;
+                }
+
+                .factors-table td {
+                    padding: 15px 12px;
+                }
+
+                .factor-input {
+                    width: 120px;
+                    padding: 8px 12px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    border: 2px solid #ccc;
+                    border-radius: 4px;
+                    text-align: center;
+                    transition: border-color 0.3s;
+                }
+
+                .factor-input:focus {
+                    outline: none;
+                    border-color: #2196f3;
+                    box-shadow: 0 0 5px rgba(33,150,243,0.3);
+                }
+
+                .factors-info {
+                    background: #e3f2fd;
+                    padding: 15px;
+                    border-radius: 6px;
+                    border-left: 4px solid #2196f3;
+                }
+
+                .btn-edit-factors {
+                    background: #ff9800;
+                    color: white;
+                    padding: 10px 18px;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.3s;
+                }
+
+                .btn-edit-factors:hover {
+                    background: #f57c00;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(255,152,0,0.3);
                 }
 
                 .file-name {
