@@ -344,22 +344,22 @@ const CustomerCRM = {
         container.innerHTML = `
             <div class="crm-container">
                 <div class="crm-header">
-                    <h1>[Users] Customer Relationship Management</h1>
+                    <h1>Upravljanje strank (CRM)</h1>
                     <div class="header-controls">
-                        <input type="text" class="search-input" placeholder="[Search] Search customers..."
+                        <input type="text" class="search-input" placeholder="Iskanje strank..."
                                value="${this.state.searchQuery}"
                                onkeyup="CustomerCRM.handleSearch(this.value)">
                         <button class="btn-add" onclick="CustomerCRM.showAddCustomer()">
-                            ➕ Add Customer
+                            Dodaj stranko
                         </button>
                         <button class="btn-export" onclick="CustomerCRM.downloadTemplate()">
-                            [Download] Download Sample Excel
+                            Prenesi vzorec Excel
                         </button>
                         <button class="btn-export" onclick="CustomerCRM.openUploadModal()">
-                            [Upload] Import from Excel
+                            Uvozi iz Excel
                         </button>
                         <button class="btn-export" onclick="CustomerCRM.exportData()">
-                            [Download] Export
+                            Izvozi
                         </button>
                     </div>
                 </div>
@@ -373,37 +373,37 @@ const CustomerCRM = {
             <div id="customer-upload-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
                 <div style="background: white; padding: 30px; border-radius: 10px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3 style="margin: 0; color: var(--ch-text-primary);">Import Customers from Excel</h3>
+                        <h3 style="margin: 0; color: var(--ch-text-primary);">Uvoz strank iz Excel</h3>
                         <button onclick="CustomerCRM.closeUploadModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--ch-text-secondary);">&times;</button>
                     </div>
 
                     <div style="margin-bottom: 20px; padding: 15px; background: var(--ch-gray-50); border-radius: 8px;">
-                        <h4 style="margin-bottom: 10px; color: var(--ch-text-primary);">Instructions:</h4>
+                        <h4 style="margin-bottom: 10px; color: var(--ch-text-primary);">Navodila:</h4>
                         <ol style="margin-left: 20px; color: var(--ch-text-secondary);">
-                            <li>Download the sample Excel file by clicking "Download Sample Excel"</li>
-                            <li>Fill in the rows with your customer data (row 2 is an example)</li>
-                            <li>Upload the completed file below</li>
+                            <li>Prenesite vzorec Excel datoteke s klikom na "Prenesi vzorec Excel"</li>
+                            <li>Izpolnite vrstice z vašimi strankami (vrstica 2 je primer)</li>
+                            <li>Naložite izpolnjeno datoteko spodaj</li>
                         </ol>
                     </div>
 
                     <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--ch-text-primary);">Select Excel file (.xlsx)</label>
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--ch-text-primary);">Izberi Excel datoteko (.xlsx)</label>
                         <input type="file" id="customer-excel-file" accept=".xlsx,.xls" onchange="CustomerCRM.previewExcelFile(this.files[0])"
                                style="padding: 10px; border: 2px dashed var(--ch-border-medium); border-radius: 8px; width: 100%;">
                     </div>
 
                     <div id="customer-upload-preview" style="margin-top: 20px; display: none;">
-                        <h4 style="margin-bottom: 10px;">Preview:</h4>
+                        <h4 style="margin-bottom: 10px;">Predogled:</h4>
                         <div id="customer-upload-preview-content" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--ch-border-medium); border-radius: 8px; padding: 10px;">
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                         <button onclick="CustomerCRM.closeUploadModal()" class="btn btn-outline">
-                            Cancel
+                            Prekliči
                         </button>
                         <button onclick="CustomerCRM.processUpload()" id="customer-upload-confirm-btn" class="btn btn-primary" disabled>
-                            Import Customers
+                            Uvozi stranke
                         </button>
                     </div>
                 </div>
@@ -1204,7 +1204,7 @@ const CustomerCRM = {
                 const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
                 if (jsonData.length === 0) {
-                    alert('Excel file is empty!');
+                    alert('Excel datoteka je prazna!');
                     return;
                 }
 
@@ -1229,7 +1229,7 @@ const CustomerCRM = {
 
                     // Validate required fields
                     if (!customer.name) {
-                        throw new Error(`Row ${index + 2}: Missing customer name`);
+                        throw new Error(`Vrstica ${index + 2}: Manjka ime stranke`);
                     }
 
                     // Validate segment
@@ -1243,14 +1243,14 @@ const CustomerCRM = {
                 // Show preview
                 const previewHtml = `
                     <p style="margin-bottom: 10px; color: var(--ch-success);">
-                        <strong>Found ${this.uploadedData.length} customers</strong>
+                        <strong>Najdenih ${this.uploadedData.length} strank</strong>
                     </p>
                     <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
                         <thead>
                             <tr style="background: var(--ch-gray-100);">
-                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Name</th>
-                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Type</th>
-                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">City</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Ime</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Tip</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Mesto</th>
                                 <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Segment</th>
                             </tr>
                         </thead>
@@ -1266,7 +1266,7 @@ const CustomerCRM = {
                             ${this.uploadedData.length > 5 ? `
                                 <tr>
                                     <td colspan="4" style="padding: 5px; text-align: center; font-style: italic;">
-                                        ... and ${this.uploadedData.length - 5} more customers
+                                        ... in še ${this.uploadedData.length - 5} strank
                                     </td>
                                 </tr>
                             ` : ''}
@@ -1279,7 +1279,7 @@ const CustomerCRM = {
                 document.getElementById('customer-upload-confirm-btn').disabled = false;
 
             } catch (error) {
-                alert('Error reading Excel file: ' + error.message);
+                alert('Napaka pri branju Excel datoteke: ' + error.message);
                 console.error('Excel parsing error:', error);
             }
         };
@@ -1289,11 +1289,11 @@ const CustomerCRM = {
 
     async processUpload() {
         if (!this.uploadedData || this.uploadedData.length === 0) {
-            alert('No data to import!');
+            alert('Ni podatkov za uvoz!');
             return;
         }
 
-        const confirmMsg = `Are you sure you want to import ${this.uploadedData.length} customers?`;
+        const confirmMsg = `Ali ste prepričani, da želite uvoziti ${this.uploadedData.length} strank?`;
         if (!confirm(confirmMsg)) {
             return;
         }
@@ -1328,7 +1328,7 @@ const CustomerCRM = {
         this.closeUploadModal();
 
         // Show result
-        alert(`Import completed!\nSuccessful: ${successCount}\nErrors: ${errorCount}`);
+        alert(`Uvoz zaključen!\nUspešno: ${successCount}\nNapake: ${errorCount}`);
     }
 };
 
