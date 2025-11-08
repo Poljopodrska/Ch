@@ -520,7 +520,7 @@ const PlanningV4 = {
             
             <div class="planning-v4-container">
                 <div class="planning-header">
-                    <h2>📊 Načrtovanje proizvodnje / Production Planning</h2>
+                    <h2>[Chart] Načrtovanje proizvodnje / Production Planning</h2>
                     <div class="planning-info">
                         Meseci → Kliknite za tedne (KW = Koledarski teden) → Kliknite za dneve
                         <br>Months → Click for weeks (KW = Calendar Week) → Click for days
@@ -535,9 +535,9 @@ const PlanningV4 = {
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
                     <h4>Legenda / Legend:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>📅 Vsak izdelek ima 6 vrstic: N-2, N-1, N (Dejanske+Plan), N (Samo Plan), N+1, N+2</li>
-                        <li>📊 N (Act+Plan): Dejanske prodaje do danes, plan za naprej</li>
-                        <li>📈 N (Plan): Samo planski podatki za celotno leto</li>
+                        <li>[Calendar] Vsak izdelek ima 6 vrstic: N-2, N-1, N (Dejanske+Plan), N (Samo Plan), N+1, N+2</li>
+                        <li>[Chart] N (Act+Plan): Dejanske prodaje do danes, plan za naprej</li>
+                        <li>[Up] N (Plan): Samo planski podatki za celotno leto</li>
                         <li>🔽 Kliknite mesec za prikaz tednov (KW = koledarski teden)</li>
                         <li>🔽 Kliknite teden za prikaz dni</li>
                         <li>✏️ Zelene celice (prihodnost) lahko urejate</li>
@@ -721,7 +721,7 @@ const PlanningV4 = {
         let html = `
             <tr class="customer-header-row">
                 <td colspan="100" style="background: #e3f2fd; padding: 8px; font-weight: 600;">
-                    👥 Customer Breakdown for ${product.name}
+                    [Users] Customer Breakdown for ${product.name}
                 </td>
             </tr>
         `;
@@ -891,7 +891,7 @@ const PlanningV4 = {
                                     style="background: #2196f3; color: white; border: none; 
                                            padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
                                     title="Show customer breakdown">
-                                <span>${isExpanded ? '▼' : '▶'}</span> 👥 Customers
+                                <span>${isExpanded ? '▼' : '▶'}</span> [Users] Customers
                             </button>
                         </div>
                     ` : ''}

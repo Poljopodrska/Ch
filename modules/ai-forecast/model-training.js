@@ -18,14 +18,14 @@ class ModelTraining {
         container.className = 'model-training-container';
         container.innerHTML = `
             <div class="model-training-header">
-                <h2>🤖 Model Training</h2>
+                <h2>Model Training</h2>
                 <p>Train and manage forecasting models</p>
             </div>
 
             <!-- Training Actions -->
             <div class="training-actions">
                 <div class="action-card">
-                    <h3>📊 Payment Predictor</h3>
+                    <h3>Payment Predictor</h3>
                     <p>XGBoost model to predict invoice payment dates and risk</p>
                     <button onclick="modelTraining.trainModel('payment_predictor')"
                             id="train-payment-btn" class="train-btn">
@@ -35,7 +35,7 @@ class ModelTraining {
                 </div>
 
                 <div class="action-card">
-                    <h3>📈 Cash Flow Forecaster</h3>
+                    <h3>Cash Flow Forecaster</h3>
                     <p>Prophet time series model for cash flow trends and seasonality</p>
                     <button onclick="modelTraining.trainModel('cashflow_forecaster')"
                             id="train-cashflow-btn" class="train-btn">
@@ -48,7 +48,7 @@ class ModelTraining {
             <!-- Model List -->
             <div class="models-section">
                 <div class="models-header">
-                    <h3>📚 Trained Models</h3>
+                    <h3>Trained Models</h3>
                     <button onclick="modelTraining.loadModels()" class="refresh-btn">
                         Refresh
                     </button>
@@ -81,7 +81,7 @@ class ModelTraining {
             this.state.training = true;
             btn.disabled = true;
             btn.textContent = 'Training...';
-            statusEl.innerHTML = '<div class="training-progress">🔄 Training in progress...</div>';
+            statusEl.innerHTML = '<div class="training-progress">[Processing] Training in progress...</div>';
 
             const response = await fetch(`${this.apiBaseUrl}/models/train?model_type=${modelType}`, {
                 method: 'POST'
@@ -92,7 +92,7 @@ class ModelTraining {
             if (response.ok) {
                 statusEl.innerHTML = `
                     <div class="training-success">
-                        ✓ Training completed successfully!<br>
+                        [Success] Training completed successfully!<br>
                         <strong>Version:</strong> ${result.version}<br>
                         <strong>Model ID:</strong> ${result.model_id}<br>
                         <details>
@@ -110,7 +110,7 @@ class ModelTraining {
         } catch (error) {
             statusEl.innerHTML = `
                 <div class="training-error">
-                    ✗ Training failed: ${error.message}
+                    [Error] Training failed: ${error.message}
                 </div>
             `;
         } finally {
@@ -141,7 +141,7 @@ class ModelTraining {
                 <div class="model-card ${model.is_active ? 'active' : ''}">
                     <div class="model-header">
                         <div class="model-title">
-                            <span class="model-icon">${model.name === 'payment_predictor' ? '📊' : '📈'}</span>
+                            <span class="model-icon">${model.name === 'payment_predictor' ? '[P]' : '[CF]'}</span>
                             <strong>${this.formatModelName(model.name)}</strong>
                             ${model.is_active ? '<span class="active-badge">ACTIVE</span>' : ''}
                         </div>

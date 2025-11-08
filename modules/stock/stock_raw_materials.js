@@ -216,7 +216,7 @@ const StockRawMaterials = {
         container.innerHTML = `
             <div class="stock-raw-materials">
                 <div class="module-header">
-                    <h2>🏭 Stock of Raw Materials</h2>
+                    <h2>[Factory] Stock of Raw Materials</h2>
                     <div class="header-controls">
                         <div class="view-tabs">
                             <button class="tab-btn ${this.currentView === 'current' ? 'active' : ''}" data-view="current">
@@ -234,10 +234,10 @@ const StockRawMaterials = {
                                 <span class="sync-indicator" id="raw-sync-indicator">🟢 Auto-tracking BOM usage</span>
                             </div>
                             <button class="btn btn-order" onclick="StockRawMaterials.generateOrders()">
-                                📋 Generate Orders
+                                [Clipboard] Generate Orders
                             </button>
                             <button class="btn btn-export" onclick="StockRawMaterials.exportData()">
-                                📥 Export
+                                [Download] Export
                             </button>
                         </div>
                     </div>
@@ -860,7 +860,7 @@ const StockRawMaterials = {
                     
                     // Check if we're below minimum
                     if (this.stockData[materialCode].currentStock < this.stockData[materialCode].minStock) {
-                        alerts.push(`⚠️ ${materialCode} below minimum stock!`);
+                        alerts.push(`[!] ${materialCode} below minimum stock!`);
                     }
                     
                     // Update average usage
@@ -954,7 +954,7 @@ const StockRawMaterials = {
     flashSyncIndicator(message) {
         const indicator = document.getElementById('raw-sync-indicator');
         if (indicator) {
-            indicator.textContent = `🔄 ${message}`;
+            indicator.textContent = `[Refresh] ${message}`;
             indicator.style.color = '#f39c12';
             setTimeout(() => {
                 indicator.textContent = '🟢 Auto-tracking BOM usage';

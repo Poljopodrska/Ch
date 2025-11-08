@@ -536,7 +536,7 @@ const CashFlow = {
 
             <div class="cashflow-container">
                 <div class="cashflow-header">
-                    <h2>💸 Načrtovanje denarnega toka</h2>
+                    <h2>Cash Flow Planning</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V1.1.0 - Razširljiv časovno-osnovni denarni tok | Klikni mesece → tedne → dneve
                     </div>
@@ -544,13 +544,13 @@ const CashFlow = {
 
                 <div class="cashflow-controls">
                     <button class="export-button" onclick="CashFlow.exportData()">
-                        📁 Izvozi
+                        Export
                     </button>
                     <button onclick="CashFlow.loadBankForecast()" style="padding: 10px 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);">
-                        🏦 Naloži napoved banke
+                        Load Bank Forecast
                     </button>
                     <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
-                        🤖 AI Forecast
+                        AI Forecast
                     </button>
                 </div>
 
@@ -559,18 +559,18 @@ const CashFlow = {
                 </div>
 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <h4>💸 Načrtovanje denarnega toka:</h4>
+                    <h4>Cash Flow Planning:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>💰 <strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>
-                        <li>📈 <strong>Prejemki:</strong> Prilivi gotovine iz prodaje in drugih virov (urejanje)</li>
-                        <li>📉 <strong>Izplačila:</strong> Skupna izplačila (klikni za razširitev na kategorije)</li>
-                        <li style="margin-left: 20px;">🔴 <strong>Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
-                        <li style="margin-left: 20px;">🟠 <strong>Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
-                        <li style="margin-left: 20px;">🟡 <strong>Nenujni:</strong> Nenujni izdatki (urejanje)</li>
-                        <li>💸 <strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
-                        <li>💵 <strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
-                        <li>📅 <strong>Razširljivo:</strong> Klikni mesece → tedne → dneve in vrstice za podroben pogled</li>
-                        <li>🏦 <strong>Napoved banke:</strong> Uvozi napovedi plačil na podlagi analiz vedenja strank (AI)</li>
+                        <li><strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>
+                        <li><strong>Prejemki:</strong> Prilivi gotovine iz prodaje in drugih virov (urejanje)</li>
+                        <li><strong>Izplačila:</strong> Skupna izplačila (klikni za razširitev na kategorije)</li>
+                        <li style="margin-left: 20px;"><strong>Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
+                        <li style="margin-left: 20px;"><strong>Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
+                        <li style="margin-left: 20px;"><strong>Nenujni:</strong> Nenujni izdatki (urejanje)</li>
+                        <li><strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
+                        <li><strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
+                        <li><strong>Razširljivo:</strong> Klikni mesece → tedne → dneve in vrstice za podroben pogled</li>
+                        <li><strong>Napoved banke:</strong> Uvozi napovedi plačil na podlagi analiz vedenja strank (AI)</li>
                     </ul>
                 </div>
             </div>
@@ -796,14 +796,14 @@ const CashFlow = {
     // Get short row label
     getRowShortLabel(rowType) {
         const labels = {
-            'cashBeginning': '💰 Začetno stanje',
-            'receipts': '📈 Prejemki',
-            'disbursements': '📉 Izplačila',
-            'disbursementsNujni': '🔴 Nujni',
-            'disbursementsPogojnoNujni': '🟠 Pogojno nujni',
-            'disbursementsNenujni': '🟡 Nenujni',
-            'netCashFlow': '💸 Neto denarni tok',
-            'cashEnding': '💵 Končno stanje'
+            'cashBeginning': 'Začetno stanje',
+            'receipts': 'Prejemki',
+            'disbursements': 'Izplačila',
+            'disbursementsNujni': '[U] Nujni',
+            'disbursementsPogojnoNujni': '[C] Pogojno nujni',
+            'disbursementsNenujni': '[F] Nenujni',
+            'netCashFlow': 'Neto denarni tok',
+            'cashEnding': 'Končno stanje'
         };
         return labels[rowType] || rowType;
     },
@@ -1191,7 +1191,7 @@ const CashFlow = {
         this.state.unsavedChanges = true;
         this.updateSaveButton();
         this.renderCashFlowGrid();
-        alert('🔄 Vsi izračuni denarnega toka posodobljeni!');
+        alert('[Updated] Vsi izračuni denarnega toka posodobljeni!');
     },
 
     // Update save button
@@ -1220,7 +1220,7 @@ const CashFlow = {
         this.state.unsavedChanges = false;
         this.updateSaveButton();
 
-        alert('✅ Podatki denarnega toka uspešno shranjeni!');
+        alert('[Success] Podatki denarnega toka uspešno shranjeni!');
     },
 
     // Export data
@@ -1368,7 +1368,7 @@ const CashFlow = {
 
             // Confirm with user
             const confirmed = confirm(
-                `🤖 Load AI Bank Forecast?\n\n` +
+                `[AI] Load AI Bank Forecast?\n\n` +
                 `Generated: ${new Date(metadata.generated_at).toLocaleString('sl-SI')}\n` +
                 `Period: ${metadata.forecast_days} days\n` +
                 `Customers Analyzed: ${metadata.total_customers_analyzed}\n` +
@@ -1386,7 +1386,7 @@ const CashFlow = {
 
         } catch (error) {
             console.error('Error loading bank forecast:', error);
-            alert(`❌ Error loading bank forecast:\n\n${error.message}\n\n` +
+            alert(`[Error] Error loading bank forecast:\n\n${error.message}\n\n` +
                   `Make sure the forecast file exists at:\n/BankData/bank_forecast_90days.json`);
         }
     },
@@ -1500,16 +1500,16 @@ const CashFlow = {
 
         // Show detailed summary
         const monthNames = Array.from(monthsWithData).map(m => this.getMonthShort(m)).join(', ');
-        alert(`✅ Bank Forecast Imported Successfully!\n\n` +
-              `📊 Summary:\n` +
+        alert(`[Success] Bank Forecast Imported Successfully!\n\n` +
+              `Summary:\n` +
               `• Receipts: ${receiptsUpdated} days updated\n` +
               `• Disbursements: ${disbursementsUpdated} days updated\n` +
               `• Total Expected Receipts: €${this.formatCurrency(totalReceipts)}\n` +
               `• Total Expected Disbursements: €${this.formatCurrency(totalDisbursements)}\n` +
               `• Net Position: €${this.formatCurrency(totalReceipts - totalDisbursements)}\n\n` +
-              `📅 Months Updated: ${monthNames}\n\n` +
-              `✓ Months have been auto-expanded to show the data.\n` +
-              `✓ Click month headers to expand weeks, then weeks to see daily values.`);
+              `Months Updated: ${monthNames}\n\n` +
+              `Note: Months have been auto-expanded to show the data.\n` +
+              `Note: Click month headers to expand weeks, then weeks to see daily values.`);
     }
 };
 

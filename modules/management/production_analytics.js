@@ -107,7 +107,7 @@ const ProductionAnalytics = {
                     <button class="back-button" onclick="ManagementSummary.backToLanding()">
                         ← Back to Summary
                     </button>
-                    <h1>🏭 Production Analytics</h1>
+                    <h1>[Factory] Production Analytics</h1>
                     <p class="header-subtitle">Comprehensive production KPIs and performance metrics</p>
                 </div>
                 
@@ -150,21 +150,21 @@ const ProductionAnalytics = {
                 
                 <div class="kpi-cards">
                     <div class="kpi-card">
-                        <div class="kpi-icon">📊</div>
+                        <div class="kpi-icon">[Chart]</div>
                         <div class="kpi-value" id="total-production">0</div>
                         <div class="kpi-label">Total Production</div>
                         <div class="kpi-change positive">+12.5% vs Plan</div>
                     </div>
                     
                     <div class="kpi-card">
-                        <div class="kpi-icon">📈</div>
+                        <div class="kpi-icon">[Up]</div>
                         <div class="kpi-value" id="daily-average">0</div>
                         <div class="kpi-label">Daily Average</div>
                         <div class="kpi-change negative">-5.2% vs Last Period</div>
                     </div>
                     
                     <div class="kpi-card">
-                        <div class="kpi-icon">🎯</div>
+                        <div class="kpi-icon">[Target]</div>
                         <div class="kpi-value" id="plan-achievement">0%</div>
                         <div class="kpi-label">Plan Achievement</div>
                         <div class="kpi-change positive">Above Target</div>
@@ -180,23 +180,23 @@ const ProductionAnalytics = {
                 
                 <div class="charts-grid">
                     <div class="chart-container">
-                        <h3>📈 Daily Production Trend</h3>
+                        <h3>[Up] Daily Production Trend</h3>
                         <canvas id="daily-production-chart"></canvas>
                     </div>
                     
                     <div class="chart-container">
-                        <h3>🎯 Plan vs Actual Comparison</h3>
+                        <h3>[Target] Plan vs Actual Comparison</h3>
                         <canvas id="plan-vs-actual-chart"></canvas>
                     </div>
                     
                     <div class="chart-container full-width">
-                        <h3>📊 Production by Product/Group</h3>
+                        <h3>[Chart] Production by Product/Group</h3>
                         <canvas id="product-breakdown-chart"></canvas>
                     </div>
                 </div>
                 
                 <div class="data-table-container">
-                    <h3>📋 Detailed Production Data</h3>
+                    <h3>[Clipboard] Detailed Production Data</h3>
                     <div id="production-data-table"></div>
                 </div>
             </div>

@@ -52,7 +52,7 @@ const PaymentManager = {
      */
     saveSettings() {
         localStorage.setItem('paymentManagerSettings', JSON.stringify(this.state.settings));
-        alert('✅ Settings saved successfully!');
+        alert('[Success] Settings saved successfully!');
     },
 
     /**
@@ -342,7 +342,7 @@ const PaymentManager = {
 
             <div class="payment-manager">
                 <div class="pm-header">
-                    <h2>💰 Payment Management</h2>
+                    <h2>Payment Management</h2>
                     <div style="margin-top: 8px; font-size: 14px; opacity: 0.95;">
                         Manage customer receivables and payment obligations with urgency classification
                     </div>
@@ -351,15 +351,15 @@ const PaymentManager = {
                 <div class="pm-tabs">
                     <button class="pm-tab ${this.state.currentView === 'receivables' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('receivables')">
-                        📊 Customer Receivables
+                        Customer Receivables
                     </button>
                     <button class="pm-tab ${this.state.currentView === 'obligations' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('obligations')">
-                        💳 Payment Obligations
+                        Payment Obligations
                     </button>
                     <button class="pm-tab ${this.state.currentView === 'settings' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('settings')">
-                        ⚙️ Settings
+                        Settings
                     </button>
                 </div>
 
@@ -411,14 +411,14 @@ const PaymentManager = {
             return `
                 <div class="pm-toolbar">
                     <button class="pm-button" onclick="PaymentManager.loadReceivables()">
-                        📥 Load Receivables Data
+                        Load Receivables Data
                     </button>
                     <button class="pm-button secondary" onclick="PaymentManager.exportReceivables()">
-                        📁 Export to Excel
+                        Export to Excel
                     </button>
                 </div>
                 <div class="empty-state">
-                    <div class="empty-state-icon">📊</div>
+                    <div class="empty-state-icon">[Data]</div>
                     <h3>No Receivables Data Loaded</h3>
                     <p>Click "Load Receivables Data" to import customer payment data</p>
                 </div>
@@ -452,10 +452,10 @@ const PaymentManager = {
 
             <div class="pm-toolbar">
                 <button class="pm-button" onclick="PaymentManager.loadReceivables()">
-                    🔄 Refresh Data
+                    Refresh Data
                 </button>
                 <button class="pm-button secondary" onclick="PaymentManager.exportReceivables()">
-                    📁 Export to Excel
+                    Export to Excel
                 </button>
             </div>
 
@@ -521,14 +521,14 @@ const PaymentManager = {
             return `
                 <div class="pm-toolbar">
                     <button class="pm-button" onclick="PaymentManager.loadObligations()">
-                        📥 Load Payment Obligations
+                        Load Payment Obligations
                     </button>
                     <button class="pm-button secondary" onclick="PaymentManager.exportObligations()">
-                        📁 Export to Excel
+                        Export to Excel
                     </button>
                 </div>
                 <div class="empty-state">
-                    <div class="empty-state-icon">💳</div>
+                    <div class="empty-state-icon">[Obligations]</div>
                     <h3>No Payment Obligations Loaded</h3>
                     <p>Click "Load Payment Obligations" to import payables data</p>
                 </div>
@@ -547,17 +547,17 @@ const PaymentManager = {
         return `
             <div class="summary-cards">
                 <div class="summary-card">
-                    <h4>🔴 Urgent (Pay on time)</h4>
+                    <h4>[Urgent] Pay on time</h4>
                     <div class="value" style="color: #dc3545;">€${this.formatCurrency(urgentTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${urgent.length} invoices</div>
                 </div>
                 <div class="summary-card">
-                    <h4>🟠 Conditional (±${this.state.settings.pogojnoNujniDays}d)</h4>
+                    <h4>[Conditional] ±${this.state.settings.pogojnoNujniDays}d</h4>
                     <div class="value" style="color: #ffc107;">€${this.formatCurrency(conditionalTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${conditional.length} invoices</div>
                 </div>
                 <div class="summary-card">
-                    <h4>🟢 Flexible (±${this.state.settings.nenujniDays}d)</h4>
+                    <h4>[Flexible] ±${this.state.settings.nenujniDays}d</h4>
                     <div class="value" style="color: #17a2b8;">€${this.formatCurrency(flexibleTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${flexible.length} invoices</div>
                 </div>
@@ -569,13 +569,13 @@ const PaymentManager = {
 
             <div class="pm-toolbar">
                 <button class="pm-button" onclick="PaymentManager.loadObligations()">
-                    🔄 Refresh Data
+                    Refresh Data
                 </button>
                 <button class="pm-button secondary" onclick="PaymentManager.saveUrgencySettings()">
-                    💾 Save Urgency Classifications
+                    Save Urgency Classifications
                 </button>
                 <button class="pm-button secondary" onclick="PaymentManager.exportObligations()">
-                    📁 Export to Excel
+                    Export to Excel
                 </button>
             </div>
 
@@ -622,17 +622,17 @@ const PaymentManager = {
                         <button class="urgency-btn urgent ${supplier.urgency === 'urgent' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'urgent')"
                                 title="Pay on time">
-                            🔴 Urgent
+                            [U] Urgent
                         </button>
                         <button class="urgency-btn conditional ${supplier.urgency === 'conditional' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'conditional')"
                                 title="Can delay up to ${this.state.settings.pogojnoNujniDays} days">
-                            🟠 ±${this.state.settings.pogojnoNujniDays}d
+                            [C] ±${this.state.settings.pogojnoNujniDays}d
                         </button>
                         <button class="urgency-btn flexible ${supplier.urgency === 'flexible' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'flexible')"
                                 title="Pay when CF available, max ${this.state.settings.nenujniDays} days">
-                            🟢 ±${this.state.settings.nenujniDays}d
+                            [F] ±${this.state.settings.nenujniDays}d
                         </button>
                     </div>
                 </td>
@@ -647,13 +647,13 @@ const PaymentManager = {
     renderSettingsView() {
         return `
             <div class="settings-panel">
-                <h3>⚙️ Payment Urgency Settings</h3>
+                <h3>Payment Urgency Settings</h3>
                 <p>Configure the delay parameters for payment classifications</p>
 
                 <div class="settings-grid">
                     <div class="setting-item">
                         <label>
-                            🟠 Conditional (Pogojno Nujni) - Maximum Delay
+                            [Conditional] Pogojno Nujni - Maximum Delay
                             <span style="font-weight: normal; font-size: 11px; color: #6c757d;">
                                 (Can be paid this many days after due date)
                             </span>
@@ -668,7 +668,7 @@ const PaymentManager = {
 
                     <div class="setting-item">
                         <label>
-                            🟢 Flexible (Nenujni) - Maximum Delay
+                            [Flexible] Nenujni - Maximum Delay
                             <span style="font-weight: normal; font-size: 11px; color: #6c757d;">
                                 (Pay when CF available, but no later than this many days)
                             </span>
@@ -684,19 +684,19 @@ const PaymentManager = {
 
                 <div style="margin-top: 20px;">
                     <button class="pm-button" onclick="PaymentManager.saveSettings()">
-                        💾 Save Settings
+                        Save Settings
                     </button>
                     <button class="pm-button secondary" onclick="PaymentManager.resetSettings()">
-                        🔄 Reset to Defaults
+                        Reset to Defaults
                     </button>
                 </div>
 
                 <div style="margin-top: 30px; padding: 15px; background: white; border-radius: 8px;">
-                    <h4>ℹ️ How Urgency Classifications Work</h4>
+                    <h4>[Info] How Urgency Classifications Work</h4>
                     <ul style="line-height: 1.8;">
-                        <li><strong>🔴 Urgent:</strong> Must be paid exactly on the due date. No flexibility.</li>
-                        <li><strong>🟠 Conditional (Pogojno Nujni):</strong> Can be delayed up to <strong>${this.state.settings.pogojnoNujniDays} days</strong> after due date if needed for cash flow management.</li>
-                        <li><strong>🟢 Flexible (Nenujni):</strong> Pay when cash flow allows, but no later than <strong>${this.state.settings.nenujniDays} days</strong> after due date.</li>
+                        <li><strong>[Urgent]:</strong> Must be paid exactly on the due date. No flexibility.</li>
+                        <li><strong>[Conditional] (Pogojno Nujni):</strong> Can be delayed up to <strong>${this.state.settings.pogojnoNujniDays} days</strong> after due date if needed for cash flow management.</li>
+                        <li><strong>[Flexible] (Nenujni):</strong> Pay when cash flow allows, but no later than <strong>${this.state.settings.nenujniDays} days</strong> after due date.</li>
                     </ul>
                     <p style="margin-top: 15px; color: #6c757d; font-size: 13px;">
                         These classifications help you prioritize payments based on supplier relationships and cash flow availability.
@@ -713,7 +713,7 @@ const PaymentManager = {
     async loadReceivables() {
         try {
             // Show loading
-            document.getElementById('pm-content').innerHTML = '<div class="loading">📥 Loading receivables data...</div>';
+            document.getElementById('pm-content').innerHTML = '<div class="loading">Loading receivables data...</div>';
 
             // Load real receivables data from converted JSON
             const response = await fetch('/BankData/receivables_data.json');
@@ -745,7 +745,7 @@ const PaymentManager = {
 
         } catch (error) {
             console.error('Error loading receivables:', error);
-            alert(`❌ Error loading receivables:\n\n${error.message}\n\nMake sure receivables_data.json exists in BankData folder.`);
+            alert(`[Error] Error loading receivables:\n\n${error.message}\n\nMake sure receivables_data.json exists in BankData folder.`);
             this.render();
         }
     },
@@ -756,7 +756,7 @@ const PaymentManager = {
     async loadObligations() {
         try {
             // Show loading
-            document.getElementById('pm-content').innerHTML = '<div class="loading">📥 Loading payment obligations...</div>';
+            document.getElementById('pm-content').innerHTML = '<div class="loading">Loading payment obligations...</div>';
 
             // Load real payables data from converted JSON
             const response = await fetch('/BankData/payables_data.json');
@@ -789,7 +789,7 @@ const PaymentManager = {
 
         } catch (error) {
             console.error('Error loading obligations:', error);
-            alert(`❌ Error loading obligations:\n\n${error.message}\n\nMake sure payables_data.json exists in BankData folder.`);
+            alert(`[Error] Error loading obligations:\n\n${error.message}\n\nMake sure payables_data.json exists in BankData folder.`);
             this.render();
         }
     },
@@ -852,7 +852,7 @@ const PaymentManager = {
             urgency: s.urgency,
             actualPayDate: s.actualPayDate
         }))));
-        alert('✅ Urgency classifications saved!');
+        alert('[Success] Urgency classifications saved!');
     },
 
     /**
@@ -876,14 +876,14 @@ const PaymentManager = {
      * Export receivables to Excel
      */
     exportReceivables() {
-        alert('📁 Export to Excel functionality - integrate with your Excel export library');
+        alert('[Export] Export to Excel functionality - integrate with your Excel export library');
     },
 
     /**
      * Export obligations to Excel
      */
     exportObligations() {
-        alert('📁 Export to Excel functionality - integrate with your Excel export library');
+        alert('[Export] Export to Excel functionality - integrate with your Excel export library');
     },
 
     /**

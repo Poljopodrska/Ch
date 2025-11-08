@@ -366,16 +366,16 @@ const CustomerCRM = {
         container.innerHTML = `
             <div class="crm-container">
                 <div class="crm-header">
-                    <h1>👥 Customer Relationship Management</h1>
+                    <h1>[Users] Customer Relationship Management</h1>
                     <div class="header-controls">
-                        <input type="text" class="search-input" placeholder="🔍 Search customers..." 
+                        <input type="text" class="search-input" placeholder="[Search] Search customers..." 
                                value="${this.state.searchQuery}"
                                onkeyup="CustomerCRM.handleSearch(this.value)">
                         <button class="btn-add" onclick="CustomerCRM.showAddCustomer()">
                             ➕ Add Customer
                         </button>
                         <button class="btn-export" onclick="CustomerCRM.exportData()">
-                            📥 Export
+                            [Download] Export
                         </button>
                     </div>
                 </div>
@@ -477,8 +477,8 @@ const CustomerCRM = {
                 </td>
                 <td class="actions">
                     <button onclick="CustomerCRM.editCustomer('${customer.id}')" title="Edit">✏️</button>
-                    <button onclick="CustomerCRM.viewPricing('${customer.id}')" title="View Pricing">💰</button>
-                    <button onclick="CustomerCRM.viewHistory('${customer.id}')" title="History">📊</button>
+                    <button onclick="CustomerCRM.viewPricing('${customer.id}')" title="View Pricing">[Money]</button>
+                    <button onclick="CustomerCRM.viewHistory('${customer.id}')" title="History">[Chart]</button>
                 </td>
             </tr>
             ${isExpanded ? this.renderCustomerDetails(customer) : ''}
@@ -491,7 +491,7 @@ const CustomerCRM = {
                 <td colspan="9">
                     <div class="details-container">
                         <div class="details-section">
-                            <h3>📋 Customer Information</h3>
+                            <h3>[Clipboard] Customer Information</h3>
                             <div class="info-grid">
                                 <div class="info-item">
                                     <label>Tax ID:</label>
@@ -525,7 +525,7 @@ const CustomerCRM = {
                         </div>
                         
                         <div class="details-section">
-                            <h3>💰 Product Pricing Overview</h3>
+                            <h3>[Money] Product Pricing Overview</h3>
                             <div class="pricing-preview">
                                 ${this.renderCustomerPricingPreview(customer.id)}
                             </div>
@@ -697,7 +697,7 @@ const CustomerCRM = {
     // Integration method for other modules
     renderCustomerPricingForProduct(productId, container) {
         let html = '<div class="customer-pricing-integration">';
-        html += '<h4>👥 Customer-Specific Pricing</h4>';
+        html += '<h4>[Users] Customer-Specific Pricing</h4>';
         
         this.state.customers.forEach(customer => {
             const pricing = this.getCustomerPricing(customer.id, productId);

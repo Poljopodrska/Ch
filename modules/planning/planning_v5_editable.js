@@ -426,7 +426,7 @@ const PlanningV5Editable = {
             
             <div class="planning-container">
                 <div class="planning-header">
-                    <h2>📈 Načrtovanje prodaje / Sales Planning</h2>
+                    <h2>[Up] Načrtovanje prodaje / Sales Planning</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V5.0.0 - Fully Editable Sales Planning Module
                         <br>Click any future planning cell to edit values
@@ -435,13 +435,13 @@ const PlanningV5Editable = {
                 
                 <div class="planning-controls">
                     <button class="save-button" onclick="PlanningV5Editable.saveData()" id="save-btn" disabled>
-                        💾 Save Changes
+                        [Save] Save Changes
                     </button>
                     <button onclick="PlanningV5Editable.exportData()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        📁 Export Data
+                        [Folder] Export Data
                     </button>
                     <button onclick="PlanningV5Editable.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        🔄 Reset to Default
+                        [Refresh] Reset to Default
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
                         Unsaved changes
@@ -455,10 +455,10 @@ const PlanningV5Editable = {
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
                     <h4>📝 Editing Instructions:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>✅ <strong>Click any blue or purple cell</strong> to edit future planning values</li>
-                        <li>📅 <strong>Historical data</strong> (gray/green) is read-only</li>
+                        <li>[OK] <strong>Click any blue or purple cell</strong> to edit future planning values</li>
+                        <li>[Calendar] <strong>Historical data</strong> (gray/green) is read-only</li>
                         <li>⭐ <strong>Edited cells</strong> show with green background and * marker</li>
-                        <li>💾 <strong>Save button</strong> becomes active when you make changes</li>
+                        <li>[Save] <strong>Save button</strong> becomes active when you make changes</li>
                         <li>🔢 <strong>Enter numbers only</strong> - values are automatically formatted</li>
                         <li>⌨️ <strong>Press Enter or click outside</strong> to confirm edit</li>
                     </ul>
@@ -735,7 +735,7 @@ const PlanningV5Editable = {
         this.updateSaveButton();
         
         // Show confirmation
-        alert('✅ Planning data saved successfully!');
+        alert('[OK] Planning data saved successfully!');
     },
     
     // Export data

@@ -500,10 +500,10 @@ const ProductionPlanningV1 = {
             
             <div class="production-planning-container">
                 <div class="production-header">
-                    <h2>🏭 Načrtovanje proizvodnje / Production Planning</h2>
+                    <h2>[Factory] Načrtovanje proizvodnje / Production Planning</h2>
                     <div class="production-info">
                         Stage 4: Enhanced with Groups & Capacity Constraints
-                        <br>📦 Current Stock | 🏷️ Product Groups | 🏭 Production Lines | ⚙️ Capacity Limits
+                        <br>[Box] Current Stock | 🏷️ Product Groups | [Factory] Production Lines | [Settings] Capacity Limits
                     </div>
                 </div>
                 
@@ -539,12 +539,12 @@ const ProductionPlanningV1 = {
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
                     <h4>Stage 4 Features:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>✅ Product Groups (Marketing categories)</li>
-                        <li>✅ Production Groups (Production lines)</li>
-                        <li>✅ Capacity constraints per line</li>
-                        <li>✅ Min batch size & max daily production limits</li>
-                        <li>✅ Dynamic shift allocation (1-4 shifts)</li>
-                        <li>📅 Today's date: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></li>
+                        <li>[OK] Product Groups (Marketing categories)</li>
+                        <li>[OK] Production Groups (Production lines)</li>
+                        <li>[OK] Capacity constraints per line</li>
+                        <li>[OK] Min batch size & max daily production limits</li>
+                        <li>[OK] Dynamic shift allocation (1-4 shifts)</li>
+                        <li>[Calendar] Today's date: <strong>${new Date().toLocaleDateString('sl-SI')}</strong></li>
                     </ul>
                 </div>
             </div>
@@ -628,7 +628,7 @@ const ProductionPlanningV1 = {
                     const capacityInfo = `Capacity: ${line.dailyCapacity} kg/day (1 shift) - ${line.maxCapacity} kg/day (4 shifts)`;
                     html += `<tr style="background: ${line.color}; color: white;">
                         <td colspan="15" style="padding: 10px; font-weight: bold; font-size: 14px;">
-                            🏭 ${line.name} | ${capacityInfo}
+                            [Factory] ${line.name} | ${capacityInfo}
                         </td>
                     </tr>`;
                     
@@ -688,8 +688,8 @@ const ProductionPlanningV1 = {
                     ${product.name}<br>
                     <small>${product.nameEn}</small><br>
                     <span class="stock-indicator">Stock: ${product.currentStock} ${product.unit}</span><br>
-                    <small style="color: ${productGroup?.color || '#666'};">📦 ${productGroup?.name || 'N/A'}</small><br>
-                    <small style="color: ${productionLine?.color || '#666'};">🏭 ${productionLine?.name || 'N/A'}</small><br>
+                    <small style="color: ${productGroup?.color || '#666'};">[Box] ${productGroup?.name || 'N/A'}</small><br>
+                    <small style="color: ${productionLine?.color || '#666'};">[Factory] ${productionLine?.name || 'N/A'}</small><br>
                     <small style="color: #999;">Min: ${product.minBatchSize} | Max: ${product.maxDailyProduction} ${product.unit}/day</small>
                 </td>
             `;

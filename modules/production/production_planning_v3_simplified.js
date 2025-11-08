@@ -629,7 +629,7 @@ const ProductionPlanningV3 = {
             
             <div class="production-v3-container">
                 <div class="production-v3-header">
-                    <h2>🏭 Production Planning - Simplified View</h2>
+                    <h2>[Factory] Production Planning - Simplified View</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V3.0.0 - Current Year Focus: Sales, Stock, Production Plan & Actual
                         <br>Expandable: Click months → weeks → days | Edit sales & production plans
@@ -657,16 +657,16 @@ const ProductionPlanningV3 = {
                 
                 <div class="production-v3-controls">
                     <button class="save-button" onclick="ProductionPlanningV3.saveData()" id="save-btn" disabled>
-                        💾 Save Plans
+                        [Save] Save Plans
                     </button>
                     <button class="calculate-button" onclick="ProductionPlanningV3.calculateProduction()">
-                        🔄 Auto-Calculate Production
+                        [Refresh] Auto-Calculate Production
                     </button>
                     <button class="export-button" onclick="ProductionPlanningV3.exportData()">
-                        📁 Export Data
+                        [Folder] Export Data
                     </button>
                     <button onclick="ProductionPlanningV3.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        🔄 Reset
+                        [Refresh] Reset
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
                         Unsaved changes
@@ -678,14 +678,14 @@ const ProductionPlanningV3 = {
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <h4>📊 Simplified Production Planning:</h4>
+                    <h4>[Chart] Simplified Production Planning:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>📈 <strong>Sales Plan:</strong> Expected sales (editable)</li>
-                        <li>📦 <strong>Stock:</strong> Current inventory levels (auto-calculated)</li>
-                        <li>🏭 <strong>Production Plan:</strong> Planned production (editable)</li>
-                        <li>✅ <strong>Actual Production:</strong> Historical production data</li>
-                        <li>🔄 <strong>Auto-Calculate:</strong> Automatically calculates production needs based on sales & stock</li>
-                        <li>📅 <strong>Expandable:</strong> Click months → weeks → days for detailed view</li>
+                        <li>[Up] <strong>Sales Plan:</strong> Expected sales (editable)</li>
+                        <li>[Box] <strong>Stock:</strong> Current inventory levels (auto-calculated)</li>
+                        <li>[Factory] <strong>Production Plan:</strong> Planned production (editable)</li>
+                        <li>[OK] <strong>Actual Production:</strong> Historical production data</li>
+                        <li>[Refresh] <strong>Auto-Calculate:</strong> Automatically calculates production needs based on sales & stock</li>
+                        <li>[Calendar] <strong>Expandable:</strong> Click months → weeks → days for detailed view</li>
                     </ul>
                 </div>
             </div>
@@ -879,10 +879,10 @@ const ProductionPlanningV3 = {
     // Get short row label
     getRowShortLabel(rowType) {
         const labels = {
-            'salesPlan': '📈 Sales Plan',
-            'stock': '📦 Stock',
-            'productionPlan': '🏭 Production Plan',
-            'actualProduction': '✅ Actual Production'
+            'salesPlan': '[Up] Sales Plan',
+            'stock': '[Box] Stock',
+            'productionPlan': '[Factory] Production Plan',
+            'actualProduction': '[OK] Actual Production'
         };
         return labels[rowType] || rowType;
     },
@@ -1237,7 +1237,7 @@ const ProductionPlanningV3 = {
         this.updateSaveButton();
         this.renderProductionGrid();
         
-        alert('🔄 Production plan calculated based on sales plan and stock levels!');
+        alert('[Refresh] Production plan calculated based on sales plan and stock levels!');
     },
     
     // Update save button
@@ -1266,7 +1266,7 @@ const ProductionPlanningV3 = {
         this.state.unsavedChanges = false;
         this.updateSaveButton();
         
-        alert('✅ Production planning data saved successfully!');
+        alert('[OK] Production planning data saved successfully!');
     },
     
     // Export data

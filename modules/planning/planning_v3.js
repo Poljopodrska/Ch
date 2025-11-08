@@ -282,7 +282,7 @@ const PlanningV3 = {
             <div class="planning-v3-container">
                 <!-- YELLOW DEPLOYMENT INDICATOR -->
                 <div style="background: #FFD700; padding: 15px; text-align: center; font-weight: bold; margin-bottom: 20px; border: 2px solid red;">
-                    ⚠️ PLANNING V3.1 - WITH 5 MOCK PRODUCTS! ⚠️
+                    [!] PLANNING V3.1 - WITH 5 MOCK PRODUCTS! [!]
                     <br>Products: Pork, Beef, Chicken, Lamb, Sausage
                     <br>Click ▶ to expand products and see 5 years of data (N-2 to N+2)
                 </div>

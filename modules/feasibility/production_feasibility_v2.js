@@ -338,7 +338,7 @@ const ProductionFeasibility = {
         container.innerHTML = `
             <div class="feasibility-v2-container">
                 <div class="feasibility-header">
-                    <h2>🎯 Production Feasibility Analysis</h2>
+                    <h2>[Target] Production Feasibility Analysis</h2>
                     <div class="header-info">
                         Click on months to expand weeks, click on weeks to expand days. Click on any cell to see details.
                     </div>
@@ -503,7 +503,7 @@ const ProductionFeasibility = {
                 <small>${product.unit}</small>
             </td>
             <td class="type-cell">
-                <span class="type-label workforce">👥 Workforce</span>
+                <span class="type-label workforce">[Users] Workforce</span>
             </td>
         `;
         html += this.renderDataCells(product.id, 'workforce', workforceData);
@@ -513,7 +513,7 @@ const ProductionFeasibility = {
         html += `<tr class="materials-row">`;
         html += `
             <td class="type-cell">
-                <span class="type-label materials">📦 Materials</span>
+                <span class="type-label materials">[Box] Materials</span>
             </td>
         `;
         html += this.renderDataCells(product.id, 'materials', materialsData);
@@ -585,12 +585,12 @@ const ProductionFeasibility = {
     
     getStatusIcon(status) {
         switch(status) {
-            case 'ok': return '✅';
-            case 'warning': return '❌';  // Under capacity - show red cross
-            case 'critical': return '❌'; // Under capacity - show red cross
-            case 'excess': return '✅';   // Over capacity is OK - show checkmark
+            case 'ok': return '[OK]';
+            case 'warning': return '[X]';  // Under capacity - show red cross
+            case 'critical': return '[X]'; // Under capacity - show red cross
+            case 'excess': return '[OK]';   // Over capacity is OK - show checkmark
             case 'none': return '➖';     // No production - keep dash
-            default: return '❌';         // Default to red cross for any issues
+            default: return '[X]';         // Default to red cross for any issues
         }
     },
     
@@ -616,7 +616,7 @@ const ProductionFeasibility = {
         const title = document.getElementById('popup-title');
         const body = document.getElementById('popup-body');
         
-        title.innerHTML = `${product.name} - ${type === 'workforce' ? '👥 Workforce' : '📦 Materials'} - ${periodLabel}`;
+        title.innerHTML = `${product.name} - ${type === 'workforce' ? '[Users] Workforce' : '[Box] Materials'} - ${periodLabel}`;
         
         if (type === 'workforce') {
             body.innerHTML = this.renderWorkforceDetail(detailData);

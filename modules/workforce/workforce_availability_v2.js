@@ -102,11 +102,11 @@ const WorkforceAvailability = {
         container.innerHTML = `
             <div class="workforce-module">
                 <div class="module-header">
-                    <h2>👥 Workforce Availability</h2>
+                    <h2>[Users] Workforce Availability</h2>
                     <div class="header-controls">
                         <button onclick="WorkforceAvailability.addWorker()">➕ Add Worker</button>
-                        <button onclick="WorkforceAvailability.exportData()">📥 Export</button>
-                        <button onclick="WorkforceAvailability.resetView()">🔄 Reset View</button>
+                        <button onclick="WorkforceAvailability.exportData()">[Download] Export</button>
+                        <button onclick="WorkforceAvailability.resetView()">[Refresh] Reset View</button>
                     </div>
                 </div>
                 

@@ -110,7 +110,7 @@
             const container = document.getElementById(containerId);
             const result = document.createElement('div');
             result.className = `test-result ${passed ? 'pass' : 'fail'}`;
-            result.innerHTML = `${passed ? '✅' : '❌'} ${message}`;
+            result.innerHTML = `${passed ? '[OK]' : '[X]'} ${message}`;
             container.appendChild(result);
         }
         
@@ -273,15 +273,15 @@
                     const stored = PlanningV2.state.planData[product.id]?.['2025']?.['m1'];
                     if (stored === 500) {
                         addTestResult('mango-test-results', 
-                            `✅ ${product.country}: ${product.name} - Successfully handled`, true);
+                            `[OK] ${product.country}: ${product.name} - Successfully handled`, true);
                     } else {
                         addTestResult('mango-test-results', 
-                            `❌ ${product.country}: ${product.name} - Storage failed`, false);
+                            `[X] ${product.country}: ${product.name} - Storage failed`, false);
                         allPassed = false;
                     }
                 } catch (error) {
                     addTestResult('mango-test-results', 
-                        `❌ ${product.country}: ${product.name} - Error: ${error.message}`, false);
+                        `[X] ${product.country}: ${product.name} - Error: ${error.message}`, false);
                     allPassed = false;
                 }
             });

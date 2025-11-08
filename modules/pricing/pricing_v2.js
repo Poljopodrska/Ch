@@ -35,12 +35,12 @@ const PricingV2 = {
             {
                 id: 'fresh',
                 name: 'Sveži izdelki / Fresh Products',
-                icon: '🥩',
+                icon: '[Meat]',
                 subgroups: [
                     {
                         id: 'meat',
                         name: 'Sveže meso / Fresh Meat',
-                        icon: '🥩',
+                        icon: '[Meat]',
                         products: [
                             { id: 'p001', code: 'SVP-100', name: 'Svinjska plečka', nameEn: 'Pork Shoulder', unit: 'kg' },
                             { id: 'p002', code: 'GOV-200', name: 'Goveji file', nameEn: 'Beef Tenderloin', unit: 'kg' }
@@ -49,7 +49,7 @@ const PricingV2 = {
                     {
                         id: 'poultry',
                         name: 'Perutnina / Poultry',
-                        icon: '🐔',
+                        icon: '[Chicken]',
                         products: [
                             { id: 'p003', code: 'PIŠ-300', name: 'Piščančje prsi', nameEn: 'Chicken Breast', unit: 'kg' },
                             { id: 'p007', code: 'PIŠ-301', name: 'Piščančja bedra', nameEn: 'Chicken Thighs', unit: 'kg' }
@@ -69,12 +69,12 @@ const PricingV2 = {
             {
                 id: 'processed',
                 name: 'Predelani izdelki / Processed Products',
-                icon: '🌭',
+                icon: '[Food]',
                 subgroups: [
                     {
                         id: 'sausages',
                         name: 'Klobase / Sausages',
-                        icon: '🌭',
+                        icon: '[Food]',
                         products: [
                             { id: 'p005', code: 'KLB-500', name: 'Domača klobasa', nameEn: 'Homemade Sausage', unit: 'kg' },
                             { id: 'p009', code: 'KLB-501', name: 'Kranjska klobasa', nameEn: 'Carniolan Sausage', unit: 'kg' },
@@ -156,17 +156,17 @@ const PricingV2 = {
             container.innerHTML = `
             <div class="pricing-v2-container">
                 <div class="pricing-header">
-                    <h1>💰 Cenik izdelkov / Product Pricing</h1>
+                    <h1>[Money] Cenik izdelkov / Product Pricing</h1>
                     <div class="header-controls">
                         <button class="btn-expand-all" onclick="PricingV2.expandAll()">
                             📂 Expand All
                         </button>
                         <button class="btn-collapse-all" onclick="PricingV2.collapseAll()">
-                            📁 Collapse All
+                            [Folder] Collapse All
                         </button>
                         <button class="btn-edit ${this.state.editMode ? 'active' : ''}" 
                                 onclick="PricingV2.toggleEditMode()">
-                            ${this.state.editMode ? '💾 Save' : '✏️ Edit Prices'}
+                            ${this.state.editMode ? '[Save] Save' : '✏️ Edit Prices'}
                         </button>
                     </div>
                 </div>
@@ -177,7 +177,7 @@ const PricingV2 = {
                 
                 <div class="pricing-summary">
                     <div class="summary-card">
-                        <h3>📊 Povzetek / Summary</h3>
+                        <h3>[Chart] Povzetek / Summary</h3>
                         <div class="summary-stats">
                             <div class="stat">
                                 <span class="stat-label">Število izdelkov / Products:</span>

@@ -33,13 +33,13 @@ const ManagementSummary = {
         container.innerHTML = `
             <div class="management-summary-container">
                 <div class="management-header">
-                    <h1>📊 Management Summary</h1>
+                    <h1>[Chart] Management Summary</h1>
                     <p class="header-subtitle">Executive dashboards and analytics</p>
                 </div>
                 
                 <div class="dashboard-grid">
                     <div class="dashboard-card production-card" onclick="ManagementSummary.openProduction()">
-                        <div class="card-icon">🏭</div>
+                        <div class="card-icon">[Factory]</div>
                         <div class="card-content">
                             <h2>Production</h2>
                             <p>Production analytics, KPIs, and performance tracking</p>
@@ -56,7 +56,7 @@ const ManagementSummary = {
                     </div>
                     
                     <div class="dashboard-card sales-card" onclick="ManagementSummary.openSales()">
-                        <div class="card-icon">💰</div>
+                        <div class="card-icon">[Money]</div>
                         <div class="card-content">
                             <h2>Sales & Margin</h2>
                             <p>Sales performance, margins, and revenue analytics</p>
@@ -118,11 +118,11 @@ const ManagementSummary = {
                     <button class="back-button" onclick="ManagementSummary.backToLanding()">
                         ← Back to Summary
                     </button>
-                    <h1>💰 Sales & Margin Analytics</h1>
+                    <h1>[Money] Sales & Margin Analytics</h1>
                 </div>
                 
                 <div class="coming-soon">
-                    <div class="coming-soon-icon">🚧</div>
+                    <div class="coming-soon-icon">[Warning]</div>
                     <h2>Coming Soon</h2>
                     <p>Sales & Margin analytics module is under development</p>
                     <button class="btn-primary" onclick="ManagementSummary.backToLanding()">

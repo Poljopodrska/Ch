@@ -29,7 +29,7 @@ const AIForecastIntegration = {
         btnContainer.innerHTML = `
             <button id="ai-forecast-btn" class="ai-forecast-toggle-btn"
                     onclick="AIForecastIntegration.openForecastPanel()">
-                🤖 AI Forecast
+                AI Forecast
             </button>
         `;
 
@@ -58,7 +58,7 @@ const AIForecastIntegration = {
         panel.className = 'ai-forecast-panel';
         panel.innerHTML = `
             <div class="panel-header">
-                <h3>🤖 AI Cash Flow Forecast</h3>
+                <h3>AI Cash Flow Forecast</h3>
                 <button onclick="AIForecastIntegration.closeForecastPanel()" class="close-btn">×</button>
             </div>
             <div class="panel-content">
@@ -69,13 +69,13 @@ const AIForecastIntegration = {
 
                 <div class="forecast-actions">
                     <button onclick="AIForecastIntegration.loadQuickForecast()" class="action-btn">
-                        📊 Load Forecast
+                        Load Forecast
                     </button>
                     <button onclick="AIForecastIntegration.importToGrid()" class="action-btn">
-                        📥 Import to Grid
+                        Import to Grid
                     </button>
                     <button onclick="AIForecastIntegration.openFullDashboard()" class="action-btn primary">
-                        🔮 Full Dashboard
+                        Full Dashboard
                     </button>
                 </div>
 
@@ -87,7 +87,7 @@ const AIForecastIntegration = {
                 </div>
 
                 <div class="high-risk-preview">
-                    <h4>⚠️ High Risk Invoices</h4>
+                    <h4>[Alert] High Risk Invoices</h4>
                     <div id="high-risk-content">Loading...</div>
                 </div>
             </div>
@@ -152,7 +152,7 @@ const AIForecastIntegration = {
             const data = await response.json();
 
             if (data.high_risk_invoices.length === 0) {
-                riskEl.innerHTML = '<div class="success-msg">✓ No high-risk invoices</div>';
+                riskEl.innerHTML = '<div class="success-msg">[OK] No high-risk invoices</div>';
                 return;
             }
 

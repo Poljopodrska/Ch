@@ -20,10 +20,10 @@ const FinanceMatching = {
         container.innerHTML = `
             <div class="finance-matching-container">
                 <div class="matching-header">
-                    <h1>📊 Invoice & Goods Receipt Matching System</h1>
+                    <h1>[Chart] Invoice & Goods Receipt Matching System</h1>
                     <p class="subtitle">Welcome Marina! Match ININ goods receipts with CSB invoices</p>
                     <div style="background: #fff3cd; color: #856404; padding: 12px; border-radius: 5px; margin-top: 15px; border: 1px solid #ffeeba;">
-                        <strong>ℹ️ Important:</strong> ININ contains only <strong>retail shop</strong> deliveries. CSB contains <strong>ALL</strong> company invoices (factory + retail).<br>
+                        <strong>[Info] Important:</strong> ININ contains only <strong>retail shop</strong> deliveries. CSB contains <strong>ALL</strong> company invoices (factory + retail).<br>
                         Unmatched CSB invoices may be factory purchases that don't appear in ININ.
                     </div>
                 </div>
@@ -43,7 +43,7 @@ const FinanceMatching = {
                     
                     <div class="upload-card">
                         <div class="card-header csb-header">
-                            <h3>🏭 CSB System (All Company)</h3>
+                            <h3>[Factory] CSB System (All Company)</h3>
                             <span class="system-badge">All Invoices (Factory + Retail)</span>
                         </div>
                         <div class="card-body">
@@ -56,7 +56,7 @@ const FinanceMatching = {
                 
                 <div class="action-section">
                     <button id="match-button" class="btn-primary" disabled>
-                        🔄 Match Documents
+                        [Refresh] Match Documents
                     </button>
                     <button id="clear-button" class="btn-secondary">
                         🗑️ Clear All
@@ -65,9 +65,9 @@ const FinanceMatching = {
                 
                 <div id="results-section" class="results-section" style="display: none;">
                     <div class="results-header">
-                        <h2>📋 Matching Results</h2>
+                        <h2>[Clipboard] Matching Results</h2>
                         <div id="suspicious-warning" style="display: none; background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ef5350;">
-                            <strong>⚠️ Warning: Suspicious Matches Detected!</strong>
+                            <strong>[!] Warning: Suspicious Matches Detected!</strong>
                             <div id="suspicious-details"></div>
                         </div>
                         <div class="summary-stats">
@@ -88,11 +88,11 @@ const FinanceMatching = {
                     </div>
                     
                     <div class="tabs">
-                        <button class="tab-btn active" data-tab="matched">✅ Matched Documents</button>
-                        <button class="tab-btn" data-tab="unmatched-inin">⚠️ Unmatched ININ</button>
-                        <button class="tab-btn" data-tab="unmatched-invoices">🏭 Unmatched Invoices (Factory+Retail)</button>
-                        <button class="tab-btn" data-tab="all-inin">📦 All ININ Data</button>
-                        <button class="tab-btn" data-tab="all-csb">💳 All CSB Data</button>
+                        <button class="tab-btn active" data-tab="matched">[OK] Matched Documents</button>
+                        <button class="tab-btn" data-tab="unmatched-inin">[!] Unmatched ININ</button>
+                        <button class="tab-btn" data-tab="unmatched-invoices">[Factory] Unmatched Invoices (Factory+Retail)</button>
+                        <button class="tab-btn" data-tab="all-inin">[Box] All ININ Data</button>
+                        <button class="tab-btn" data-tab="all-csb">[Card] All CSB Data</button>
                     </div>
                     
                     <div id="matched-tab" class="tab-content active">
@@ -156,7 +156,7 @@ const FinanceMatching = {
                     </div>
                     
                     <div id="all-inin-tab" class="tab-content">
-                        <h3>📦 All ININ Goods Receipts</h3>
+                        <h3>[Box] All ININ Goods Receipts</h3>
                         <table class="results-table">
                             <thead>
                                 <tr>
@@ -179,7 +179,7 @@ const FinanceMatching = {
                     </div>
                     
                     <div id="all-csb-tab" class="tab-content">
-                        <h3>💳 All CSB Invoices (Factory + Retail)</h3>
+                        <h3>[Card] All CSB Invoices (Factory + Retail)</h3>
                         <table class="results-table">
                             <thead>
                                 <tr>
@@ -203,10 +203,10 @@ const FinanceMatching = {
                     
                     <div class="export-section">
                         <button id="export-csv" class="btn-export">
-                            📥 Export to CSV
+                            [Download] Export to CSV
                         </button>
                         <button id="export-json" class="btn-export">
-                            📄 Export to JSON
+                            [Doc] Export to JSON
                         </button>
                     </div>
                 </div>
@@ -705,13 +705,13 @@ const FinanceMatching = {
     
     updateININStatus(count) {
         const status = document.getElementById('inin-status');
-        status.innerHTML = `✅ Loaded ${count} ININ documents (${Object.keys(this.ininDocuments).length} goods receipts)`;
+        status.innerHTML = `[OK] Loaded ${count} ININ documents (${Object.keys(this.ininDocuments).length} goods receipts)`;
         this.checkReadyToMatch();
     },
     
     updateCSBStatus(count) {
         const status = document.getElementById('csb-status');
-        status.innerHTML = `✅ Loaded ${count} invoice files`;
+        status.innerHTML = `[OK] Loaded ${count} invoice files`;
         this.checkReadyToMatch();
     },
     
@@ -848,7 +848,7 @@ const FinanceMatching = {
                     invoiceCount: deliveryNoteInvoiceCount[dn].length,
                     invoices: deliveryNoteInvoiceCount[dn]
                 });
-                console.warn(`⚠️ SUSPICIOUS: Delivery note "${dn}" appears in ${deliveryNoteInvoiceCount[dn].length} invoices!`);
+                console.warn(`[!] SUSPICIOUS: Delivery note "${dn}" appears in ${deliveryNoteInvoiceCount[dn].length} invoices!`);
             }
         }
         
@@ -867,7 +867,7 @@ const FinanceMatching = {
             });
             
             const removedCount = originalCount - this.matchedDocuments.length;
-            console.log(`\n🔍 Removed ${removedCount} suspicious matches (delivery notes appearing in multiple invoices)`);
+            console.log(`\n[Search] Removed ${removedCount} suspicious matches (delivery notes appearing in multiple invoices)`);
             
             // Store suspicious matches for display
             this.suspiciousMatches = suspiciousMatches;
@@ -904,8 +904,8 @@ const FinanceMatching = {
         console.log(`- VALID matches: ${this.matchedDocuments.length} (after filtering suspicious)`);
         console.log(`- Suspicious matches removed: ${this.suspiciousMatches ? this.suspiciousMatches.length : 0}`);
         console.log(`- ${this.unmatchedININ.length} unmatched ININ receipts`);
-        if (vatErrors > 0) console.log(`- ⚠️ VAT ERRORS: ${vatErrors} documents missing VAT data`);
-        if (vatMismatches > 0) console.log(`- ⚠️ VAT MISMATCHES: ${vatMismatches} documents where VAT + base ≠ total`);
+        if (vatErrors > 0) console.log(`- [!] VAT ERRORS: ${vatErrors} documents missing VAT data`);
+        if (vatMismatches > 0) console.log(`- [!] VAT MISMATCHES: ${vatMismatches} documents where VAT + base ≠ total`);
         
         this.displayResults();
     },
@@ -948,7 +948,7 @@ const FinanceMatching = {
             // Add VAT warnings
             if (vatErrors > 0 || vatMismatches > 0) {
                 warningHTML += '<hr style="margin: 15px 0;">';
-                warningHTML += '<p style="color: red; font-weight: bold;">⚠️ VAT Data Issues:</p>';
+                warningHTML += '<p style="color: red; font-weight: bold;">[!] VAT Data Issues:</p>';
                 warningHTML += '<ul style="margin-top: 10px;">';
                 if (vatErrors > 0) {
                     warningHTML += `<li><strong>${vatErrors} documents</strong> are missing VAT data in the XML</li>`;
@@ -969,7 +969,7 @@ const FinanceMatching = {
             
             warningDiv.style.display = 'block';
             
-            let warningHTML = '<p style="color: red; font-weight: bold;">⚠️ VAT Data Issues:</p>';
+            let warningHTML = '<p style="color: red; font-weight: bold;">[!] VAT Data Issues:</p>';
             warningHTML += '<ul style="margin-top: 10px;">';
             if (vatErrors > 0) {
                 warningHTML += `<li><strong>${vatErrors} documents</strong> are missing VAT data in the XML</li>`;
@@ -1001,12 +1001,12 @@ const FinanceMatching = {
             // Validate that the numbers add up correctly
             let validationError = '';
             if (vatAmount === undefined || amountExclVAT === undefined) {
-                validationError = '⚠️ Missing VAT data';
+                validationError = '[!] Missing VAT data';
             } else if (amountIncVAT > 0) {
                 const calculated = amountExclVAT + vatAmount;
                 const diff = Math.abs(calculated - amountIncVAT);
                 if (diff > 0.02) { // Allow 2 cents tolerance for rounding
-                    validationError = `⚠️ VAT mismatch: ${amountExclVAT.toFixed(2)} + ${vatAmount.toFixed(2)} ≠ ${amountIncVAT.toFixed(2)}`;
+                    validationError = `[!] VAT mismatch: ${amountExclVAT.toFixed(2)} + ${vatAmount.toFixed(2)} ≠ ${amountIncVAT.toFixed(2)}`;
                 }
             }
             

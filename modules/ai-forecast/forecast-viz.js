@@ -21,7 +21,7 @@ class ForecastVisualization {
         container.className = 'forecast-viz-container';
         container.innerHTML = `
             <div class="forecast-header">
-                <h2>🔮 AI Cash Flow Forecast</h2>
+                <h2>AI Cash Flow Forecast</h2>
                 <div class="forecast-controls">
                     <select id="scenario-select" onchange="forecastViz.changeScenario(this.value)">
                         <option value="optimistic">Optimistic (P10)</option>
@@ -67,13 +67,13 @@ class ForecastVisualization {
 
             <!-- Time Series Forecast -->
             <div class="timeseries-container">
-                <h3>📈 Trend Analysis (Prophet Model)</h3>
+                <h3>Trend Analysis (Prophet Model)</h3>
                 <div id="timeseries-content">Loading...</div>
             </div>
 
             <!-- Invoice-level Predictions -->
             <div class="predictions-container">
-                <h3>📋 Invoice Predictions</h3>
+                <h3>Invoice Predictions</h3>
                 <div class="predictions-controls">
                     <button onclick="forecastViz.loadPredictions()" class="load-btn">
                         Load All Predictions
@@ -87,7 +87,7 @@ class ForecastVisualization {
 
             <!-- High Risk Alerts -->
             <div class="alerts-container">
-                <h3>⚠️ High Risk Invoices</h3>
+                <h3>[Alert] High Risk Invoices</h3>
                 <div id="alerts-list">Loading...</div>
             </div>
         `;
@@ -149,7 +149,7 @@ class ForecastVisualization {
             if (data.model_status === 'not_trained' || !data.model_metrics || Object.keys(data.model_metrics).length === 0) {
                 document.getElementById('timeseries-content').innerHTML =
                     `<div class="info-message">
-                        <p><strong>📊 No Cash Flow Forecaster model trained yet</strong></p>
+                        <p><strong>[Info] No Cash Flow Forecaster model trained yet</strong></p>
                         <p>Upload payment history data and train the Prophet model to see trend analysis.</p>
                     </div>`;
                 document.getElementById('trend-indicator').innerHTML = '<span style="color: #666;">-</span>';
@@ -161,7 +161,7 @@ class ForecastVisualization {
                     <div class="trend-item">
                         <strong>Direction:</strong>
                         <span class="trend-badge ${data.trend_analysis.trend_direction}">
-                            ${data.trend_analysis.trend_direction === 'increasing' ? '📈' : '📉'}
+                            ${data.trend_analysis.trend_direction === 'increasing' ? '[Up]' : '[Down]'}
                             ${data.trend_analysis.trend_direction}
                         </span>
                     </div>
@@ -185,7 +185,7 @@ class ForecastVisualization {
             document.getElementById('timeseries-content').innerHTML = trendHtml;
             document.getElementById('trend-indicator').innerHTML =
                 `<span class="trend-badge ${data.trend_analysis.trend_direction}">
-                    ${data.trend_analysis.trend_direction === 'increasing' ? '📈' : '📉'}
+                    ${data.trend_analysis.trend_direction === 'increasing' ? '[Up]' : '[Down]'}
                 </span>`;
 
         } catch (error) {

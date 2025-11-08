@@ -20,21 +20,21 @@ class AIForecastModule {
         container.innerHTML = `
             <div class="ai-forecast-nav">
                 <div class="nav-title">
-                    <h1>🤖 AI Forecasting Platform</h1>
+                    <h1>AI Forecasting Platform</h1>
                     <p>Machine Learning-Powered Cash Flow Predictions</p>
                 </div>
                 <div class="nav-tabs">
                     <button onclick="aiForecastModule.switchView('forecast')"
                             class="nav-tab active" id="tab-forecast">
-                        🔮 Forecast
+                        Forecast
                     </button>
                     <button onclick="aiForecastModule.switchView('data')"
                             class="nav-tab" id="tab-data">
-                        📊 Data Upload
+                        Data Upload
                     </button>
                     <button onclick="aiForecastModule.switchView('models')"
                             class="nav-tab" id="tab-models">
-                        🤖 Model Training
+                        Model Training
                     </button>
                 </div>
             </div>

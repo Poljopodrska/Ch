@@ -776,7 +776,7 @@ const BOMV2Advanced = {
             
             <div class="bom-container">
                 <div class="bom-header">
-                    <h2>📋 Bill of Materials (BOM) - Advanced Management</h2>
+                    <h2>[Clipboard] Bill of Materials (BOM) - Advanced Management</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V2.0.0 - Database-Ready Structure with Complete Resource Tracking
                     </div>
@@ -785,7 +785,7 @@ const BOMV2Advanced = {
                 <div class="bom-layout">
                     <!-- Product List -->
                     <div class="product-list">
-                        <h3>📦 Products</h3>
+                        <h3>[Box] Products</h3>
                         <div id="product-list-items">
                             ${this.renderProductList()}
                         </div>
@@ -850,7 +850,7 @@ const BOMV2Advanced = {
             <!-- Tabs -->
             <div class="form-tabs">
                 <button class="tab-button active" onclick="BOMV2Advanced.switchTab('ingredients')">
-                    🥩 Ingredients
+                    [Meat] Ingredients
                 </button>
                 <button class="tab-button" onclick="BOMV2Advanced.switchTab('energy')">
                     ⚡ Energy
@@ -859,13 +859,13 @@ const BOMV2Advanced = {
                     💧 Water
                 </button>
                 <button class="tab-button" onclick="BOMV2Advanced.switchTab('packaging')">
-                    📦 Packaging
+                    [Box] Packaging
                 </button>
                 <button class="tab-button" onclick="BOMV2Advanced.switchTab('workforce')">
                     👷 Workforce
                 </button>
                 <button class="tab-button" onclick="BOMV2Advanced.switchTab('summary')">
-                    💰 Cost Summary
+                    [Money] Cost Summary
                 </button>
             </div>
             
@@ -898,10 +898,10 @@ const BOMV2Advanced = {
             <div class="save-section">
                 <div>
                     <button class="save-button" onclick="BOMV2Advanced.saveBOM()" id="save-btn">
-                        💾 Save BOM
+                        [Save] Save BOM
                     </button>
                     <button class="export-button" onclick="BOMV2Advanced.exportBOM()">
-                        📁 Export to JSON
+                        [Folder] Export to JSON
                     </button>
                     <button class="export-button" onclick="BOMV2Advanced.exportToSQL()" style="background: #4caf50;">
                         🗄️ Generate SQL
@@ -922,7 +922,7 @@ const BOMV2Advanced = {
         return `
             <div class="form-section">
                 <div class="ingredient-group">
-                    <h5>🥩 MAIN INGREDIENTS (Primary Raw Materials)</h5>
+                    <h5>[Meat] MAIN INGREDIENTS (Primary Raw Materials)</h5>
                     <div id="main-ingredients">
                         ${this.renderIngredientItems(ingredients.main, 'main')}
                     </div>
@@ -1117,7 +1117,7 @@ const BOMV2Advanced = {
         
         return `
             <div class="form-section">
-                <h4>📦 Packaging Materials per Unit</h4>
+                <h4>[Box] Packaging Materials per Unit</h4>
                 <div style="display: grid; grid-template-columns: 1.5fr 2fr 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 5px; font-size: 11px; color: #666; font-weight: 600;">
                     <div>Type</div><div>Material</div><div>Qty</div><div>Unit</div><div>Cost</div><div>Weight(kg)</div><div>Recyclable</div><div></div>
                 </div>
@@ -1245,7 +1245,7 @@ const BOMV2Advanced = {
         
         return `
             <div class="cost-summary">
-                <h4>💰 Cost Summary per Unit</h4>
+                <h4>[Money] Cost Summary per Unit</h4>
                 
                 <div class="cost-item">
                     <span>Main Ingredients:</span>
@@ -1663,7 +1663,7 @@ const BOMV2Advanced = {
             indicator.classList.remove('show');
         }
         
-        alert('✅ BOM data saved successfully!');
+        alert('[OK] BOM data saved successfully!');
     },
     
     // Export BOM

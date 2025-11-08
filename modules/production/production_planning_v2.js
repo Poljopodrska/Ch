@@ -705,7 +705,7 @@ const ProductionPlanningV2 = {
             
             <div class="production-planning-container">
                 <div class="production-header">
-                    <h2>🏭 Načrtovanje proizvodnje / Production Planning</h2>
+                    <h2>[Factory] Načrtovanje proizvodnje / Production Planning</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V2.0.0 - Advanced Production Planning with Expandable Hierarchy
                         <br>Click months → weeks → days | Edit future production values | Track capacity & efficiency
@@ -733,19 +733,19 @@ const ProductionPlanningV2 = {
                 
                 <div class="production-controls">
                     <button class="save-button" onclick="ProductionPlanningV2.saveData()" id="save-btn" disabled>
-                        💾 Save Production Plan
+                        [Save] Save Production Plan
                     </button>
                     <button class="export-button" onclick="ProductionPlanningV2.exportData()">
-                        📁 Export Plan
+                        [Folder] Export Plan
                     </button>
                     <button class="capacity-button" onclick="ProductionPlanningV2.showCapacitySettings()">
-                        ⚙️ Capacity Settings
+                        [Settings] Capacity Settings
                     </button>
                     <button onclick="ProductionPlanningV2.optimizePlan()" style="padding: 10px 20px; background: #9c27b0; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                        🎯 Optimize Plan
+                        [Target] Optimize Plan
                     </button>
                     <button onclick="ProductionPlanningV2.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                        🔄 Reset
+                        [Refresh] Reset
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
                         Unsaved changes
@@ -757,15 +757,15 @@ const ProductionPlanningV2 = {
                 </div>
                 
                 <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
-                    <h4>📊 Production Planning Features:</h4>
+                    <h4>[Chart] Production Planning Features:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li>📅 <strong>Expandable Hierarchy:</strong> Click months to see weeks, click weeks to see days</li>
+                        <li>[Calendar] <strong>Expandable Hierarchy:</strong> Click months to see weeks, click weeks to see days</li>
                         <li>✏️ <strong>Inline Editing:</strong> Click any blue/purple cell to edit future production</li>
-                        <li>🏭 <strong>Capacity Planning:</strong> Track production capacity and efficiency per line</li>
+                        <li>[Factory] <strong>Capacity Planning:</strong> Track production capacity and efficiency per line</li>
                         <li>👷 <strong>Shift Management:</strong> Plan production across multiple shifts</li>
-                        <li>📈 <strong>Efficiency Tracking:</strong> Monitor OEE and production efficiency</li>
-                        <li>🎯 <strong>Optimization:</strong> Auto-optimize based on capacity and demand</li>
-                        <li>💾 <strong>Data Persistence:</strong> All changes are saved locally</li>
+                        <li>[Up] <strong>Efficiency Tracking:</strong> Monitor OEE and production efficiency</li>
+                        <li>[Target] <strong>Optimization:</strong> Auto-optimize based on capacity and demand</li>
+                        <li>[Save] <strong>Data Persistence:</strong> All changes are saved locally</li>
                         <li>🔗 <strong>BOM Integration:</strong> Links to Bill of Materials for resource planning</li>
                     </ul>
                 </div>
@@ -1326,7 +1326,7 @@ const ProductionPlanningV2 = {
         this.state.unsavedChanges = false;
         this.updateSaveButton();
         
-        alert('✅ Production planning data saved successfully!');
+        alert('[OK] Production planning data saved successfully!');
     },
     
     // Export data
@@ -1353,7 +1353,7 @@ const ProductionPlanningV2 = {
     
     // Show capacity settings dialog
     showCapacitySettings() {
-        alert('⚙️ Capacity Settings\n\nProduction Lines:\n' +
+        alert('[Settings] Capacity Settings\n\nProduction Lines:\n' +
               this.state.productionSettings.productionLines.map(line => 
                   `${line.name}: ${line.capacity} ${line.unit}`
               ).join('\n') +
@@ -1407,7 +1407,7 @@ const ProductionPlanningV2 = {
         this.updateSaveButton();
         this.renderProductionGrid();
         
-        alert('🎯 Production plan optimized!\n\nProduction has been leveled across working days to improve efficiency.');
+        alert('[Target] Production plan optimized!\n\nProduction has been leveled across working days to improve efficiency.');
     },
     
     // Reset data

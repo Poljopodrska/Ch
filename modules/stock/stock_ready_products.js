@@ -155,7 +155,7 @@ const StockReadyProducts = {
         container.innerHTML = `
             <div class="stock-ready-products">
                 <div class="module-header">
-                    <h2>📦 Stock of Ready Products</h2>
+                    <h2>[Box] Stock of Ready Products</h2>
                     <div class="header-controls">
                         <div class="view-tabs">
                             <button class="tab-btn ${this.currentView === 'current' ? 'active' : ''}" data-view="current">
@@ -173,7 +173,7 @@ const StockReadyProducts = {
                                 <span class="sync-indicator" id="sync-indicator">🟢 Auto-sync active</span>
                             </div>
                             <button class="btn btn-export" onclick="StockReadyProducts.exportData()">
-                                📥 Export
+                                [Download] Export
                             </button>
                         </div>
                     </div>
@@ -783,7 +783,7 @@ const StockReadyProducts = {
     flashSyncIndicator(message) {
         const indicator = document.getElementById('sync-indicator');
         if (indicator) {
-            indicator.textContent = `🔄 ${message}`;
+            indicator.textContent = `[Refresh] ${message}`;
             indicator.style.color = '#f39c12';
             setTimeout(() => {
                 indicator.textContent = '🟢 Auto-sync active';

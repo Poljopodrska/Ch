@@ -21,7 +21,7 @@ class DataUpload {
         container.className = 'data-upload-container';
         container.innerHTML = `
             <div class="data-upload-header">
-                <h2>📊 Data Upload</h2>
+                <h2>Data Upload</h2>
                 <p>Upload historical data to train forecasting models</p>
             </div>
 
@@ -29,7 +29,7 @@ class DataUpload {
                 <!-- Customers Upload -->
                 <div class="upload-section">
                     <div class="upload-section-header">
-                        <h3>👥 Customers</h3>
+                        <h3>Customers</h3>
                         <span class="upload-status" id="customers-status">Ready</span>
                     </div>
                     <p class="upload-description">
@@ -46,7 +46,7 @@ class DataUpload {
                 <!-- Invoices Upload -->
                 <div class="upload-section">
                     <div class="upload-section-header">
-                        <h3>📄 Invoices</h3>
+                        <h3>Invoices</h3>
                         <span class="upload-status" id="invoices-status">Ready</span>
                     </div>
                     <p class="upload-description">
@@ -64,7 +64,7 @@ class DataUpload {
                 <!-- Payments Upload -->
                 <div class="upload-section">
                     <div class="upload-section-header">
-                        <h3>💰 Payments</h3>
+                        <h3>Payments</h3>
                         <span class="upload-status" id="payments-status">Ready</span>
                     </div>
                     <p class="upload-description">
@@ -80,14 +80,14 @@ class DataUpload {
 
             <!-- Data Statistics -->
             <div class="data-stats">
-                <h3>📈 Current Database Statistics</h3>
+                <h3>Current Database Statistics</h3>
                 <div id="stats-content">Loading...</div>
                 <button onclick="dataUpload.loadStats()" class="refresh-btn">Refresh Stats</button>
             </div>
 
             <!-- Sample Data Templates -->
             <div class="templates-section">
-                <h3>📋 Sample Templates</h3>
+                <h3>Sample Templates</h3>
                 <button onclick="dataUpload.downloadTemplate('customers')" class="template-btn">
                     Download Customer Template
                 </button>

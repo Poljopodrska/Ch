@@ -331,7 +331,7 @@ const PricingV4 = {
                 id: 'fresh-meat',
                 nameSl: 'Sveže meso',
                 nameHr: 'Svježe meso',
-                icon: '🐔',
+                icon: '[Chicken]',
                 products: [
                     { id: 'p1', code: '2143', nameSl: 'Piščančja klobasa debrecinka 320 g - IK', nameHr: 'Pileća kobasica debrecinka 320 g - IK', unit: 'kg', lc: 1.76 },
                     { id: 'p2', code: '641', nameSl: 'Pileči file - gastro', nameHr: 'Pileći file - gastro', unit: 'kg', lc: 4.0536 },
@@ -344,7 +344,7 @@ const PricingV4 = {
                 id: 'meat-products',
                 nameSl: 'Mesni izdelki in pečeno meso',
                 nameHr: 'Mesni proizvodi i pečeno meso',
-                icon: '🌭',
+                icon: '[Food]',
                 products: [
                     { id: 'p6', code: '825', nameSl: 'Pečene pileće trakice zabatka', nameHr: 'Pečene pileće trakice zabatka', unit: 'kg', lc: 3.173 },
                     { id: 'p7', code: '1485', nameSl: 'Suha salama narezek 100 g', nameHr: 'Suha salama narezak 100 g', unit: 'kos', lc: 1.1413 }
@@ -354,7 +354,7 @@ const PricingV4 = {
                 id: 'delamaris',
                 nameSl: 'Delamaris',
                 nameHr: 'Delamaris',
-                icon: '🐟',
+                icon: '[Fish]',
                 products: [
                     { id: 'p8', code: '36851', nameSl: 'Makrela Provencale 125g', nameHr: 'Skuša Provencale 125g', unit: 'kos', lc: 0.7738 },
                     { id: 'p9', code: '36875', nameSl: 'Makrelin file v olivnem olju 125g', nameHr: 'Fileti skuše u maslinovom ulju 125g', unit: 'kos', lc: 1.3687 }
@@ -507,7 +507,7 @@ const PricingV4 = {
             <div class="pricing-v4-container">
                 <div class="pricing-header">
                     <div>
-                        <h1>💰 ${this.getText('title')}</h1>
+                        <h1>[Money] ${this.getText('title')}</h1>
                         <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
                             ${this.getText('subtitle')}
                         </p>
@@ -516,33 +516,33 @@ const PricingV4 = {
                         <button class="language-btn ${this.state.language === 'sl' ? 'active' : ''}"
                                 onclick="PricingV4.switchLanguage('sl')"
                                 title="Slovenščina">
-                            🇸🇮
+                            
                         </button>
                         <button class="language-btn ${this.state.language === 'hr' ? 'active' : ''}"
                                 onclick="PricingV4.switchLanguage('hr')"
                                 title="Hrvatski">
-                            🇭🇷
+                            
                         </button>
                         <button class="btn-upload" onclick="PricingV4.showUploadModal()">
-                            📤 ${this.getText('uploadData')}
+                            [Upload] ${this.getText('uploadData')}
                         </button>
                         <button class="btn-expand-all" onclick="PricingV4.expandAll()">
                             📂 ${this.getText('expandAll')}
                         </button>
                         <button class="btn-collapse-all" onclick="PricingV4.collapseAll()">
-                            📁 ${this.getText('collapseAll')}
+                            [Folder] ${this.getText('collapseAll')}
                         </button>
                         <button class="btn-info" onclick="PricingV4.showPolicyInfo()">
-                            ℹ️ ${this.getText('policyInfo')}
+                            [Info] ${this.getText('policyInfo')}
                         </button>
                         <button class="btn-edit-factors" onclick="PricingV4.showFactorsModal()">
-                            ⚙️ ${this.getText('editFactors')}
+                            [Settings] ${this.getText('editFactors')}
                         </button>
                     </div>
                 </div>
 
                 <div class="pricing-legend">
-                    <h3>📊 ${this.getText('priceLevels')}:</h3>
+                    <h3>[Chart] ${this.getText('priceLevels')}:</h3>
                     <div class="legend-items">
                         <div class="legend-item">
                             <span class="legend-color" style="background: #4CAF50;"></span>
@@ -585,12 +585,12 @@ const PricingV4 = {
                 <div id="upload-modal" class="upload-modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>📤 ${this.getText('uploadTitle')}</h2>
+                            <h2>[Upload] ${this.getText('uploadTitle')}</h2>
                             <button class="modal-close" onclick="PricingV4.closeUploadModal()">✕</button>
                         </div>
                         <div class="modal-body">
                             <div class="upload-info">
-                                <h3>📋 ${this.getText('excelFormatRequired')}:</h3>
+                                <h3>[Clipboard] ${this.getText('excelFormatRequired')}:</h3>
                                 <div class="format-section">
                                     <h4>${this.getText('sheet1')}: "Izdelki" (${this.getText('products')})</h4>
                                     <table class="format-table">
@@ -635,7 +635,7 @@ const PricingV4 = {
                             <div class="upload-area">
                                 <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;" onchange="PricingV4.handleFileSelect(event)">
                                 <button class="btn-select-file" onclick="document.getElementById('excel-file-input').click()">
-                                    📁 ${this.getText('selectFile')}
+                                    [Folder] ${this.getText('selectFile')}
                                 </button>
                                 <div id="file-name" class="file-name"></div>
                                 <div id="upload-status" class="upload-status"></div>
@@ -652,7 +652,7 @@ const PricingV4 = {
                 <div id="factors-modal" class="upload-modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>⚙️ ${this.getText('editFactors')}</h2>
+                            <h2>[Settings] ${this.getText('editFactors')}</h2>
                             <button class="modal-close" onclick="PricingV4.closeFactorsModal()">✕</button>
                         </div>
                         <div class="modal-body">
@@ -672,7 +672,7 @@ const PricingV4 = {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>🐔 ${this.state.language === 'sl' ? 'Sveže meso' : 'Svježe meso'}</td>
+                                        <td>[Chicken] ${this.state.language === 'sl' ? 'Sveže meso' : 'Svježe meso'}</td>
                                         <td>
                                             <input type="number"
                                                    id="factor-fresh-meat"
@@ -683,7 +683,7 @@ const PricingV4 = {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>🥩 ${this.state.language === 'sl' ? 'Mesni izdelki in pečeno meso' : 'Mesni proizvodi i pečeno meso'}</td>
+                                        <td>[Meat] ${this.state.language === 'sl' ? 'Mesni izdelki in pečeno meso' : 'Mesni proizvodi i pečeno meso'}</td>
                                         <td>
                                             <input type="number"
                                                    id="factor-meat-products"
@@ -694,7 +694,7 @@ const PricingV4 = {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td>🐟 Delamaris</td>
+                                        <td>[Fish] Delamaris</td>
                                         <td>
                                             <input type="number"
                                                    id="factor-delamaris"
@@ -889,7 +889,7 @@ const PricingV4 = {
 
         return `
             <div class="top-level-summary">
-                <h3>📊 ${summaryText}</h3>
+                <h3>[Chart] ${summaryText}</h3>
                 <div class="summary-grid">
                     <div class="summary-metric">
                         <div class="metric-label">${this.state.productGroups.length} ${industriesText}</div>
@@ -906,11 +906,11 @@ const PricingV4 = {
                         </div>
                     </div>
                     <div class="summary-metric">
-                        <div class="metric-label">✅ ${fullCoverageText}</div>
+                        <div class="metric-label">[OK] ${fullCoverageText}</div>
                         <div class="metric-value good">${summary.fullCoverageCount}</div>
                     </div>
                     <div class="summary-metric">
-                        <div class="metric-label">⚠️ ${needsApprovalText}</div>
+                        <div class="metric-label">[!] ${needsApprovalText}</div>
                         <div class="metric-value ${summary.belowCminCount > 0 ? 'warning' : 'good'}">
                             ${summary.belowCminCount}
                         </div>
@@ -958,11 +958,11 @@ const PricingV4 = {
                             </span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">✅:</span>
+                            <span class="stat-label">[OK]:</span>
                             <span class="stat-value good">${summary.fullCoverageCount}</span>
                         </div>
                         <div class="stat-item">
-                            <span class="stat-label">⚠️:</span>
+                            <span class="stat-label">[!]:</span>
                             <span class="stat-value ${summary.belowCminCount > 0 ? 'warning' : 'good'}">
                                 ${summary.belowCminCount}
                             </span>
@@ -1047,7 +1047,7 @@ const PricingV4 = {
                                 onclick="PricingV4.toggleProduct('${product.id}')"
                                 title="${this.getText('showCustomers')}">
                             <span class="expand-icon">${isExpanded ? '▼' : '▶'}</span>
-                            <span class="customer-count">👥 ${customerCount} ${customersText}</span>
+                            <span class="customer-count">[Users] ${customerCount} ${customersText}</span>
                         </button>
                     </td>
                 </tr>
@@ -1217,7 +1217,7 @@ const PricingV4 = {
             <tr class="detail-row">
                 <td colspan="8">
                     <div class="detailed-breakdown">
-                        <h4>📊 ${this.getText('detailedBreakdown')}: ${this.getName(product)} → ${custPricing.customerName}</h4>
+                        <h4>[Chart] ${this.getText('detailedBreakdown')}: ${this.getName(product)} → ${custPricing.customerName}</h4>
 
                         <div class="breakdown-grid">
                             <div class="breakdown-section">
@@ -1272,7 +1272,7 @@ const PricingV4 = {
                             </div>
 
                             <div class="breakdown-section">
-                                <h5>📉 ${this.getText('discounts')}</h5>
+                                <h5>[Down] ${this.getText('discounts')}</h5>
                                 <table class="breakdown-table">
                                     ${Object.entries(custPricing.discountBreakdown).map(([key, value]) => `
                                         <tr>
@@ -1294,7 +1294,7 @@ const PricingV4 = {
                             </div>
 
                             <div class="breakdown-section">
-                                <h5>✅ ${this.getText('coverageAnalysis')}</h5>
+                                <h5>[OK] ${this.getText('coverageAnalysis')}</h5>
                                 <table class="breakdown-table">
                                     <tr>
                                         <td>${this.getText('coverageVsC0')}:</td>
@@ -1361,7 +1361,7 @@ const PricingV4 = {
 
         return `
             <div class="summary-card">
-                <h3>📊 Sažetak / Summary</h3>
+                <h3>[Chart] Sažetak / Summary</h3>
                 <div class="summary-stats">
                     <div class="stat">
                         <span class="stat-label">Broj artikala / Products:</span>
@@ -1386,7 +1386,7 @@ const PricingV4 = {
                 </div>
 
                 <div class="policy-reminder">
-                    <strong>🎯 Cilj:</strong> Uvijek težiti ka većoj cijeni od Cmin zbog drugih slučajeva gdje nećemo moći postići Cmin
+                    <strong>[Target] Cilj:</strong> Uvijek težiti ka većoj cijeni od Cmin zbog drugih slučajeva gdje nećemo moći postići Cmin
                     <br><em>Goal: Always aim for higher price than Cmin to compensate for cases where Cmin cannot be achieved</em>
                 </div>
             </div>
@@ -1453,7 +1453,7 @@ Cmin - Cijena nakon uračunanih svih (potencialnih) odobrenja kupcu + minimalna 
 CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
      Sales price, inflated for all (potential) discounts to customer
 
-⚠️ VAŽNO: Transferna cijena Delamaris ZG ↔ Pivka d.d. je NEBITNA!
+[!] VAŽNO: Transferna cijena Delamaris ZG ↔ Pivka d.d. je NEBITNA!
           Važna je marža od početka do kraja, ne mjesto gdje se ostvarila.`);
     },
 
@@ -1513,12 +1513,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
             // Validate - only check for valid numbers, allow any positive value
             if (isNaN(freshMeat) || isNaN(meatProducts) || isNaN(delamaris)) {
-                statusDiv.innerHTML = '<div class="error">❌ Invalid factor values</div>';
+                statusDiv.innerHTML = '<div class="error">[X] Invalid factor values</div>';
                 return;
             }
 
             if (freshMeat <= 0 || meatProducts <= 0 || delamaris <= 0) {
-                statusDiv.innerHTML = '<div class="error">❌ Factors must be positive numbers</div>';
+                statusDiv.innerHTML = '<div class="error">[X] Factors must be positive numbers</div>';
                 return;
             }
 
@@ -1530,7 +1530,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             // Save to localStorage
             localStorage.setItem('industryProductionFactors', JSON.stringify(this.state.industryProductionFactors));
 
-            statusDiv.innerHTML = '<div class="success">✅ Factors updated successfully!</div>';
+            statusDiv.innerHTML = '<div class="success">[OK] Factors updated successfully!</div>';
 
             // Close modal and re-render after short delay
             setTimeout(() => {
@@ -1540,7 +1540,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
         } catch (error) {
             console.error('Error saving factors:', error);
-            statusDiv.innerHTML = '<div class="error">❌ Error saving factors</div>';
+            statusDiv.innerHTML = '<div class="error">[X] Error saving factors</div>';
         }
     },
 
@@ -1557,7 +1557,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         const fileExt = fileName.split('.').pop().toLowerCase();
 
         if (fileExt !== 'xlsx' && fileExt !== 'xls') {
-            statusDiv.innerHTML = '<div class="error">❌ Please select an Excel file (.xlsx or .xls)</div>';
+            statusDiv.innerHTML = '<div class="error">[X] Please select an Excel file (.xlsx or .xls)</div>';
             processBtn.disabled = true;
             return;
         }
@@ -1611,31 +1611,31 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     const result = this.validateAndLoadData(izdelkiData, []);
 
                     if (result.success) {
-                        statusDiv.innerHTML = `<div class="success">✅ Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
+                        statusDiv.innerHTML = `<div class="success">[OK] Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
                         setTimeout(() => {
                             this.closeUploadModal();
                             this.render();
                         }, 2000);
                     } else {
-                        statusDiv.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+                        statusDiv.innerHTML = `<div class="error">[X] ${result.error}</div>`;
                     }
 
                 } catch (error) {
                     console.error('Error parsing Excel:', error);
-                    statusDiv.innerHTML = `<div class="error">❌ Error parsing Excel: ${error.message}</div>`;
+                    statusDiv.innerHTML = `<div class="error">[X] Error parsing Excel: ${error.message}</div>`;
                 }
             };
 
             reader.onerror = (error) => {
                 console.error('Error reading file:', error);
-                statusDiv.innerHTML = '<div class="error">❌ Error reading file</div>';
+                statusDiv.innerHTML = '<div class="error">[X] Error reading file</div>';
             };
 
             reader.readAsArrayBuffer(file);
 
         } catch (error) {
             console.error('Error processing file:', error);
-            statusDiv.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            statusDiv.innerHTML = `<div class="error">[X] ${error.message}</div>`;
         }
     },
 
@@ -1706,9 +1706,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
             // Build product groups structure
             const industryMapping = {
-                'Sveže meso': { id: 'fresh-meat', icon: '🥩', nameEn: 'Fresh Meat' },
-                'Mesni izdelki in pečeno meso': { id: 'meat-products', icon: '🌭', nameEn: 'Meat Products and Roasted Meat' },
-                'Delamaris': { id: 'delamaris', icon: '🐟', nameEn: 'Delamaris' }
+                'Sveže meso': { id: 'fresh-meat', icon: '[Meat]', nameEn: 'Fresh Meat' },
+                'Mesni izdelki in pečeno meso': { id: 'meat-products', icon: '[Food]', nameEn: 'Meat Products and Roasted Meat' },
+                'Delamaris': { id: 'delamaris', icon: '[Fish]', nameEn: 'Delamaris' }
             };
 
             this.state.productGroups = [];

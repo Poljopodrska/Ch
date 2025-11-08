@@ -317,16 +317,16 @@ const ProductionFeasibility = {
         document.getElementById('feasibility-container').innerHTML = `
             <div class="feasibility-module">
                 <div class="module-header">
-                    <h2>🎯 Production Feasibility Analysis</h2>
+                    <h2>[Target] Production Feasibility Analysis</h2>
                     <div class="header-info">
                         Real-time analysis of production capability based on materials, workforce, and resources
                     </div>
                     <div class="header-controls">
                         <button onclick="ProductionFeasibility.refresh()" class="btn-refresh">
-                            🔄 Refresh Analysis
+                            [Refresh] Refresh Analysis
                         </button>
                         <button onclick="ProductionFeasibility.exportReport()" class="btn-export">
-                            📥 Export Report
+                            [Download] Export Report
                         </button>
                     </div>
                 </div>
@@ -411,8 +411,8 @@ const ProductionFeasibility = {
                         </div>
                         <div class="product-status">
                             ${hasIssues ? 
-                                '<span class="status-indicator status-warning">⚠️ Issues Found</span>' : 
-                                '<span class="status-indicator status-ok">✅ All Clear</span>'
+                                '<span class="status-indicator status-warning">[!] Issues Found</span>' : 
+                                '<span class="status-indicator status-ok">[OK] All Clear</span>'
                             }
                         </div>
                     </div>
@@ -445,8 +445,8 @@ const ProductionFeasibility = {
                         <div class="period-quantity">${period.plannedQuantity} units</div>
                         <div class="period-status">
                             ${feasible ? 
-                                '✅' : 
-                                critical ? '❌' : '⚠️'
+                                '[OK]' : 
+                                critical ? '[X]' : '[!]'
                             }
                         </div>
                         ${!feasible ? `
@@ -491,7 +491,7 @@ const ProductionFeasibility = {
                 <div class="alerts-list">
                     ${alerts.map(alert => `
                         <div class="alert-item alert-critical">
-                            <div class="alert-icon">❌</div>
+                            <div class="alert-icon">[X]</div>
                             <div class="alert-content">
                                 <div class="alert-title">
                                     ${alert.product.name} - Month ${alert.month}

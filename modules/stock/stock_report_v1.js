@@ -366,7 +366,7 @@ const StockReportV1 = {
             
             <div class="stock-report-container">
                 <div class="stock-header">
-                    <h2>📦 Poročilo o zalogah / Stock Report</h2>
+                    <h2>[Box] Poročilo o zalogah / Stock Report</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         Stage 2: Stock Management System
                         <br>Trenutno stanje: ${new Date().toLocaleDateString('sl-SI')} ${new Date().toLocaleTimeString('sl-SI')}
