@@ -13,16 +13,16 @@ const CustomerCRM = {
         integrationMode: false // When true, shows compact view for integration
     },
     
-    init(options = {}) {
+    async init(options = {}) {
         console.log(`CRM Module V${this.VERSION} initializing...`);
         this.state.integrationMode = options.integrationMode || false;
-        this.loadCustomers();
+        await this.loadCustomers();
         this.loadCustomerPricing();
-        
+
         if (!this.state.integrationMode) {
             this.render();
         }
-        
+
         // Make CRM data available globally for other modules
         window.CRMData = {
             getCustomers: () => this.state.customers,
@@ -31,13 +31,63 @@ const CustomerCRM = {
         };
     },
     
-    loadCustomers() {
-        // Load saved customers or use defaults
-        const saved = localStorage.getItem('ch_crm_customers');
-        if (saved) {
-            this.state.customers = JSON.parse(saved);
-        } else {
-            // Default customers
+    async loadCustomers() {
+        console.log('[CRM] Loading customers from database API...');
+        try {
+            // Fetch customers from database API
+            const response = await fetch('/api/v1/customers/');
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const dbCustomers = await response.json();
+            console.log(`[CRM] Loaded ${dbCustomers.length} customers from database`);
+
+            // Map database fields to CRM structure
+            this.state.customers = dbCustomers.map(dbCustomer => {
+                // Parse notes for additional fields (website, discount, orderCount)
+                let notesObj = {};
+                try {
+                    if (dbCustomer.notes && dbCustomer.notes.startsWith('{')) {
+                        notesObj = JSON.parse(dbCustomer.notes);
+                    }
+                } catch (e) {
+                    console.warn('[CRM] Could not parse notes as JSON for customer:', dbCustomer.id);
+                }
+
+                return {
+                    id: dbCustomer.id,
+                    code: dbCustomer.customer_code || `CUS${dbCustomer.id}`,
+                    name: dbCustomer.name,
+                    type: dbCustomer.customer_type || 'General',
+                    country: dbCustomer.country || '',
+                    city: dbCustomer.city || '',
+                    address: dbCustomer.address || '',
+                    phone: dbCustomer.phone || '',
+                    email: dbCustomer.email || '',
+                    website: notesObj.website || '',
+                    taxId: dbCustomer.tax_id || '',
+                    responsiblePerson: dbCustomer.account_manager || '',
+                    creditLimit: dbCustomer.credit_limit || 0,
+                    paymentTerms: dbCustomer.payment_terms_days || 30,
+                    discount: notesObj.discount || 0,
+                    rating: dbCustomer.segment || 'C',
+                    status: dbCustomer.is_active ? 'active' : 'inactive',
+                    notes: notesObj.notes || dbCustomer.notes || '',
+                    totalRevenue: dbCustomer.lifetime_value || 0,
+                    lastOrder: dbCustomer.last_order_date || '',
+                    orderCount: notesObj.orderCount || 0
+                };
+            });
+
+            console.log('[CRM] Successfully mapped customers to CRM structure');
+
+        } catch (error) {
+            console.error('[CRM] Failed to load customers from API:', error);
+            console.log('[CRM] Falling back to sample data');
+
+            // Fallback to default customers if API fails
             this.state.customers = [
                 {
                     id: 'c001',
@@ -235,6 +285,119 @@ const CustomerCRM = {
         } else {
             // Generate customer-specific pricing based on discounts
             this.generateCustomerPricing();
+        }
+    },
+
+    async saveCustomer(customer) {
+        console.log('[CRM] Saving customer to database API:', customer.name);
+        try {
+            // Prepare notes object with additional fields
+            const notesObj = {
+                website: customer.website,
+                discount: customer.discount,
+                orderCount: customer.orderCount,
+                notes: customer.notes
+            };
+
+            // Map CRM fields to database schema
+            const dbCustomer = {
+                name: customer.name,
+                customer_code: customer.code || `CUS${Date.now()}`,
+                customer_type: customer.type,
+                country: customer.country,
+                city: customer.city,
+                address: customer.address,
+                phone: customer.phone,
+                email: customer.email,
+                tax_id: customer.taxId,
+                account_manager: customer.responsiblePerson,
+                credit_limit: customer.creditLimit,
+                payment_terms_days: customer.paymentTerms,
+                segment: customer.rating,
+                is_active: customer.status === 'active',
+                notes: JSON.stringify(notesObj),
+                lifetime_value: customer.totalRevenue,
+                last_order_date: customer.lastOrder || null
+            };
+
+            let response;
+            let method;
+            let url;
+
+            // Check if this is a new customer (no id or id starts with 'c')
+            const isNewCustomer = !customer.id || (typeof customer.id === 'string' && customer.id.startsWith('c'));
+
+            if (isNewCustomer) {
+                // POST for new customers
+                method = 'POST';
+                url = '/api/v1/customers/';
+                console.log('[CRM] Creating new customer');
+            } else {
+                // PUT for existing customers
+                method = 'PUT';
+                url = `/api/v1/customers/${customer.id}`;
+                dbCustomer.id = customer.id;
+                console.log('[CRM] Updating existing customer:', customer.id);
+            }
+
+            response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dbCustomer)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            const savedCustomer = await response.json();
+            console.log('[CRM] Customer saved successfully:', savedCustomer.id);
+
+            // Update customer in state with the returned ID
+            if (isNewCustomer) {
+                customer.id = savedCustomer.id;
+                customer.code = savedCustomer.customer_code;
+                this.state.customers.push(customer);
+            } else {
+                const index = this.state.customers.findIndex(c => c.id === customer.id);
+                if (index !== -1) {
+                    this.state.customers[index] = customer;
+                }
+            }
+
+            return savedCustomer;
+
+        } catch (error) {
+            console.error('[CRM] Failed to save customer:', error);
+            alert(`Failed to save customer: ${error.message}`);
+            throw error;
+        }
+    },
+
+    async deleteCustomer(customerId) {
+        console.log('[CRM] Deleting customer:', customerId);
+        try {
+            const response = await fetch(`/api/v1/customers/${customerId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+            }
+
+            console.log('[CRM] Customer deleted successfully:', customerId);
+
+            // Remove customer from state
+            this.state.customers = this.state.customers.filter(c => c.id !== customerId);
+
+            return true;
+
+        } catch (error) {
+            console.error('[CRM] Failed to delete customer:', error);
+            alert(`Failed to delete customer: ${error.message}`);
+            throw error;
         }
     },
     
@@ -681,11 +844,7 @@ const CustomerCRM = {
         a.download = 'crm_customers.json';
         a.click();
     },
-    
-    saveCustomers() {
-        localStorage.setItem('ch_crm_customers', JSON.stringify(this.state.customers));
-    },
-    
+
     saveCustomerPricing() {
         localStorage.setItem('ch_crm_customer_pricing', JSON.stringify(this.state.customerPricing));
     },
