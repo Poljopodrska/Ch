@@ -23,24 +23,9 @@
     <!-- SheetJS XLSX Library for Excel file parsing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
-    <!-- Modern Navigation CSS - Orange Theme -->
+    <!-- Modern Navigation CSS - Uses Constitutional Design System -->
     <style>
-        :root {
-            /* Use design system colors */
-            --primary-color: var(--ch-primary, #E8640B);
-            --primary-dark: var(--ch-primary-dark, #C45309);
-            --primary-light: var(--ch-primary-light, #FF8835);
-            --secondary-color: var(--ch-gray-800, #424242);
-            --accent-color: var(--ch-primary, #E8640B);
-            --success-color: var(--ch-success, #388e3c);
-            --warning-color: var(--ch-warning, #f57c00);
-            --error-color: var(--ch-error, #d32f2f);
-            --bg-color: var(--ch-bg-base, #fafafa);
-            --card-bg: var(--ch-bg-card, #ffffff);
-            --text-primary: var(--ch-text-primary, #212121);
-            --text-secondary: var(--ch-text-secondary, #757575);
-            --border-color: var(--ch-border-light, #e0e0e0);
-        }
+        /* Navigation uses design system variables directly */
         
         * {
             margin: 0;
@@ -49,9 +34,9 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
+            font-family: var(--font-primary);
+            background-color: var(--ch-bg-base);
+            color: var(--ch-text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -73,10 +58,10 @@
         
         /* Header */
         header {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
             color: white;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
         }
         
         header h1 {
@@ -140,14 +125,14 @@
 
         .nav-link.active {
             background: white;
-            color: var(--primary-color);
+            color: var(--ch-primary);
             font-weight: 600;
-            box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+            box-shadow: var(--shadow-sm);
         }
 
         .nav-link.main-tab.active {
             background: rgba(255,255,255,0.95);
-            color: var(--primary-color);
+            color: var(--ch-primary);
         }
 
         .sub-tabs .nav-link {
@@ -166,7 +151,7 @@
         
         /* Footer */
         footer {
-            background: var(--secondary-color);
+            background: var(--ch-gray-800);
             color: white;
             padding: 15px 20px;
             text-align: center;
@@ -191,23 +176,23 @@
         }
         
         .loading h2 {
-            color: var(--primary-color);
+            color: var(--ch-primary);
             margin-bottom: 10px;
         }
-        
+
         /* Cards */
         .card {
-            background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--ch-bg-card);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
             margin-bottom: 20px;
         }
-        
+
         .card-header {
             padding: 15px;
-            background: var(--primary-light);
+            background: var(--ch-primary-light);
             color: white;
-            border-radius: 8px 8px 0 0;
+            border-radius: var(--radius-md) var(--radius-md) 0 0;
             font-weight: 600;
         }
         
