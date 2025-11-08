@@ -168,6 +168,15 @@ const ChApp = {
                 `;
                 this.currentSubTab = 'finance-overview';
                 break;
+
+            case 'nabava':
+                subTabsHTML = `
+                    <button class="nav-link active" data-view="suppliers">
+                        <span class="nav-text">Dobavitelji</span>
+                    </button>
+                `;
+                this.currentSubTab = 'suppliers';
+                break;
         }
         
         subTabsContainer.innerHTML = subTabsHTML;
@@ -253,6 +262,8 @@ const ChApp = {
                 return this.getFinanceCFView();
             case 'finance-payments':
                 return this.getFinancePaymentsView();
+            case 'suppliers':
+                return this.getSuppliersView();
             default:
                 // Default to production planning if unknown view
                 return this.getProductionPlanningView();
@@ -1158,6 +1169,36 @@ const ChApp = {
             };
             script.onerror = (e) => {
                 console.error('Failed to load payment-manager.js:', e);
+            };
+            document.head.appendChild(script);
+        }, 100);
+
+        return html;
+    },
+
+    // Suppliers view
+    async getSuppliersView() {
+        console.log('Loading Suppliers module...');
+
+        const html = `
+            <div id="suppliers-container">
+                <!-- Suppliers module will be loaded here -->
+            </div>
+        `;
+
+        setTimeout(async () => {
+            const script = document.createElement('script');
+            script.src = 'modules/procurement/suppliers.js?v=' + Date.now();
+            script.onload = () => {
+                console.log('Suppliers module loaded');
+                if (typeof SuppliersModule !== 'undefined') {
+                    SuppliersModule.init();
+                } else {
+                    console.error('SuppliersModule not found after loading script');
+                }
+            };
+            script.onerror = (e) => {
+                console.error('Failed to load suppliers.js:', e);
             };
             document.head.appendChild(script);
         }, 100);
