@@ -70,9 +70,9 @@ const ChApp = {
             if (!this.checkFinanceAuth()) {
                 console.log('Not authenticated, showing password prompt...');
                 // Show password prompt
-                const password = prompt('Please enter the password to access Finance module:');
+                const password = prompt('Prosim, vnesite geslo za dostop do finančnega modula:');
                 if (password !== 'Marina') {
-                    alert('Incorrect password. Access denied.');
+                    alert('Napačno geslo. Dostop zavrnjen.');
                     // Don't change tab
                     return;
                 }
@@ -113,51 +113,51 @@ const ChApp = {
                     </button>
                     <button class="nav-link" data-view="pricing">
                         <span class="nav-icon">💰</span>
-                        <span class="nav-text">Pricing</span>
+                        <span class="nav-text">Cene</span>
                     </button>
                     <button class="nav-link" data-view="planning">
                         <span class="nav-icon">📈</span>
-                        <span class="nav-text">Sales Planning</span>
+                        <span class="nav-text">Načrtovanje prodaje</span>
                     </button>
                 `;
                 this.currentSubTab = 'crm';
                 break;
-                
+
             case 'production':
                 subTabsHTML = `
                     <button class="nav-link active" data-view="production-planning">
                         <span class="nav-icon">🏭</span>
-                        <span class="nav-text">Production Planning</span>
+                        <span class="nav-text">Načrtovanje proizvodnje</span>
                     </button>
                     <button class="nav-link" data-view="stock-report">
                         <span class="nav-icon">📦</span>
-                        <span class="nav-text">Stock Report</span>
+                        <span class="nav-text">Poročilo o zalogi</span>
                     </button>
                     <button class="nav-link" data-view="bom">
                         <span class="nav-icon">📋</span>
-                        <span class="nav-text">BOM</span>
+                        <span class="nav-text">Kosovnica</span>
                     </button>
                     <button class="nav-link" data-view="workforce">
                         <span class="nav-icon">👥</span>
-                        <span class="nav-text">Workforce</span>
+                        <span class="nav-text">Delovna sila</span>
                     </button>
                     <button class="nav-link" data-view="feasibility">
                         <span class="nav-icon">🎯</span>
-                        <span class="nav-text">Feasibility</span>
+                        <span class="nav-text">Izvedljivost</span>
                     </button>
                 `;
                 this.currentSubTab = 'production-planning';
                 break;
-                
+
             case 'management':
                 subTabsHTML = `
                     <button class="nav-link active" data-view="management-production">
                         <span class="nav-icon">🏭</span>
-                        <span class="nav-text">Production Analytics</span>
+                        <span class="nav-text">Analitika proizvodnje</span>
                     </button>
                     <button class="nav-link" data-view="management-sales">
                         <span class="nav-icon">💰</span>
-                        <span class="nav-text">Sales & Margin</span>
+                        <span class="nav-text">Prodaja in marža</span>
                     </button>
                 `;
                 this.currentSubTab = 'management-production';
@@ -168,15 +168,15 @@ const ChApp = {
                 subTabsHTML = `
                     <button class="nav-link active" data-view="finance-overview">
                         <span class="nav-icon">💰</span>
-                        <span class="nav-text">Overview</span>
+                        <span class="nav-text">Pregled</span>
                     </button>
                     <button class="nav-link" data-view="finance-cf">
                         <span class="nav-icon">💸</span>
-                        <span class="nav-text">CF</span>
+                        <span class="nav-text">Denarni tok</span>
                     </button>
                     <button class="nav-link" data-view="finance-payments">
                         <span class="nav-icon">📊</span>
-                        <span class="nav-text">Payments</span>
+                        <span class="nav-text">Plačila</span>
                     </button>
                 `;
                 this.currentSubTab = 'finance-overview';
