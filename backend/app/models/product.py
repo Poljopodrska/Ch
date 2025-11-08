@@ -31,6 +31,7 @@ class Product(Base):
     industry = relationship("Industry", back_populates="products")
     base_prices = relationship("ProductBasePrice", back_populates="product", cascade="all, delete-orphan")
     customer_prices = relationship("CustomerProductPrice", back_populates="product", cascade="all, delete-orphan")
+    sales_history = relationship("InvoiceLineItem", back_populates="product")
 
     def __repr__(self):
         return f"<Product {self.code}: {self.name_sl}>"
@@ -136,9 +137,8 @@ class CustomerProductPrice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False, index=True)
-    customer_id = Column(String(50), nullable=False, index=True)  # e.g., c001
-    customer_name = Column(String(255), nullable=False)
-    customer_type = Column(String(100))  # Trgovska veriga, Supermarket, etc.
+    customer_id = Column(Integer, ForeignKey("customers.id"), nullable=False, index=True)  # FK to customers table
+    # Note: customer_name and customer_type moved to Customer model - access via relationship
 
     # Strategic pricing
     strategic_cmin = Column(Float, nullable=False)  # Strategic minimum (can be > calculated Cmin)
@@ -171,6 +171,7 @@ class CustomerProductPrice(Base):
 
     # Relationships
     product = relationship("Product", back_populates="customer_prices")
+    customer = relationship("Customer", back_populates="product_prices")
 
     def __repr__(self):
         return f"<CustomerProductPrice {self.product_id}-{self.customer_id}: CP={self.cp}>"
