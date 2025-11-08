@@ -211,14 +211,15 @@ const SuppliersModule = {
                             <th>Kontakt oseba</th>
                             <th>Email</th>
                             <th>Telefon</th>
-                            <th>Dopustna zamuda plačil (dni)</th>
+                            <th>Plačilni pogoji (dni)</th>
+                            <th>Dopustna dodatna zamuda (dni)</th>
                             <th>Naslov</th>
                             <th>Dejanja</th>
                         </tr>
                     </thead>
                     <tbody id="suppliers-tbody">
                         <tr>
-                            <td colspan="8" style="text-align: center; padding: 40px;">
+                            <td colspan="9" style="text-align: center; padding: 40px;">
                                 Nalaganje dobaviteljev...
                             </td>
                         </tr>
@@ -266,11 +267,20 @@ const SuppliersModule = {
                             </div>
 
                             <div class="form-group">
-                                <label for="supplier-payment-terms">Dopustna zamuda plačil (dni) *</label>
+                                <label for="supplier-payment-terms">Plačilni pogoji (dni) *</label>
                                 <input type="number" id="supplier-payment-terms" min="0" required
                                        placeholder="npr. 30, 60, 90">
                                 <small style="color: var(--ch-text-secondary); margin-top: 5px;">
-                                    Koliko dni lahko zamudimo s plačilom brez posledic
+                                    Kdaj mora biti plačilo opravljeno (npr. 30 dni po prejemu računa)
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier-additional-delay">Dopustna dodatna zamuda (dni) *</label>
+                                <input type="number" id="supplier-additional-delay" min="0" required
+                                       placeholder="npr. 10, 15, 30">
+                                <small style="color: var(--ch-text-secondary); margin-top: 5px;">
+                                    Koliko dni lahko dodatno zamudimo s plačilom brez posledic
                                 </small>
                             </div>
 
@@ -332,6 +342,7 @@ const SuppliersModule = {
                 email: 'janez@dobavitelj-a.si',
                 phone: '01 234 5678',
                 payment_terms_days: 30,
+                additional_delay_days: 15,
                 address: 'Poslovna cesta 123, 1000 Ljubljana',
                 notes: 'Glavni dobavitelj surovin'
             },
@@ -343,6 +354,7 @@ const SuppliersModule = {
                 email: 'marija@trgovina-b.si',
                 phone: '02 345 6789',
                 payment_terms_days: 60,
+                additional_delay_days: 10,
                 address: 'Industrijska 45, 2000 Maribor',
                 notes: 'Dobavitelj embalaže'
             },
@@ -354,6 +366,7 @@ const SuppliersModule = {
                 email: 'peter@podjetje-c.si',
                 phone: '03 456 7890',
                 payment_terms_days: 90,
+                additional_delay_days: 30,
                 address: 'Obrtniška 67, 3000 Celje',
                 notes: 'Dobavitelj komponent'
             }
@@ -367,7 +380,7 @@ const SuppliersModule = {
         if (suppliers.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
                         Ni najdenih dobaviteljev
                     </td>
                 </tr>
@@ -383,6 +396,7 @@ const SuppliersModule = {
                 <td>${supplier.email || '-'}</td>
                 <td>${supplier.phone || '-'}</td>
                 <td class="payment-delay">${supplier.payment_terms_days} dni</td>
+                <td class="payment-delay">${supplier.additional_delay_days || 0} dni</td>
                 <td>${supplier.address || '-'}</td>
                 <td>
                     <button class="btn-edit" onclick="SuppliersModule.editSupplier(${supplier.id})">
@@ -424,6 +438,7 @@ const SuppliersModule = {
         document.getElementById('supplier-email').value = supplier.email || '';
         document.getElementById('supplier-phone').value = supplier.phone || '';
         document.getElementById('supplier-payment-terms').value = supplier.payment_terms_days;
+        document.getElementById('supplier-additional-delay').value = supplier.additional_delay_days || 0;
         document.getElementById('supplier-address').value = supplier.address || '';
         document.getElementById('supplier-notes').value = supplier.notes || '';
         document.getElementById('supplier-form').dataset.supplierId = id;
@@ -447,6 +462,7 @@ const SuppliersModule = {
             email: document.getElementById('supplier-email').value,
             phone: document.getElementById('supplier-phone').value,
             payment_terms_days: parseInt(document.getElementById('supplier-payment-terms').value),
+            additional_delay_days: parseInt(document.getElementById('supplier-additional-delay').value),
             address: document.getElementById('supplier-address').value,
             notes: document.getElementById('supplier-notes').value
         };
