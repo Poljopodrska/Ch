@@ -14,22 +14,22 @@
     flex-direction: column;
     gap: 12px;
     padding: 8px;
-    background: #f8f9fa;
-    border-radius: 6px;
+    background: var(--ch-gray-100);
+    border-radius: var(--radius-md);
 }
 
 .chart-section {
     position: relative;
-    background: white;
+    background: var(--ch-white);
     padding: 8px;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
 }
 
 .chart-label {
     font-size: 11px;
     font-weight: 600;
-    color: #7f8c8d;
+    color: var(--ch-text-secondary);
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -40,9 +40,9 @@
     height: 32px;
     display: flex;
     position: relative;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     overflow: hidden;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ch-border-medium);
 }
 
 .cost-segment {
@@ -80,7 +80,7 @@
 .chart-total,
 .chart-price {
     font-size: 11px;
-    color: #2c3e50;
+    color: var(--ch-text-primary);
     margin-top: 4px;
     font-weight: 600;
 }
@@ -88,11 +88,11 @@
 /* Coverage Chart */
 .coverage-chart .coverage-bar {
     height: 32px;
-    background: #ecf0f1;
-    border-radius: 4px;
+    background: var(--ch-gray-200);
+    border-radius: var(--radius-sm);
     position: relative;
     overflow: hidden;
-    border: 1px solid #ddd;
+    border: 1px solid var(--ch-border-medium);
 }
 
 .coverage-fill {
@@ -112,7 +112,7 @@
     top: -4px;
     bottom: -4px;
     width: 3px;
-    background: #e74c3c;
+    background: var(--ch-error);
     box-shadow: 0 0 6px rgba(231, 76, 60, 0.5);
 }
 
@@ -125,7 +125,7 @@
     height: 0;
     border-left: 5px solid transparent;
     border-right: 5px solid transparent;
-    border-top: 8px solid #e74c3c;
+    border-top: 8px solid var(--ch-error);
 }
 
 .coverage-percent {
@@ -134,7 +134,7 @@
     left: -15px;
     font-size: 10px;
     font-weight: 600;
-    color: #e74c3c;
+    color: var(--ch-error);
     white-space: nowrap;
 }
 
@@ -148,26 +148,26 @@
 }
 
 input[type="number"][step="0.0001"] {
-    font-family: 'Consolas', 'Monaco', monospace;
+    font-family: var(--font-mono);
 }
 
 /* Preview in Modal */
 .form-preview {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #ecf0f1;
+    border-top: 1px solid var(--ch-border-light);
 }
 
 .form-preview h5 {
     margin: 0 0 12px 0;
-    color: #2c3e50;
+    color: var(--ch-text-primary);
     font-size: 14px;
 }
 
 .preview-container {
-    background: #f8f9fa;
+    background: var(--ch-gray-100);
     padding: 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-md);
 }
 
 /* Enhanced Margin Display */
@@ -252,9 +252,9 @@ input[type="number"][step="0.0001"] {
 .unit-type {
     display: inline-block;
     padding: 2px 6px;
-    background: #ecf0f1;
-    border-radius: 3px;
+    background: var(--ch-gray-200);
+    border-radius: var(--radius-sm);
     font-size: 11px;
-    color: #7f8c8d;
+    color: var(--ch-text-secondary);
     margin-left: 6px;
 }

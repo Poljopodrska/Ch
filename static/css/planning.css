@@ -15,10 +15,10 @@
     align-items: center;
     margin-bottom: 1rem;
     flex-wrap: wrap;
-    background: white;
+    background: var(--ch-white);
     padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
 
 /* Time Controls */
@@ -29,23 +29,23 @@
 
 .time-btn {
     padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    background: white;
-    border-radius: 4px;
+    border: 1px solid var(--ch-border-medium);
+    background: var(--ch-white);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: all 0.3s;
     font-weight: 500;
 }
 
 .time-btn:hover {
-    border-color: #3498db;
-    color: #3498db;
+    border-color: var(--ch-primary);
+    color: var(--ch-primary);
 }
 
 .time-btn.active {
-    background: #3498db;
-    color: white;
-    border-color: #3498db;
+    background: var(--ch-primary);
+    color: var(--ch-white);
+    border-color: var(--ch-primary);
 }
 
 /* History Controls */
@@ -63,8 +63,8 @@
 
 .control-group select {
     padding: 0.4rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    border: 1px solid var(--ch-border-medium);
+    border-radius: var(--radius-sm);
 }
 
 /* Planning Actions */
@@ -79,8 +79,8 @@
     display: flex;
     gap: 2rem;
     padding: 0.75rem 1rem;
-    background: #f8f9fa;
-    border-radius: 6px;
+    background: var(--ch-gray-100);
+    border-radius: var(--radius-md);
     margin-bottom: 1rem;
     font-size: 0.9rem;
 }
@@ -94,24 +94,24 @@
 .legend-color {
     width: 20px;
     height: 20px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--ch-border-medium);
 }
 
 .legend-color.history {
-    background: #ecf0f1;
+    background: var(--ch-gray-200);
 }
 
 .legend-color.actual {
-    background: #3498db;
+    background: var(--ch-primary);
 }
 
 .legend-color.plan-current {
-    background: #2ecc71;
+    background: var(--ch-success);
 }
 
 .legend-color.future {
-    background: #f39c12;
+    background: var(--ch-warning);
 }
 
 .legend-icon {
@@ -122,9 +122,9 @@
 .planning-grid-container {
     flex: 1;
     overflow: auto;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: var(--ch-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
     margin-bottom: 1rem;
 }
 
@@ -135,12 +135,12 @@
 }
 
 .planning-table th {
-    background: #f8f9fa;
+    background: var(--ch-gray-100);
     padding: 0.75rem 0.5rem;
     text-align: center;
     font-weight: 600;
-    color: #2c3e50;
-    border: 1px solid #dee2e6;
+    color: var(--ch-text-primary);
+    border: 1px solid var(--ch-border-light);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -148,14 +148,14 @@
 
 .planning-table td {
     padding: 0.5rem;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--ch-border-light);
     text-align: center;
 }
 
 /* Fixed Columns */
 .fixed-column {
     position: sticky;
-    background: white;
+    background: var(--ch-white);
     z-index: 5;
 }
 
@@ -174,17 +174,17 @@
     right: 0;
     min-width: 80px;
     font-weight: 600;
-    background: #f8f9fa;
+    background: var(--ch-gray-100);
 }
 
 /* Column Types */
 .history-column {
-    background: #fafafa;
-    color: #7f8c8d;
+    background: var(--ch-gray-50);
+    color: var(--ch-text-secondary);
 }
 
 .current-column {
-    background: #e3f2fd;
+    background: var(--ch-primary-pale);
 }
 
 .future-column {
@@ -192,13 +192,13 @@
 }
 
 .current-period {
-    border-left: 2px solid #3498db;
-    border-right: 2px solid #3498db;
+    border-left: 2px solid var(--ch-primary);
+    border-right: 2px solid var(--ch-primary);
 }
 
 /* Cell Types */
 .historical-cell {
-    background: #ecf0f1;
+    background: var(--ch-gray-200);
 }
 
 .historical-value {
@@ -218,11 +218,11 @@
 }
 
 .actual-cell {
-    background: #e3f2fd;
+    background: var(--ch-primary-pale);
 }
 
 .actual-value {
-    color: #1976d2;
+    color: var(--ch-primary-dark);
     font-weight: 600;
 }
 
@@ -238,12 +238,12 @@
 }
 
 .split-value .actual {
-    color: #1976d2;
+    color: var(--ch-primary-dark);
     font-weight: 600;
 }
 
 .split-value .divider {
-    color: #ccc;
+    color: var(--ch-gray-300);
 }
 
 .plan-cell {
@@ -258,11 +258,11 @@
 .plan-input {
     width: 70px;
     padding: 4px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
+    border: 1px solid var(--ch-border-medium);
+    border-radius: var(--radius-sm);
     text-align: center;
     font-size: 0.85rem;
-    font-family: 'Consolas', 'Monaco', monospace;
+    font-family: var(--font-mono);
 }
 
 .plan-input.mini {
@@ -273,29 +273,29 @@
 
 .plan-input:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    border-color: var(--ch-primary);
+    box-shadow: 0 0 0 3px var(--ch-primary-pale);
 }
 
 /* Totals Row */
 .totals-row {
     font-weight: 600;
-    background: #f8f9fa;
+    background: var(--ch-gray-100);
 }
 
 .totals-row td {
-    border-top: 2px solid #dee2e6;
+    border-top: 2px solid var(--ch-border-light);
 }
 
 .column-total,
 .row-total {
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--ch-text-primary);
 }
 
 .grand-total {
     font-size: 1.1rem;
-    color: #e74c3c;
+    color: var(--ch-error);
 }
 
 /* Planning Summary */
@@ -306,16 +306,16 @@
 }
 
 .summary-card {
-    background: white;
+    background: var(--ch-white);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .summary-card h4 {
     margin: 0 0 0.5rem 0;
-    color: #7f8c8d;
+    color: var(--ch-text-secondary);
     font-size: 0.9rem;
     font-weight: 500;
 }
@@ -323,7 +323,7 @@
 .summary-value {
     font-size: 2rem;
     font-weight: bold;
-    color: #2c3e50;
+    color: var(--ch-text-primary);
 }
 
 /* Modal Styles */
@@ -332,9 +332,9 @@
 }
 
 #distribute-preview {
-    background: #f8f9fa;
+    background: var(--ch-gray-100);
     padding: 1rem;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     margin-top: 1rem;
 }
 
@@ -343,7 +343,7 @@
 }
 
 #distribute-preview strong {
-    color: #3498db;
+    color: var(--ch-primary);
 }
 
 /* Responsive Design */
