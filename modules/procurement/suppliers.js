@@ -192,9 +192,17 @@ const SuppliersModule = {
 
             <div class="suppliers-header">
                 <h2>Dobavitelji</h2>
-                <button class="btn btn-primary" onclick="SuppliersModule.openAddModal()">
-                    Dodaj dobavitelja
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-primary" onclick="SuppliersModule.openAddModal()">
+                        Dodaj dobavitelja
+                    </button>
+                    <button class="btn btn-outline" onclick="SuppliersModule.downloadTemplate()" style="background: white; color: var(--ch-primary);">
+                        Prenesi vzorec Excel
+                    </button>
+                    <button class="btn btn-outline" onclick="SuppliersModule.openUploadModal()" style="background: white; color: var(--ch-primary);">
+                        Uvozi iz Excel
+                    </button>
+                </div>
             </div>
 
             <div class="suppliers-content">
@@ -306,11 +314,56 @@ const SuppliersModule = {
                     </form>
                 </div>
             </div>
+
+            <!-- Upload Modal -->
+            <div id="supplier-upload-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Uvoz dobaviteljev iz Excel</h3>
+                        <button class="close-btn" onclick="SuppliersModule.closeUploadModal()">&times;</button>
+                    </div>
+
+                    <div style="margin-bottom: 20px; padding: 15px; background: var(--ch-gray-50); border-radius: var(--radius-sm);">
+                        <h4 style="margin-bottom: 10px; color: var(--ch-text-primary);">Navodila:</h4>
+                        <ol style="margin-left: 20px; color: var(--ch-text-secondary);">
+                            <li>Prenesite vzorec Excel datoteke s klikom na "Prenesi vzorec Excel"</li>
+                            <li>Izpolnite vrstice z vašimi dobavitelji (vrstica 2 je primer)</li>
+                            <li>Naložite izpolnjeno datoteko spodaj</li>
+                        </ol>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="supplier-excel-file">Izberi Excel datoteko (.xlsx)</label>
+                        <input type="file" id="supplier-excel-file" accept=".xlsx,.xls"
+                               style="padding: 10px; border: 2px dashed var(--ch-border-medium); border-radius: var(--radius-sm); width: 100%;">
+                    </div>
+
+                    <div id="upload-preview" style="margin-top: 20px; display: none;">
+                        <h4 style="margin-bottom: 10px;">Predogled:</h4>
+                        <div id="upload-preview-content" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--ch-border-medium); border-radius: var(--radius-sm); padding: 10px;">
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="margin-top: 20px;">
+                        <button type="button" class="btn btn-outline" onclick="SuppliersModule.closeUploadModal()">
+                            Prekliči
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="SuppliersModule.processUpload()" id="upload-confirm-btn" disabled>
+                            Uvozi dobavitelje
+                        </button>
+                    </div>
+                </div>
+            </div>
         `;
 
         // Setup search
         document.getElementById('search-supplier').addEventListener('input', (e) => {
             this.filterSuppliers(e.target.value);
+        });
+
+        // Setup file upload preview
+        document.getElementById('supplier-excel-file')?.addEventListener('change', (e) => {
+            this.previewExcelFile(e.target.files[0]);
         });
     },
 
@@ -321,59 +374,19 @@ const SuppliersModule = {
                 this.suppliers = await response.json();
                 console.log('Loaded suppliers from database:', this.suppliers);
             } else {
-                console.warn('API not available, using sample data');
-                // If API not ready, use sample data
-                this.suppliers = this.getSampleSuppliers();
+                console.warn('API not available, showing empty list');
+                // If API not ready, show empty list
+                this.suppliers = [];
             }
             this.displaySuppliers();
         } catch (error) {
             console.error('Error loading suppliers:', error);
-            // Use sample data
-            this.suppliers = this.getSampleSuppliers();
+            // Show empty list on error
+            this.suppliers = [];
             this.displaySuppliers();
         }
     },
 
-    getSampleSuppliers() {
-        return [
-            {
-                id: 1,
-                name: 'Dobavitelj A d.o.o.',
-                supplies: 'Surovine za proizvodnjo',
-                contact_person: 'Janez Novak',
-                email: 'janez@dobavitelj-a.si',
-                phone: '01 234 5678',
-                payment_terms_days: 30,
-                additional_delay_days: 15,
-                address: 'Poslovna cesta 123, 1000 Ljubljana',
-                notes: 'Glavni dobavitelj surovin'
-            },
-            {
-                id: 2,
-                name: 'Trgovina B s.p.',
-                supplies: 'Embalaža in pakirni material',
-                contact_person: 'Marija Horvat',
-                email: 'marija@trgovina-b.si',
-                phone: '02 345 6789',
-                payment_terms_days: 60,
-                additional_delay_days: 10,
-                address: 'Industrijska 45, 2000 Maribor',
-                notes: 'Dobavitelj embalaže'
-            },
-            {
-                id: 3,
-                name: 'Podjetje C d.d.',
-                supplies: 'Komponente in polizdelki',
-                contact_person: 'Peter Kovač',
-                email: 'peter@podjetje-c.si',
-                phone: '03 456 7890',
-                payment_terms_days: 90,
-                additional_delay_days: 30,
-                address: 'Obrtniška 67, 3000 Celje',
-                notes: 'Dobavitelj komponent'
-            }
-        ];
-    },
 
     displaySuppliers(suppliers = this.suppliers) {
         const tbody = document.getElementById('suppliers-tbody');
@@ -542,5 +555,188 @@ const SuppliersModule = {
             this.displaySuppliers();
             alert('Dobavitelj izbrisan (lokalno)!');
         }
+    },
+
+    downloadTemplate() {
+        // Create sample Excel file with headers and one example row
+        const sampleData = [
+            {
+                'Naziv dobavitelja': 'Primer d.o.o.',
+                'Kaj dobavlja': 'Surovine in embalaža',
+                'Kontakt oseba': 'Janez Novak',
+                'Email': 'janez@primer.si',
+                'Telefon': '+386 1 234 5678',
+                'Plačilni pogoji (dni)': 30,
+                'Dopustna dodatna zamuda (dni)': 15,
+                'Naslov': 'Primerjeva ulica 1, 1000 Ljubljana',
+                'Opombe': 'To je vzorec - izbrišite to vrstico in dodajte svoje dobavitelje'
+            }
+        ];
+
+        // Create worksheet
+        const ws = XLSX.utils.json_to_sheet(sampleData);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 25 }, // Naziv dobavitelja
+            { wch: 30 }, // Kaj dobavlja
+            { wch: 20 }, // Kontakt oseba
+            { wch: 25 }, // Email
+            { wch: 18 }, // Telefon
+            { wch: 20 }, // Plačilni pogoji
+            { wch: 28 }, // Dopustna dodatna zamuda
+            { wch: 35 }, // Naslov
+            { wch: 40 }  // Opombe
+        ];
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Dobavitelji');
+
+        // Generate and download
+        XLSX.writeFile(wb, 'dobavitelji_vzorec.xlsx');
+    },
+
+    openUploadModal() {
+        document.getElementById('supplier-upload-modal').classList.add('active');
+        // Reset file input
+        const fileInput = document.getElementById('supplier-excel-file');
+        if (fileInput) fileInput.value = '';
+        document.getElementById('upload-preview').style.display = 'none';
+        document.getElementById('upload-confirm-btn').disabled = true;
+        this.uploadedData = null;
+    },
+
+    closeUploadModal() {
+        document.getElementById('supplier-upload-modal').classList.remove('active');
+    },
+
+    async previewExcelFile(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Get first sheet
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                if (jsonData.length === 0) {
+                    alert('Excel datoteka je prazna!');
+                    return;
+                }
+
+                // Validate and map columns
+                this.uploadedData = jsonData.map((row, index) => {
+                    const supplier = {
+                        name: row['Naziv dobavitelja'] || '',
+                        supplies: row['Kaj dobavlja'] || '',
+                        contact_person: row['Kontakt oseba'] || '',
+                        email: row['Email'] || '',
+                        phone: row['Telefon'] || '',
+                        payment_terms_days: parseInt(row['Plačilni pogoji (dni)']) || 30,
+                        additional_delay_days: parseInt(row['Dopustna dodatna zamuda (dni)']) || 0,
+                        address: row['Naslov'] || '',
+                        notes: row['Opombe'] || '',
+                        supplier_code: 'SUP' + Date.now() + '_' + index
+                    };
+
+                    // Validate required fields
+                    if (!supplier.name) {
+                        throw new Error(`Vrstica ${index + 2}: Manjka naziv dobavitelja`);
+                    }
+
+                    return supplier;
+                });
+
+                // Show preview
+                const previewHtml = `
+                    <p style="margin-bottom: 10px; color: var(--ch-success);">
+                        <strong>Najdenih ${this.uploadedData.length} dobaviteljev</strong>
+                    </p>
+                    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--ch-gray-100);">
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Naziv</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Kaj dobavlja</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Plačilni pogoji</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.uploadedData.slice(0, 5).map(s => `
+                                <tr>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.name}</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.supplies}</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.payment_terms_days} + ${s.additional_delay_days} dni</td>
+                                </tr>
+                            `).join('')}
+                            ${this.uploadedData.length > 5 ? `
+                                <tr>
+                                    <td colspan="3" style="padding: 5px; text-align: center; font-style: italic;">
+                                        ... in še ${this.uploadedData.length - 5} dobaviteljev
+                                    </td>
+                                </tr>
+                            ` : ''}
+                        </tbody>
+                    </table>
+                `;
+
+                document.getElementById('upload-preview-content').innerHTML = previewHtml;
+                document.getElementById('upload-preview').style.display = 'block';
+                document.getElementById('upload-confirm-btn').disabled = false;
+
+            } catch (error) {
+                alert('Napaka pri branju Excel datoteke: ' + error.message);
+                console.error('Excel parsing error:', error);
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    },
+
+    async processUpload() {
+        if (!this.uploadedData || this.uploadedData.length === 0) {
+            alert('Ni podatkov za uvoz!');
+            return;
+        }
+
+        const confirmMsg = `Ali ste prepričani, da želite uvoziti ${this.uploadedData.length} dobaviteljev?`;
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Upload each supplier
+        for (const supplierData of this.uploadedData) {
+            try {
+                const response = await fetch('/api/v1/suppliers/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(supplierData)
+                });
+
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    errorCount++;
+                    console.error('Failed to upload supplier:', supplierData.name);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error('Error uploading supplier:', error);
+            }
+        }
+
+        // Reload suppliers
+        await this.loadSuppliers();
+        this.closeUploadModal();
+
+        // Show result
+        alert(`Uvoz zaključen!\nUspešno: ${successCount}\nNapake: ${errorCount}`);
     }
 };

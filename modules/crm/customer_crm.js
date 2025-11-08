@@ -85,195 +85,10 @@ const CustomerCRM = {
 
         } catch (error) {
             console.error('[CRM] Failed to load customers from API:', error);
-            console.log('[CRM] Falling back to sample data');
+            console.log('[CRM] Showing empty customer list');
 
-            // Fallback to default customers if API fails
-            this.state.customers = [
-                {
-                    id: 'c001',
-                    code: 'MER-001',
-                    name: 'Mercator d.d.',
-                    type: 'Retail Chain',
-                    country: 'Slovenia',
-                    city: 'Ljubljana',
-                    address: 'Dunajska cesta 107',
-                    phone: '+386 1 560 1000',
-                    email: 'nabava@mercator.si',
-                    website: 'www.mercator.si',
-                    taxId: 'SI45884595',
-                    responsiblePerson: 'Ana Novak',
-                    creditLimit: 100000,
-                    paymentTerms: 30,
-                    discount: 5,
-                    rating: 'A',
-                    status: 'active',
-                    notes: 'Largest retail chain in Slovenia',
-                    totalRevenue: 458000,
-                    lastOrder: '2024-01-15',
-                    orderCount: 156
-                },
-                {
-                    id: 'c002',
-                    code: 'SPA-002',
-                    name: 'Spar Slovenija d.o.o.',
-                    type: 'Retail Chain',
-                    country: 'Slovenia',
-                    city: 'Ljubljana',
-                    address: 'Letališka cesta 26',
-                    phone: '+386 1 568 4300',
-                    email: 'info@spar.si',
-                    website: 'www.spar.si',
-                    taxId: 'SI35512024',
-                    responsiblePerson: 'Marko Horvat',
-                    creditLimit: 80000,
-                    paymentTerms: 45,
-                    discount: 3,
-                    rating: 'A',
-                    status: 'active',
-                    notes: 'Second largest retail chain',
-                    totalRevenue: 385000,
-                    lastOrder: '2024-01-18',
-                    orderCount: 142
-                },
-                {
-                    id: 'c003',
-                    code: 'TUS-003',
-                    name: 'Tuš d.o.o.',
-                    type: 'Retail Chain',
-                    country: 'Slovenia',
-                    city: 'Celje',
-                    address: 'Cesta v Trnovlje 10a',
-                    phone: '+386 3 426 4000',
-                    email: 'nabava@tus.si',
-                    website: 'www.tus.si',
-                    taxId: 'SI55905757',
-                    responsiblePerson: 'Petra Krajnc',
-                    creditLimit: 75000,
-                    paymentTerms: 30,
-                    discount: 4,
-                    rating: 'B',
-                    status: 'active',
-                    notes: 'Regional chain, strong in Štajerska',
-                    totalRevenue: 295000,
-                    lastOrder: '2024-01-20',
-                    orderCount: 98
-                },
-                {
-                    id: 'c004',
-                    code: 'LEC-004',
-                    name: 'E.Leclerc Ljubljana',
-                    type: 'Hypermarket',
-                    country: 'Slovenia',
-                    city: 'Ljubljana',
-                    address: 'Jurčkova cesta 233',
-                    phone: '+386 1 585 2600',
-                    email: 'ljubljana@leclerc.si',
-                    website: 'www.leclerc.si',
-                    taxId: 'SI88957420',
-                    responsiblePerson: 'Janez Kos',
-                    creditLimit: 50000,
-                    paymentTerms: 60,
-                    discount: 2,
-                    rating: 'B',
-                    status: 'active',
-                    notes: 'French hypermarket chain',
-                    totalRevenue: 178000,
-                    lastOrder: '2024-01-12',
-                    orderCount: 67
-                },
-                {
-                    id: 'c005',
-                    code: 'HOF-005',
-                    name: 'Hofer d.o.o.',
-                    type: 'Discount Store',
-                    country: 'Slovenia',
-                    city: 'Lukovica',
-                    address: 'Krašnja 1',
-                    phone: '+386 1 834 6600',
-                    email: 'info@hofer.si',
-                    website: 'www.hofer.si',
-                    taxId: 'SI47978457',
-                    responsiblePerson: 'Eva Potočnik',
-                    creditLimit: 60000,
-                    paymentTerms: 15,
-                    discount: 1,
-                    rating: 'A',
-                    status: 'active',
-                    notes: 'Discount chain (Aldi)',
-                    totalRevenue: 312000,
-                    lastOrder: '2024-01-22',
-                    orderCount: 124
-                },
-                {
-                    id: 'c006',
-                    code: 'RES-006',
-                    name: 'Gostilna Pri Kolovratu',
-                    type: 'Restaurant',
-                    country: 'Slovenia',
-                    city: 'Ljubljana',
-                    address: 'Ciril-Metodov trg 17',
-                    phone: '+386 1 438 0760',
-                    email: 'info@prikolovratu.si',
-                    website: 'www.prikolovratu.si',
-                    taxId: 'SI12345678',
-                    responsiblePerson: 'Tomaž Kavčič',
-                    creditLimit: 10000,
-                    paymentTerms: 15,
-                    discount: 8,
-                    rating: 'A',
-                    status: 'active',
-                    notes: 'Premium restaurant, quality focused',
-                    totalRevenue: 45000,
-                    lastOrder: '2024-01-21',
-                    orderCount: 89
-                },
-                {
-                    id: 'c007',
-                    code: 'MEA-007',
-                    name: 'Mesnica Jelen',
-                    type: 'Butcher Shop',
-                    country: 'Slovenia',
-                    city: 'Maribor',
-                    address: 'Partizanska cesta 21',
-                    phone: '+386 2 229 1000',
-                    email: 'info@mesnica-jelen.si',
-                    website: 'www.mesnica-jelen.si',
-                    taxId: 'SI87654321',
-                    responsiblePerson: 'Aleš Jelen',
-                    creditLimit: 15000,
-                    paymentTerms: 7,
-                    discount: 10,
-                    rating: 'B',
-                    status: 'active',
-                    notes: 'Local butcher chain',
-                    totalRevenue: 68000,
-                    lastOrder: '2024-01-19',
-                    orderCount: 156
-                },
-                {
-                    id: 'c008',
-                    code: 'HTL-008',
-                    name: 'Hotel Union',
-                    type: 'Hotel',
-                    country: 'Slovenia',
-                    city: 'Ljubljana',
-                    address: 'Miklošičeva cesta 1',
-                    phone: '+386 1 308 1270',
-                    email: 'purchasing@union-hotels.eu',
-                    website: 'www.union-hotels.eu',
-                    taxId: 'SI24681357',
-                    responsiblePerson: 'Nina Zupan',
-                    creditLimit: 25000,
-                    paymentTerms: 30,
-                    discount: 6,
-                    rating: 'A',
-                    status: 'active',
-                    notes: 'Premium hotel, regular orders',
-                    totalRevenue: 92000,
-                    lastOrder: '2024-01-17',
-                    orderCount: 78
-                }
-            ];
+            // Show empty list if API fails
+            this.state.customers = [];
         }
     },
     
@@ -531,11 +346,17 @@ const CustomerCRM = {
                 <div class="crm-header">
                     <h1>[Users] Customer Relationship Management</h1>
                     <div class="header-controls">
-                        <input type="text" class="search-input" placeholder="[Search] Search customers..." 
+                        <input type="text" class="search-input" placeholder="[Search] Search customers..."
                                value="${this.state.searchQuery}"
                                onkeyup="CustomerCRM.handleSearch(this.value)">
                         <button class="btn-add" onclick="CustomerCRM.showAddCustomer()">
                             ➕ Add Customer
+                        </button>
+                        <button class="btn-export" onclick="CustomerCRM.downloadTemplate()">
+                            [Download] Download Sample Excel
+                        </button>
+                        <button class="btn-export" onclick="CustomerCRM.openUploadModal()">
+                            [Upload] Import from Excel
                         </button>
                         <button class="btn-export" onclick="CustomerCRM.exportData()">
                             [Download] Export
@@ -547,7 +368,47 @@ const CustomerCRM = {
                     ${this.renderCustomerList()}
                 </div>
             </div>
-            
+
+            <!-- Upload Modal -->
+            <div id="customer-upload-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="margin: 0; color: var(--ch-text-primary);">Import Customers from Excel</h3>
+                        <button onclick="CustomerCRM.closeUploadModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--ch-text-secondary);">&times;</button>
+                    </div>
+
+                    <div style="margin-bottom: 20px; padding: 15px; background: var(--ch-gray-50); border-radius: 8px;">
+                        <h4 style="margin-bottom: 10px; color: var(--ch-text-primary);">Instructions:</h4>
+                        <ol style="margin-left: 20px; color: var(--ch-text-secondary);">
+                            <li>Download the sample Excel file by clicking "Download Sample Excel"</li>
+                            <li>Fill in the rows with your customer data (row 2 is an example)</li>
+                            <li>Upload the completed file below</li>
+                        </ol>
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500; color: var(--ch-text-primary);">Select Excel file (.xlsx)</label>
+                        <input type="file" id="customer-excel-file" accept=".xlsx,.xls" onchange="CustomerCRM.previewExcelFile(this.files[0])"
+                               style="padding: 10px; border: 2px dashed var(--ch-border-medium); border-radius: 8px; width: 100%;">
+                    </div>
+
+                    <div id="customer-upload-preview" style="margin-top: 20px; display: none;">
+                        <h4 style="margin-bottom: 10px;">Preview:</h4>
+                        <div id="customer-upload-preview-content" style="max-height: 300px; overflow-y: auto; border: 1px solid var(--ch-border-medium); border-radius: 8px; padding: 10px;">
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                        <button onclick="CustomerCRM.closeUploadModal()" class="btn btn-outline">
+                            Cancel
+                        </button>
+                        <button onclick="CustomerCRM.processUpload()" id="customer-upload-confirm-btn" class="btn btn-primary" disabled>
+                            Import Customers
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             ${this.getStyles()}
         `;
     },
@@ -1255,6 +1116,219 @@ const CustomerCRM = {
                 }
             </style>
         `;
+    },
+
+    downloadTemplate() {
+        // Create sample Excel file with headers and one example row
+        const sampleData = [
+            {
+                'Customer Name': 'Example Company Ltd.',
+                'Customer Code': 'CUST001',
+                'Type': 'Retail Chain',
+                'Country': 'Slovenia',
+                'City': 'Ljubljana',
+                'Address': 'Example Street 123',
+                'Phone': '+386 1 234 5678',
+                'Email': 'info@example.com',
+                'Tax ID': 'SI12345678',
+                'Account Manager': 'John Doe',
+                'Credit Limit': 50000,
+                'Payment Terms (days)': 30,
+                'Segment (A/B/C)': 'B',
+                'Notes': 'This is a sample - delete this row and add your customers'
+            }
+        ];
+
+        // Create worksheet
+        const ws = XLSX.utils.json_to_sheet(sampleData);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 30 }, // Customer Name
+            { wch: 15 }, // Customer Code
+            { wch: 20 }, // Type
+            { wch: 15 }, // Country
+            { wch: 20 }, // City
+            { wch: 35 }, // Address
+            { wch: 18 }, // Phone
+            { wch: 30 }, // Email
+            { wch: 15 }, // Tax ID
+            { wch: 20 }, // Account Manager
+            { wch: 15 }, // Credit Limit
+            { wch: 20 }, // Payment Terms
+            { wch: 15 }, // Segment
+            { wch: 50 }  // Notes
+        ];
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Customers');
+
+        // Generate and download
+        XLSX.writeFile(wb, 'customers_template.xlsx');
+    },
+
+    openUploadModal() {
+        const modal = document.getElementById('customer-upload-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            // Reset file input
+            const fileInput = document.getElementById('customer-excel-file');
+            if (fileInput) fileInput.value = '';
+            const preview = document.getElementById('customer-upload-preview');
+            if (preview) preview.style.display = 'none';
+            const confirmBtn = document.getElementById('customer-upload-confirm-btn');
+            if (confirmBtn) confirmBtn.disabled = true;
+            this.uploadedData = null;
+        }
+    },
+
+    closeUploadModal() {
+        const modal = document.getElementById('customer-upload-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    },
+
+    async previewExcelFile(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+
+                // Get first sheet
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                if (jsonData.length === 0) {
+                    alert('Excel file is empty!');
+                    return;
+                }
+
+                // Validate and map columns
+                this.uploadedData = jsonData.map((row, index) => {
+                    const customer = {
+                        name: row['Customer Name'] || '',
+                        customer_code: row['Customer Code'] || 'CUS' + Date.now() + '_' + index,
+                        customer_type: row['Type'] || 'General',
+                        country: row['Country'] || '',
+                        city: row['City'] || '',
+                        address: row['Address'] || '',
+                        phone: row['Phone'] || '',
+                        email: row['Email'] || '',
+                        tax_id: row['Tax ID'] || '',
+                        account_manager: row['Account Manager'] || '',
+                        credit_limit: parseFloat(row['Credit Limit']) || 0,
+                        payment_terms_days: parseInt(row['Payment Terms (days)']) || 30,
+                        segment: (row['Segment (A/B/C)'] || 'C').toUpperCase(),
+                        notes: row['Notes'] || ''
+                    };
+
+                    // Validate required fields
+                    if (!customer.name) {
+                        throw new Error(`Row ${index + 2}: Missing customer name`);
+                    }
+
+                    // Validate segment
+                    if (!['A', 'B', 'C'].includes(customer.segment)) {
+                        customer.segment = 'C';
+                    }
+
+                    return customer;
+                });
+
+                // Show preview
+                const previewHtml = `
+                    <p style="margin-bottom: 10px; color: var(--ch-success);">
+                        <strong>Found ${this.uploadedData.length} customers</strong>
+                    </p>
+                    <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--ch-gray-100);">
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Name</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Type</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">City</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Segment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.uploadedData.slice(0, 5).map(c => `
+                                <tr>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${c.name}</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${c.customer_type}</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${c.city}</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${c.segment}</td>
+                                </tr>
+                            `).join('')}
+                            ${this.uploadedData.length > 5 ? `
+                                <tr>
+                                    <td colspan="4" style="padding: 5px; text-align: center; font-style: italic;">
+                                        ... and ${this.uploadedData.length - 5} more customers
+                                    </td>
+                                </tr>
+                            ` : ''}
+                        </tbody>
+                    </table>
+                `;
+
+                document.getElementById('customer-upload-preview-content').innerHTML = previewHtml;
+                document.getElementById('customer-upload-preview').style.display = 'block';
+                document.getElementById('customer-upload-confirm-btn').disabled = false;
+
+            } catch (error) {
+                alert('Error reading Excel file: ' + error.message);
+                console.error('Excel parsing error:', error);
+            }
+        };
+
+        reader.readAsArrayBuffer(file);
+    },
+
+    async processUpload() {
+        if (!this.uploadedData || this.uploadedData.length === 0) {
+            alert('No data to import!');
+            return;
+        }
+
+        const confirmMsg = `Are you sure you want to import ${this.uploadedData.length} customers?`;
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Upload each customer
+        for (const customerData of this.uploadedData) {
+            try {
+                const response = await fetch('/api/v1/customers/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(customerData)
+                });
+
+                if (response.ok) {
+                    successCount++;
+                } else {
+                    errorCount++;
+                    console.error('Failed to upload customer:', customerData.name);
+                }
+            } catch (error) {
+                errorCount++;
+                console.error('Error uploading customer:', error);
+            }
+        }
+
+        // Reload customers
+        await this.loadCustomers();
+        this.render();
+        this.closeUploadModal();
+
+        // Show result
+        alert(`Import completed!\nSuccessful: ${successCount}\nErrors: ${errorCount}`);
     }
 };
 
