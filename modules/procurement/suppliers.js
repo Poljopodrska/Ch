@@ -207,17 +207,18 @@ const SuppliersModule = {
                     <thead>
                         <tr>
                             <th>Naziv dobavitelja</th>
+                            <th>Kaj dobavlja</th>
                             <th>Kontakt oseba</th>
                             <th>Email</th>
                             <th>Telefon</th>
-                            <th>Plačilni pogoji (dni)</th>
+                            <th>Dopustna zamuda plačil (dni)</th>
                             <th>Naslov</th>
                             <th>Dejanja</th>
                         </tr>
                     </thead>
                     <tbody id="suppliers-tbody">
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px;">
+                            <td colspan="8" style="text-align: center; padding: 40px;">
                                 Nalaganje dobaviteljev...
                             </td>
                         </tr>
@@ -241,6 +242,15 @@ const SuppliersModule = {
                             </div>
 
                             <div class="form-group">
+                                <label for="supplier-supplies">Kaj dobavlja *</label>
+                                <input type="text" id="supplier-supplies" required
+                                       placeholder="npr. Surovine, Embalaža, Komponente">
+                                <small style="color: var(--ch-text-secondary); margin-top: 5px;">
+                                    Kratki opis kaj dobavitelj dobavlja
+                                </small>
+                            </div>
+
+                            <div class="form-group">
                                 <label for="supplier-contact">Kontakt oseba</label>
                                 <input type="text" id="supplier-contact">
                             </div>
@@ -256,11 +266,11 @@ const SuppliersModule = {
                             </div>
 
                             <div class="form-group">
-                                <label for="supplier-payment-terms">Plačilni pogoji (dni) *</label>
+                                <label for="supplier-payment-terms">Dopustna zamuda plačil (dni) *</label>
                                 <input type="number" id="supplier-payment-terms" min="0" required
                                        placeholder="npr. 30, 60, 90">
                                 <small style="color: var(--ch-text-secondary); margin-top: 5px;">
-                                    Koliko dni lahko zakasnimo s plačilom
+                                    Koliko dni lahko zamudimo s plačilom brez posledic
                                 </small>
                             </div>
 
@@ -317,6 +327,7 @@ const SuppliersModule = {
             {
                 id: 1,
                 name: 'Dobavitelj A d.o.o.',
+                supplies: 'Surovine za proizvodnjo',
                 contact_person: 'Janez Novak',
                 email: 'janez@dobavitelj-a.si',
                 phone: '01 234 5678',
@@ -327,6 +338,7 @@ const SuppliersModule = {
             {
                 id: 2,
                 name: 'Trgovina B s.p.',
+                supplies: 'Embalaža in pakirni material',
                 contact_person: 'Marija Horvat',
                 email: 'marija@trgovina-b.si',
                 phone: '02 345 6789',
@@ -337,6 +349,7 @@ const SuppliersModule = {
             {
                 id: 3,
                 name: 'Podjetje C d.d.',
+                supplies: 'Komponente in polizdelki',
                 contact_person: 'Peter Kovač',
                 email: 'peter@podjetje-c.si',
                 phone: '03 456 7890',
@@ -354,7 +367,7 @@ const SuppliersModule = {
         if (suppliers.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
+                    <td colspan="8" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
                         Ni najdenih dobaviteljev
                     </td>
                 </tr>
@@ -365,6 +378,7 @@ const SuppliersModule = {
         tbody.innerHTML = suppliers.map(supplier => `
             <tr>
                 <td><strong>${supplier.name}</strong></td>
+                <td>${supplier.supplies || '-'}</td>
                 <td>${supplier.contact_person || '-'}</td>
                 <td>${supplier.email || '-'}</td>
                 <td>${supplier.phone || '-'}</td>
@@ -405,6 +419,7 @@ const SuppliersModule = {
 
         document.getElementById('modal-title').textContent = 'Uredi dobavitelja';
         document.getElementById('supplier-name').value = supplier.name;
+        document.getElementById('supplier-supplies').value = supplier.supplies || '';
         document.getElementById('supplier-contact').value = supplier.contact_person || '';
         document.getElementById('supplier-email').value = supplier.email || '';
         document.getElementById('supplier-phone').value = supplier.phone || '';
@@ -427,6 +442,7 @@ const SuppliersModule = {
 
         const supplierData = {
             name: document.getElementById('supplier-name').value,
+            supplies: document.getElementById('supplier-supplies').value,
             contact_person: document.getElementById('supplier-contact').value,
             email: document.getElementById('supplier-email').value,
             phone: document.getElementById('supplier-phone').value,
