@@ -153,7 +153,7 @@ const WorkforceAvailability = {
                 }
                 
                 .module-header {
-                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
+                    background: var(--ch-primary);
                     color: white;
                     padding: 20px;
                     border-radius: 8px;

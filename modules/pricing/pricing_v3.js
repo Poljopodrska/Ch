@@ -688,7 +688,7 @@ const PricingV3 = {
                 }
                 
                 .pricing-header {
-                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
+                    background: var(--ch-primary);
                     color: white;
                     padding: 25px;
                     border-radius: 10px;

@@ -314,7 +314,7 @@ const ProductionPlanningV3 = {
                 .production-v3-header {
                     margin-bottom: 20px;
                     padding: 15px;
-                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
+                    background: var(--ch-primary);
                     color: white;
                     border-radius: 8px;
                 }

@@ -356,20 +356,20 @@ const StockReadyProducts = {
                 
                 .stock-fill {
                     height: 100%;
-                    background: linear-gradient(90deg, var(--ch-primary), var(--ch-primary-dark));
+                    background: var(--ch-primary);
                     transition: width 0.3s;
                 }
-                
+
                 .stock-critical {
-                    background: linear-gradient(90deg, var(--ch-error), var(--ch-error));
+                    background: var(--ch-error);
                 }
-                
+
                 .stock-warning {
-                    background: linear-gradient(90deg, var(--ch-warning), var(--ch-warning));
+                    background: var(--ch-warning);
                 }
-                
+
                 .stock-good {
-                    background: linear-gradient(90deg, var(--ch-success), var(--ch-success));
+                    background: var(--ch-success);
                 }
                 
                 .status-badge {

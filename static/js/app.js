@@ -938,7 +938,7 @@ const ChApp = {
                         text-align: center;
                         margin-bottom: 40px;
                         padding: 25px;
-                        background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
+                        background: var(--ch-primary);
                         color: white;
                         border-radius: 10px;
                     }
