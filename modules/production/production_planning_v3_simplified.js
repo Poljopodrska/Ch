@@ -314,7 +314,7 @@ const ProductionPlanningV3 = {
                 .production-v3-header {
                     margin-bottom: 20px;
                     padding: 15px;
-                    background: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     border-radius: 8px;
                 }
@@ -426,7 +426,7 @@ const ProductionPlanningV3 = {
                     padding: 8px 4px;
                     text-align: center;
                     font-weight: 600;
-                    border: 1px solid #0d47a1;
+                    border: 1px solid var(--ch-primary-dark);
                     position: sticky;
                     top: 0;
                     z-index: 10;
@@ -466,7 +466,7 @@ const ProductionPlanningV3 = {
                 }
                 
                 .week-header:hover {
-                    background: #1e88e5 !important;
+                    background: var(--ch-primary) !important;
                 }
                 
                 .day-header {
@@ -503,7 +503,7 @@ const ProductionPlanningV3 = {
                     left: 0;
                     z-index: 5;
                     padding: 8px !important;
-                    border-right: 2px solid #1565c0;
+                    border-right: 2px solid var(--ch-primary-dark);
                 }
                 
                 .row-type-cell {

@@ -15,8 +15,8 @@ const WorkforceAvailability = {
             holiday: { value: 0, label: 'Holiday', color: '#e74c3c' },
             sick: { value: 0, label: 'Sick Leave', color: '#e67e22' },
             training: { value: 0.5, label: 'Training', color: '#f39c12' },
-            meeting: { value: 0.7, label: 'Meetings', color: '#3498db' },
-            partial: { value: 0.5, label: 'Partial', color: '#9b59b6' },
+            meeting: { value: 0.7, label: 'Meetings', color: 'var(--ch-primary)' },
+            partial: { value: 0.5, label: 'Partial', color: 'var(--ch-primary-dark)' },
             elsewhere: { value: 0, label: 'Elsewhere', color: '#95a5a6' },
             weekend: { value: 0, label: 'Weekend', color: '#34495e' }
         }
@@ -153,7 +153,7 @@ const WorkforceAvailability = {
                 }
                 
                 .module-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     padding: 20px;
                     border-radius: 8px;
@@ -255,7 +255,7 @@ const WorkforceAvailability = {
                 }
                 
                 .week-header {
-                    background: #5dade2 !important;
+                    background: var(--ch-primary) !important;
                     font-size: 11px;
                     cursor: pointer;
                 }
@@ -265,7 +265,7 @@ const WorkforceAvailability = {
                 }
                 
                 .day-header {
-                    background: #85c1e2 !important;
+                    background: var(--ch-primary-pale) !important;
                     font-size: 10px;
                 }
                 
@@ -341,7 +341,7 @@ const WorkforceAvailability = {
                 .availability-popup {
                     position: fixed;
                     background: white;
-                    border: 2px solid #3498db;
+                    border: 2px solid var(--ch-primary);
                     border-radius: 8px;
                     padding: 15px;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -576,7 +576,7 @@ const WorkforceAvailability = {
                         
                         html += `
                             <td class="availability-cell week-cell" 
-                                style="background: ${this.getColorForValue(avgValue, '#3498db')}; 
+                                style="background: ${this.getColorForValue(avgValue, 'var(--ch-primary)')}; 
                                        color: ${avgValue > 0.5 ? 'white' : '#2c3e50'};"
                                 onclick="WorkforceAvailability.editWeek('${worker.id}', ${this.state.currentYear}, ${month}, ${w}, event)">
                                 ${weekValue.toFixed(1)}
@@ -595,7 +595,7 @@ const WorkforceAvailability = {
                 
                 html += `
                     <td class="availability-cell month-cell" 
-                        style="background: ${this.getColorForValue(avgValue, '#2980b9')}; 
+                        style="background: ${this.getColorForValue(avgValue, 'var(--ch-primary-dark)')}; 
                                color: ${avgValue > 0.5 ? 'white' : '#2c3e50'};"
                         onclick="WorkforceAvailability.editMonth('${worker.id}', ${this.state.currentYear}, ${month}, event)">
                         ${monthValue.toFixed(1)}

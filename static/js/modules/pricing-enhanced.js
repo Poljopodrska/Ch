@@ -178,8 +178,8 @@ const Pricing = {
             { name: 'Prod OH', value: product.production_overhead, color: '#f39c12' },
             { name: 'Logistics', value: product.logistics_overhead, color: '#f1c40f' },
             { name: 'Marketing', value: product.marketing_overhead, color: '#27ae60' },
-            { name: 'General', value: product.general_overhead, color: '#3498db' },
-            { name: 'Profit', value: product.profit_overhead, color: '#9b59b6' }
+            { name: 'General', value: product.general_overhead, color: 'var(--ch-primary)' },
+            { name: 'Profit', value: product.profit_overhead, color: 'var(--ch-primary-dark)' }
         ];
         
         const totalCost = costs.reduce((sum, c) => sum + c.value, 0);

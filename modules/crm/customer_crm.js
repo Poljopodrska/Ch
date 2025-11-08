@@ -582,9 +582,9 @@ const CustomerCRM = {
         
         const segments = [
             { type: 'production', color: '#4CAF50', needed: pricing.productionCost, covered: pricing.cumulativeCoverage.production },
-            { type: 'goh', color: '#2196F3', needed: pricing.goh, covered: pricing.cumulativeCoverage.goh },
+            { type: 'goh', color: 'var(--ch-primary)', needed: pricing.goh, covered: pricing.cumulativeCoverage.goh },
             { type: 'moh', color: '#FF9800', needed: pricing.moh, covered: pricing.cumulativeCoverage.moh },
-            { type: 'loh', color: '#9C27B0', needed: pricing.loh, covered: pricing.cumulativeCoverage.loh },
+            { type: 'loh', color: 'var(--ch-primary-dark)', needed: pricing.loh, covered: pricing.cumulativeCoverage.loh },
             { type: 'profit', color: '#F44336', needed: pricing.profit || 2.0, covered: pricing.cumulativeCoverage.profit }
         ];
         
@@ -739,7 +739,7 @@ const CustomerCRM = {
                 }
                 
                 .crm-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     padding: 25px;
                     border-radius: 10px;

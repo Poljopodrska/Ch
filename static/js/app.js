@@ -523,9 +523,9 @@ const ChApp = {
                     background: #f0f0f0;
                 }
                 .stock-tab-btn.active {
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
-                    border-color: #3498db;
+                    border-color: var(--ch-primary);
                 }
             </style>
         `;
@@ -938,7 +938,7 @@ const ChApp = {
                         text-align: center;
                         margin-bottom: 40px;
                         padding: 25px;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                         color: white;
                         border-radius: 10px;
                     }
@@ -1005,16 +1005,16 @@ const ChApp = {
                     }
                     
                     .navigation-hint {
-                        background: #e3f2fd;
+                        background: var(--ch-primary-pale);
                         padding: 15px;
                         border-radius: 8px;
-                        border-left: 4px solid #2196f3;
+                        border-left: 4px solid var(--ch-primary);
                         margin-top: 20px;
                     }
-                    
+
                     .navigation-hint p {
                         margin: 0;
-                        color: #1976d2;
+                        color: var(--ch-primary-dark);
                         font-size: 14px;
                     }
                 </style>

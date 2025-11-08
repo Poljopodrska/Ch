@@ -734,7 +734,7 @@ const ProductionFeasibility = {
             case 'ok': return '#d4edda';
             case 'warning': return '#fff3cd';
             case 'critical': return '#f8d7da';
-            case 'excess': return '#cce5ff';
+            case 'excess': return 'var(--ch-primary-pale)';
             case 'none': return '#f8f9fa';
             default: return '#ffffff';
         }
@@ -841,7 +841,7 @@ const ProductionFeasibility = {
                 .feasibility-header {
                     margin-bottom: 20px;
                     padding: 15px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     border-radius: 8px;
                 }
@@ -971,7 +971,7 @@ const ProductionFeasibility = {
                 }
                 
                 .type-label.materials {
-                    background: #f3e5f5;
+                    background: var(--ch-gray-100);
                     color: var(--ch-primary);
                 }
                 
@@ -989,7 +989,7 @@ const ProductionFeasibility = {
                 }
                 
                 .cell-excess {
-                    background: #cce5ff;
+                    background: var(--ch-primary-pale);
                 }
                 
                 .cell-none {

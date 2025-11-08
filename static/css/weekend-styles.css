@@ -15,7 +15,7 @@
 
 /* Weekend cells with data */
 .cell-actual.weekend-cell {
-    background: #dce8f4 !important;
+    background: var(--ch-primary-pale) !important;
 }
 
 .cell-plan.weekend-cell {
@@ -23,7 +23,7 @@
 }
 
 .cell-future.weekend-cell {
-    background: #ede0f0 !important;
+    background: var(--ch-gray-100) !important;
 }
 
 /* Editable weekend cells */

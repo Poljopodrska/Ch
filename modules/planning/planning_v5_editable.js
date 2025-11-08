@@ -272,7 +272,7 @@ const PlanningV5Editable = {
                 .planning-header {
                     margin-bottom: 20px;
                     padding: 15px;
-                    background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     border-radius: 8px;
                 }
@@ -332,7 +332,7 @@ const PlanningV5Editable = {
                     padding: 8px 4px;
                     text-align: center;
                     font-weight: 600;
-                    border: 1px solid #0d47a1;
+                    border: 1px solid var(--ch-primary-dark);
                     position: sticky;
                     top: 0;
                     z-index: 10;
@@ -415,7 +415,7 @@ const PlanningV5Editable = {
                 .cell-actual { background: #e8f5e9; color: var(--ch-success); font-weight: 600; }
                 .cell-current { background: #fff3e0; color: var(--ch-warning); font-weight: bold; }
                 .cell-plan { background: var(--ch-primary-light); color: var(--ch-primary-dark); }
-                .cell-future { background: #f3e5f5; color: var(--ch-primary-dark); }
+                .cell-future { background: var(--ch-gray-100); color: var(--ch-primary-dark); }
                 
                 .total-cell {
                     background: #fff8e1 !important;
