@@ -391,7 +391,7 @@ class ForecastVisualization {
             }
 
             .refresh-btn {
-                background: #2196f3;
+                background: var(--ch-primary);
                 color: white;
                 border: none;
                 cursor: pointer;
@@ -421,7 +421,7 @@ class ForecastVisualization {
             .overview-value {
                 font-size: 28px;
                 font-weight: bold;
-                color: #2196f3;
+                color: var(--ch-primary);
             }
 
             .overview-value.risk {
@@ -454,7 +454,7 @@ class ForecastVisualization {
 
             .trend-item {
                 padding: 10px;
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 border-radius: 4px;
             }
 
@@ -466,18 +466,18 @@ class ForecastVisualization {
             }
 
             .trend-badge.increasing {
-                background: #4caf50;
+                background: var(--ch-success);
                 color: white;
             }
 
             .trend-badge.decreasing {
-                background: #f44336;
+                background: var(--ch-error);
                 color: white;
             }
 
             .model-performance {
                 padding: 10px;
-                background: #e3f2fd;
+                background: var(--ch-primary-light);
                 border-radius: 4px;
                 font-size: 13px;
             }
@@ -488,7 +488,7 @@ class ForecastVisualization {
 
             .load-btn {
                 padding: 8px 16px;
-                background: #2196f3;
+                background: var(--ch-primary);
                 color: white;
                 border: none;
                 border-radius: 4px;
@@ -497,7 +497,7 @@ class ForecastVisualization {
             }
 
             .load-btn.risk {
-                background: #f44336;
+                background: var(--ch-error);
             }
 
             .predictions-table {
@@ -506,7 +506,7 @@ class ForecastVisualization {
             }
 
             .predictions-table th {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 padding: 10px;
                 text-align: left;
                 border-bottom: 2px solid #ddd;

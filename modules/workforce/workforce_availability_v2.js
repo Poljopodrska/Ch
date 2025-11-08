@@ -244,14 +244,14 @@ const WorkforceAvailability = {
                 
                 /* Month headers - exactly like Production Planning */
                 .month-header {
-                    background: #3498db !important;
+                    background: var(--ch-primary) !important;
                     cursor: pointer;
                     user-select: none;
                     position: relative;
                 }
                 
                 .month-header:hover {
-                    background: #2980b9 !important;
+                    background: var(--ch-primary-dark) !important;
                 }
                 
                 .week-header {
@@ -261,7 +261,7 @@ const WorkforceAvailability = {
                 }
                 
                 .week-header:hover {
-                    background: #3498db !important;
+                    background: var(--ch-primary) !important;
                 }
                 
                 .day-header {
@@ -312,7 +312,7 @@ const WorkforceAvailability = {
                 
                 .btn-remove {
                     padding: 4px 8px;
-                    background: #e74c3c;
+                    background: var(--ch-error);
                     color: white;
                     border: none;
                     border-radius: 3px;
@@ -334,7 +334,7 @@ const WorkforceAvailability = {
                 }
                 
                 .summary-row {
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     font-weight: bold;
                 }
                 
@@ -382,7 +382,7 @@ const WorkforceAvailability = {
                 
                 .custom-value button {
                     padding: 5px 10px;
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 3px;

@@ -245,17 +245,17 @@ const PlanningV3 = {
                     text-align: center;
                 }
                 .macro-row {
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     font-weight: bold;
                 }
                 .macro-row.expanded {
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 .micro-row {
                     background: white;
                 }
-                .historical-year { background: #f8f9fa; }
+                .historical-year { background: var(--ch-gray-100); }
                 .current-year { background: #fff9e6; }
                 .future-year { background: #e8f5e9; }
                 .expand-toggle {
@@ -272,9 +272,9 @@ const PlanningV3 = {
                     text-align: left;
                     font-weight: 600;
                 }
-                .cell-type-historical { background: #f5f5f5; color: #666; }
-                .cell-type-actual { background: #e3f2fd; color: #1565c0; }
-                .cell-type-current { background: #fff3e0; color: #e65100; border: 2px solid #ff9800; }
+                .cell-type-historical { background: var(--ch-gray-100); color: #666; }
+                .cell-type-actual { background: var(--ch-primary-light); color: var(--ch-primary-dark); }
+                .cell-type-current { background: #fff3e0; color: var(--ch-warning); border: 2px solid #ff9800; }
                 .cell-type-plan { background: #fff8e1; color: #f57c00; }
                 .cell-type-future { background: #f1f8e9; color: #558b2f; }
             </style>

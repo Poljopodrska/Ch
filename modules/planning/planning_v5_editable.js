@@ -287,7 +287,7 @@ const PlanningV5Editable = {
                 
                 .save-button {
                     padding: 10px 20px;
-                    background: #4CAF50;
+                    background: var(--ch-success);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -306,7 +306,7 @@ const PlanningV5Editable = {
                 
                 .unsaved-indicator {
                     padding: 5px 10px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border-radius: 3px;
                     font-size: 12px;
@@ -327,7 +327,7 @@ const PlanningV5Editable = {
                 }
                 
                 .planning-table th {
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                     color: white;
                     padding: 8px 4px;
                     text-align: center;
@@ -351,7 +351,7 @@ const PlanningV5Editable = {
                 .product-cell {
                     text-align: left !important;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -360,7 +360,7 @@ const PlanningV5Editable = {
                 }
                 
                 .year-cell {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     font-weight: 500;
                     font-size: 10px;
                 }
@@ -372,8 +372,8 @@ const PlanningV5Editable = {
                 }
                 
                 .editable-cell:hover {
-                    background: #e3f2fd !important;
-                    box-shadow: inset 0 0 0 2px #2196f3;
+                    background: var(--ch-primary-light) !important;
+                    box-shadow: inset 0 0 0 2px var(--ch-primary);
                 }
                 
                 .editable-cell.editing {
@@ -402,7 +402,7 @@ const PlanningV5Editable = {
                 
                 .edited-cell::after {
                     content: '*';
-                    color: #4CAF50;
+                    color: var(--ch-success);
                     font-weight: bold;
                     position: absolute;
                     top: 1px;
@@ -411,11 +411,11 @@ const PlanningV5Editable = {
                 }
                 
                 /* Cell type styling */
-                .cell-historical { background: #fafafa; color: #7f8c8d; }
-                .cell-actual { background: #e8f5e9; color: #2e7d32; font-weight: 600; }
-                .cell-current { background: #fff3e0; color: #e65100; font-weight: bold; }
-                .cell-plan { background: #e3f2fd; color: #1565c0; }
-                .cell-future { background: #f3e5f5; color: #6a1b9a; }
+                .cell-historical { background: var(--ch-gray-100); color: #7f8c8d; }
+                .cell-actual { background: #e8f5e9; color: var(--ch-success); font-weight: 600; }
+                .cell-current { background: #fff3e0; color: var(--ch-warning); font-weight: bold; }
+                .cell-plan { background: var(--ch-primary-light); color: var(--ch-primary-dark); }
+                .cell-future { background: #f3e5f5; color: var(--ch-primary-dark); }
                 
                 .total-cell {
                     background: #fff8e1 !important;
@@ -437,10 +437,10 @@ const PlanningV5Editable = {
                     <button class="save-button" onclick="PlanningV5Editable.saveData()" id="save-btn" disabled>
                         [Save] Save Changes
                     </button>
-                    <button onclick="PlanningV5Editable.exportData()" style="padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="PlanningV5Editable.exportData()" style="padding: 10px 20px; background: var(--ch-primary); color: white; border: none; border-radius: 5px; cursor: pointer;">
                         [Folder] Export Data
                     </button>
-                    <button onclick="PlanningV5Editable.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="PlanningV5Editable.resetData()" style="padding: 10px 20px; background: var(--ch-error); color: white; border: none; border-radius: 5px; cursor: pointer;">
                         [Refresh] Reset to Default
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
@@ -452,7 +452,7 @@ const PlanningV5Editable = {
                     ${this.renderTable()}
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>📝 Editing Instructions:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>[OK] <strong>Click any blue or purple cell</strong> to edit future planning values</li>
@@ -517,7 +517,7 @@ const PlanningV5Editable = {
             html += this.renderProductRows(product);
             
             if (index < this.state.products.length - 1) {
-                html += '<tr style="height: 3px; background: #1565c0;"><td colspan="100"></td></tr>';
+                html += '<tr style="height: 3px; background: var(--ch-primary-dark);"><td colspan="100"></td></tr>';
             }
         });
         

@@ -630,11 +630,11 @@ const ProductionAnalytics = {
                 }
                 
                 .kpi-change.positive {
-                    color: #27ae60;
+                    color: var(--ch-success);
                 }
                 
                 .kpi-change.negative {
-                    color: #e74c3c;
+                    color: var(--ch-error);
                 }
                 
                 .kpi-change.neutral {
@@ -688,7 +688,7 @@ const ProductionAnalytics = {
                 }
                 
                 .data-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     text-align: left;
                     font-weight: 600;
@@ -702,16 +702,16 @@ const ProductionAnalytics = {
                 }
                 
                 .data-table tbody tr:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .data-table .positive {
-                    color: #27ae60;
+                    color: var(--ch-success);
                     font-weight: 600;
                 }
                 
                 .data-table .negative {
-                    color: #e74c3c;
+                    color: var(--ch-error);
                     font-weight: 600;
                 }
                 
@@ -721,7 +721,7 @@ const ProductionAnalytics = {
                     top: 50%;
                     transform: translateY(-50%);
                     padding: 10px 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border: 1px solid #dee2e6;
                     border-radius: 8px;
                     cursor: pointer;

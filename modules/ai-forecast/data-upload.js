@@ -270,12 +270,12 @@ class DataUpload {
             }
 
             .upload-status.success {
-                background: #4caf50;
+                background: var(--ch-success);
                 color: white;
             }
 
             .upload-status.error {
-                background: #f44336;
+                background: var(--ch-error);
                 color: white;
             }
 
@@ -287,7 +287,7 @@ class DataUpload {
             }
 
             .upload-description code {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 padding: 2px 6px;
                 border-radius: 3px;
                 font-size: 12px;
@@ -305,7 +305,7 @@ class DataUpload {
             .upload-btn {
                 width: 100%;
                 padding: 10px;
-                background: #2196f3;
+                background: var(--ch-primary);
                 color: white;
                 border: none;
                 border-radius: 4px;
@@ -314,7 +314,7 @@ class DataUpload {
             }
 
             .upload-btn:hover {
-                background: #1976d2;
+                background: var(--ch-primary-dark);
             }
 
             .upload-result {
@@ -407,7 +407,7 @@ class DataUpload {
             }
 
             .template-btn:hover {
-                background: #7b1fa2;
+                background: var(--ch-primary);
             }
 
             details {
@@ -416,11 +416,11 @@ class DataUpload {
 
             details summary {
                 cursor: pointer;
-                color: #2196f3;
+                color: var(--ch-primary);
             }
 
             details pre {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 padding: 10px;
                 border-radius: 4px;
                 overflow-x: auto;

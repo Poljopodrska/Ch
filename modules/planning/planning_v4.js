@@ -390,7 +390,7 @@ const PlanningV4 = {
                 .planning-table td.product-cell {
                     text-align: left;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -401,7 +401,7 @@ const PlanningV4 = {
                 .planning-table td.year-cell {
                     text-align: left;
                     font-weight: 500;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     position: sticky;
                     left: 200px;
                     z-index: 4;
@@ -416,7 +416,7 @@ const PlanningV4 = {
                 }
                 
                 .product-header-row td {
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     font-weight: bold;
                     padding: 10px;
                 }
@@ -450,31 +450,31 @@ const PlanningV4 = {
                 
                 /* Data cell types */
                 .cell-historical {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     color: #7f8c8d;
                 }
                 
                 .cell-actual {
-                    background: #e3f2fd;
-                    color: #1565c0;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                     font-weight: 600;
                 }
                 
                 .cell-current {
                     background: #fff3e0;
-                    color: #e65100;
+                    color: var(--ch-warning);
                     font-weight: bold;
                     border: 2px solid #ff9800;
                 }
                 
                 .cell-plan {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
                 
                 .cell-future {
                     background: #f3e5f5;
-                    color: #6a1b9a;
+                    color: var(--ch-primary-dark);
                 }
                 
                 .cell-total {
@@ -498,10 +498,10 @@ const PlanningV4 = {
                 }
                 
                 /* Year row styling */
-                .year-n-2 { background: #f5f5f5; }
-                .year-n-1 { background: #fafafa; }
+                .year-n-2 { background: var(--ch-gray-100); }
+                .year-n-1 { background: var(--ch-gray-100); }
                 .year-n { background: #fff8e1; font-weight: 600; }
-                .year-n-plan { background: #e3f2fd; font-style: italic; }
+                .year-n-plan { background: var(--ch-primary-light); font-style: italic; }
                 .year-n1 { background: #f1f8e9; }
                 .year-n2 { background: #e8f5e9; }
                 
@@ -532,7 +532,7 @@ const PlanningV4 = {
                     ${this.renderTable()}
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>Legenda / Legend:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>[Calendar] Vsak izdelek ima 6 vrstic: N-2, N-1, N (Dejanske+Plan), N (Samo Plan), N+1, N+2</li>
@@ -720,7 +720,7 @@ const PlanningV4 = {
         const customers = window.CRMData.getCustomers();
         let html = `
             <tr class="customer-header-row">
-                <td colspan="100" style="background: #e3f2fd; padding: 8px; font-weight: 600;">
+                <td colspan="100" style="background: var(--ch-primary-light); padding: 8px; font-weight: 600;">
                     [Users] Customer Breakdown for ${product.name}
                 </td>
             </tr>
@@ -732,7 +732,7 @@ const PlanningV4 = {
         topCustomers.forEach(customer => {
             const customerData = this.getCustomerPlanningData(product.id, customer.id);
             html += `
-                <tr class="customer-row" style="background: #f5f5f5;">
+                <tr class="customer-row" style="background: var(--ch-gray-100);">
                     <td class="customer-name" style="padding-left: 20px; font-size: 13px;">
                         <strong>${customer.code}</strong><br>
                         ${customer.name}<br>
@@ -888,7 +888,7 @@ const PlanningV4 = {
                         <div style="margin-top: 8px;">
                             <button class="expand-customers-btn" 
                                     onclick="PlanningV4.toggleCustomerView('${product.id}')"
-                                    style="background: #2196f3; color: white; border: none; 
+                                    style="background: var(--ch-primary); color: white; border: none; 
                                            padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;"
                                     title="Show customer breakdown">
                                 <span>${isExpanded ? '▼' : '▶'}</span> [Users] Customers

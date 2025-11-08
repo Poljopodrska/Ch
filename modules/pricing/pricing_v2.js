@@ -417,7 +417,7 @@ const PricingV2 = {
                 }
                 
                 .pricing-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     padding: 25px;
                     border-radius: 10px;
@@ -454,7 +454,7 @@ const PricingV2 = {
                 }
                 
                 .header-controls button.active {
-                    background: #4caf50;
+                    background: var(--ch-success);
                 }
                 
                 .pricing-list {
@@ -473,7 +473,7 @@ const PricingV2 = {
                 }
                 
                 .group-header {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     padding: 15px;
                     cursor: pointer;
                     display: flex;
@@ -485,7 +485,7 @@ const PricingV2 = {
                 }
                 
                 .group-header:hover {
-                    background: #eeeeee;
+                    background: var(--ch-gray-200);
                 }
                 
                 .group-content {
@@ -509,7 +509,7 @@ const PricingV2 = {
                 }
                 
                 .subgroup-header {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     cursor: pointer;
                     display: flex;
@@ -521,7 +521,7 @@ const PricingV2 = {
                 }
                 
                 .subgroup-header:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .subgroup-content {
@@ -562,7 +562,7 @@ const PricingV2 = {
                 }
                 
                 .pricing-table thead {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .pricing-table th {
@@ -581,12 +581,12 @@ const PricingV2 = {
                 }
                 
                 .product-row:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .product-row .code {
                     font-weight: 600;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
                 
                 .product-row .name {
@@ -615,23 +615,23 @@ const PricingV2 = {
                 
                 .margin-percent.good {
                     background: #c8e6c9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
                 
                 .margin-percent.medium {
                     background: #fff3e0;
-                    color: #ef6c00;
+                    color: var(--ch-warning);
                 }
                 
                 .margin-percent.low {
                     background: #ffebee;
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
                 
                 .pricing-table input {
                     width: 80px;
                     padding: 4px;
-                    border: 1px solid #2196f3;
+                    border: 1px solid var(--ch-primary);
                     border-radius: 4px;
                     text-align: right;
                     font-weight: 600;
@@ -661,9 +661,9 @@ const PricingV2 = {
                     justify-content: space-between;
                     align-items: center;
                     padding: 15px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 8px;
-                    border-left: 4px solid #2196f3;
+                    border-left: 4px solid var(--ch-primary);
                 }
                 
                 .stat-label {
@@ -674,7 +674,7 @@ const PricingV2 = {
                 .stat-value {
                     font-size: 24px;
                     font-weight: bold;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
                 
                 .group-content.collapsed,

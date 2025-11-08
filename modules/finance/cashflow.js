@@ -283,7 +283,7 @@ const CashFlow = {
 
                 .save-button {
                     padding: 10px 20px;
-                    background: #4CAF50;
+                    background: var(--ch-success);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -302,7 +302,7 @@ const CashFlow = {
 
                 .calculate-button {
                     padding: 10px 20px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -312,7 +312,7 @@ const CashFlow = {
 
                 .export-button {
                     padding: 10px 20px;
-                    background: #2196F3;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -322,7 +322,7 @@ const CashFlow = {
 
                 .unsaved-indicator {
                     padding: 5px 10px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border-radius: 3px;
                     font-size: 12px;
@@ -347,7 +347,7 @@ const CashFlow = {
                 }
 
                 .cashflow-table th {
-                    background: #667eea;
+                    background: var(--ch-primary);
                     color: white;
                     padding: 8px 4px;
                     text-align: center;
@@ -368,7 +368,7 @@ const CashFlow = {
 
                 /* Month headers with expand/collapse */
                 .month-header {
-                    background: #667eea !important;
+                    background: var(--ch-primary) !important;
                     cursor: pointer;
                     user-select: none;
                     position: relative;
@@ -416,7 +416,7 @@ const CashFlow = {
 
                 .row-type-cell {
                     text-align: left !important;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     position: sticky;
                     left: 0;
                     z-index: 4;
@@ -428,7 +428,7 @@ const CashFlow = {
                 }
 
                 /* Row type specific styling */
-                .row-cashBeginning { background: #e3f2fd; }
+                .row-cashBeginning { background: var(--ch-primary-light); }
                 .row-receipts { background: #e8f5e9; }
                 .row-disbursements { background: #ffe0e0; }
                 .row-disbursementsNujni { background: #ffebee; }
@@ -453,20 +453,20 @@ const CashFlow = {
 
                 /* Cell styling based on data */
                 .cell-past {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     color: #7f8c8d;
                 }
 
                 .cell-current {
                     background: #fff3e0;
-                    color: #e65100;
+                    color: var(--ch-warning);
                     font-weight: bold;
                     border: 2px solid #ff9800;
                 }
 
                 .cell-future {
-                    background: #e3f2fd;
-                    color: #1565c0;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
 
                 .cell-total {
@@ -482,8 +482,8 @@ const CashFlow = {
                 }
 
                 .editable-cell:hover {
-                    background: #bbdefb !important;
-                    box-shadow: inset 0 0 0 2px #2196f3;
+                    background: var(--ch-primary-light) !important;
+                    box-shadow: inset 0 0 0 2px var(--ch-primary);
                 }
 
                 .editable-cell.editing {
@@ -512,7 +512,7 @@ const CashFlow = {
 
                 .edited-cell::after {
                     content: '*';
-                    color: #4CAF50;
+                    color: var(--ch-success);
                     font-weight: bold;
                     position: absolute;
                     top: 1px;
@@ -522,15 +522,15 @@ const CashFlow = {
 
                 /* Positive/Negative values */
                 .cell-positive {
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 .cell-negative {
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
 
                 .weekend-cell {
-                    background: #fafafa !important;
+                    background: var(--ch-gray-100) !important;
                 }
             </style>
 
@@ -558,7 +558,7 @@ const CashFlow = {
                     ${this.renderTable()}
                 </div>
 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>Cash Flow Planning:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li><strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>

@@ -545,31 +545,31 @@ const PricingV4 = {
                     <h3>[Chart] ${this.getText('priceLevels')}:</h3>
                     <div class="legend-items">
                         <div class="legend-item">
-                            <span class="legend-color" style="background: #4CAF50;"></span>
+                            <span class="legend-color" style="background: var(--ch-success);"></span>
                             <div class="legend-text">
                                 <strong>${this.getText('lcLabel')}</strong> - ${this.getText('lcDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-color" style="background: #2196F3;"></span>
+                            <span class="legend-color" style="background: var(--ch-primary);"></span>
                             <div class="legend-text">
                                 <strong>${this.getText('c0Label')}</strong> - ${this.getText('c0Desc')}
                             </div>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-color" style="background: #FF9800;"></span>
+                            <span class="legend-color" style="background: var(--ch-warning);"></span>
                             <div class="legend-text">
                                 <strong>${this.getText('cminLabel')}</strong> - ${this.getText('cminDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-color" style="background: #9C27B0;"></span>
+                            <span class="legend-color" style="background: var(--ch-primary);"></span>
                             <div class="legend-text">
                                 <strong>${this.getText('bufferLabel')}</strong> - ${this.getText('bufferDesc')}
                             </div>
                         </div>
                         <div class="legend-item">
-                            <span class="legend-color" style="background: #F44336;"></span>
+                            <span class="legend-color" style="background: var(--ch-error);"></span>
                             <div class="legend-text">
                                 <strong>${this.getText('discountsLabel')}</strong> - ${this.getText('discountsDesc')}
                             </div>
@@ -1158,16 +1158,16 @@ const PricingV4 = {
 
         html += `
             <div class="flow-segment" style="width: ${lcWidth}px;" title="LC: €${basePrice.lc.toFixed(2)}">
-                <div class="segment-background" style="background: #4CAF5030; width: ${lcWidth}px;"></div>
-                <div class="segment-covered" style="background: #4CAF50; width: ${lcCoveredWidth}px;"></div>
+                <div class="segment-background" style="background: var(--ch-success)30; width: ${lcWidth}px;"></div>
+                <div class="segment-covered" style="background: var(--ch-success); width: ${lcCoveredWidth}px;"></div>
             </div>
         `;
 
         if (ohWidth > 0) {
             html += `
                 <div class="flow-segment" style="width: ${ohWidth}px;" title="OH: €${(basePrice.c0 - basePrice.lc).toFixed(2)}">
-                    <div class="segment-background" style="background: #2196F330; width: ${ohWidth}px;"></div>
-                    <div class="segment-covered" style="background: #2196F3; width: ${ohCoveredWidth}px;"></div>
+                    <div class="segment-background" style="background: var(--ch-primary)30; width: ${ohWidth}px;"></div>
+                    <div class="segment-covered" style="background: var(--ch-primary); width: ${ohCoveredWidth}px;"></div>
                 </div>
             `;
         }
@@ -1175,8 +1175,8 @@ const PricingV4 = {
         if (minProfitWidth > 0) {
             html += `
                 <div class="flow-segment" style="width: ${minProfitWidth}px;" title="Min Profit: €${(basePrice.cmin - basePrice.c0).toFixed(2)}">
-                    <div class="segment-background" style="background: #FF980030; width: ${minProfitWidth}px;"></div>
-                    <div class="segment-covered" style="background: #FF9800; width: ${minProfitCoveredWidth}px;"></div>
+                    <div class="segment-background" style="background: var(--ch-warning)30; width: ${minProfitWidth}px;"></div>
+                    <div class="segment-covered" style="background: var(--ch-warning); width: ${minProfitCoveredWidth}px;"></div>
                 </div>
             `;
         }
@@ -1184,8 +1184,8 @@ const PricingV4 = {
         if (bufferWidth > 0) {
             html += `
                 <div class="flow-segment" style="width: ${bufferWidth}px;" title="Buffer: €${(custPricing.strategicCmin - basePrice.cmin).toFixed(2)}">
-                    <div class="segment-background" style="background: #9C27B030; width: ${bufferWidth}px;"></div>
-                    <div class="segment-covered" style="background: #9C27B0; width: ${bufferCoveredWidth}px;"></div>
+                    <div class="segment-background" style="background: var(--ch-primary)30; width: ${bufferWidth}px;"></div>
+                    <div class="segment-covered" style="background: var(--ch-primary); width: ${bufferCoveredWidth}px;"></div>
                 </div>
             `;
         }
@@ -1193,8 +1193,8 @@ const PricingV4 = {
         if (discountWidth > 0) {
             html += `
                 <div class="flow-segment discount-segment" style="width: ${discountWidth}px;" title="Discounts: €${(custPricing.cp - custPricing.realizedPrice).toFixed(2)}">
-                    <div class="segment-background" style="background: #F4433630; width: ${discountWidth}px;"></div>
-                    <div class="segment-covered" style="background: #F44336; width: ${discountWidth}px;"></div>
+                    <div class="segment-background" style="background: var(--ch-error)30; width: ${discountWidth}px;"></div>
+                    <div class="segment-covered" style="background: var(--ch-error); width: ${discountWidth}px;"></div>
                 </div>
             `;
         }
@@ -1908,7 +1908,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     align-items: center;
                     gap: 12px;
                     padding: 10px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 6px;
                 }
 
@@ -1985,7 +1985,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .subgroup-header {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     cursor: pointer;
                     display: flex;
@@ -1997,7 +1997,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .subgroup-header:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
 
                 .subgroup-content {
@@ -2059,10 +2059,10 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     min-width: 70px;
                 }
 
-                .price-level.lc { background: #4CAF5020; }
-                .price-level.c0 { background: #2196F320; }
-                .price-level.cmin { background: #FF980020; }
-                .price-level.strategic { background: #9C27B020; text-align: right; }
+                .price-level.lc { background: var(--ch-success)20; }
+                .price-level.c0 { background: var(--ch-primary)20; }
+                .price-level.cmin { background: var(--ch-warning)20; }
+                .price-level.strategic { background: var(--ch-primary)20; text-align: right; }
 
                 .pricing-table td {
                     padding: 10px 8px;
@@ -2075,12 +2075,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .product-row:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
 
                 .product-row .code {
                     font-weight: 600;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
 
                 .product-row .name small {
@@ -2093,14 +2093,14 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .expand-customers-btn {
-                    background: #e3f2fd;
-                    border: 1px solid #2196f3;
+                    background: var(--ch-primary-light);
+                    border: 1px solid var(--ch-primary);
                     padding: 6px 12px;
                     border-radius: 4px;
                     cursor: pointer;
                     font-size: 12px;
                     font-weight: 600;
-                    color: #1976d2;
+                    color: var(--ch-primary-dark);
                     transition: all 0.2s;
                     display: inline-flex;
                     align-items: center;
@@ -2108,17 +2108,17 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .expand-customers-btn:hover {
-                    background: #bbdefb;
+                    background: var(--ch-primary-light);
                 }
 
                 .expand-customers-btn.expanded {
-                    background: #2196f3;
+                    background: var(--ch-primary);
                     color: white;
                 }
 
                 .customer-row {
-                    background: #f8f9fa;
-                    border-left: 3px solid #2196f3;
+                    background: var(--ch-gray-100);
+                    border-left: 3px solid var(--ch-primary);
                 }
 
                 .customer-row:hover {
@@ -2155,16 +2155,16 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .price-simple.strategic {
-                    background: #9C27B010;
+                    background: var(--ch-primary)10;
                 }
 
                 .price-simple.cp {
-                    background: #2196F310;
+                    background: var(--ch-primary)10;
                 }
 
                 .price-simple.realized {
-                    background: #4CAF5010;
-                    color: #2e7d32;
+                    background: var(--ch-success)10;
+                    color: var(--ch-success);
                 }
 
                 .status-check {
@@ -2175,12 +2175,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .status-check.pass {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 .status-check.fail {
                     background: #ffebee;
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
 
                 .status-icon {
@@ -2198,16 +2198,16 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .status-check-product.pass {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 .status-check-product.fail {
                     background: #ffebee;
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
 
                 .status-check-product.neutral {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     color: #9e9e9e;
                 }
 
@@ -2236,23 +2236,23 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .expand-detail-btn:hover {
-                    background: #e3f2fd;
-                    border-color: #2196f3;
+                    background: var(--ch-primary-light);
+                    border-color: var(--ch-primary);
                 }
 
                 .expand-detail-btn.expanded {
-                    background: #2196f3;
-                    border-color: #2196f3;
+                    background: var(--ch-primary);
+                    border-color: var(--ch-primary);
                     color: white;
                 }
 
                 .customer-info strong {
-                    color: #1976d2;
+                    color: var(--ch-primary-dark);
                 }
 
                 .cp-price {
                     text-align: right;
-                    color: #9C27B0;
+                    color: var(--ch-primary);
                     font-weight: 600;
                 }
 
@@ -2261,13 +2261,13 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .realized-cell strong {
-                    color: #2e7d32;
+                    color: var(--ch-success);
                     font-size: 14px;
                 }
 
                 .buffer-badge {
                     display: inline-block;
-                    background: #9C27B0;
+                    background: var(--ch-primary);
                     color: white;
                     padding: 2px 6px;
                     border-radius: 3px;
@@ -2277,7 +2277,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .discount-badge {
                     display: inline-block;
-                    background: #F44336;
+                    background: var(--ch-error);
                     color: white;
                     padding: 3px 8px;
                     border-radius: 4px;
@@ -2292,7 +2292,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     border-radius: 3px;
                 }
 
-                .coverage.full { background: #4CAF50; color: white; }
+                .coverage.full { background: var(--ch-success); color: white; }
                 .coverage.good { background: #8BC34A; color: white; }
                 .coverage.medium { background: #FFC107; color: #333; }
                 .coverage.low { background: #FF5722; color: white; }
@@ -2309,7 +2309,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     border-radius: 4px;
                     overflow: hidden;
                     position: relative;
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     margin-bottom: 4px;
                 }
 
@@ -2321,7 +2321,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .flow-segment.discount-segment {
-                    border-left: 2px dashed #F44336;
+                    border-left: 2px dashed var(--ch-error);
                 }
 
                 .segment-background {
@@ -2363,31 +2363,31 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .flow-arrow {
-                    color: #9C27B0;
+                    color: var(--ch-primary);
                 }
 
                 .flow-result {
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 /* Detailed Breakdown */
                 .detail-row {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
 
                 .detailed-breakdown {
                     padding: 20px;
                     background: white;
-                    border: 2px solid #e3f2fd;
+                    border: 2px solid var(--ch-primary-light);
                     border-radius: 8px;
                     margin: 10px;
                 }
 
                 .detailed-breakdown h4 {
                     margin: 0 0 20px 0;
-                    color: #1976d2;
+                    color: var(--ch-primary-dark);
                     font-size: 18px;
-                    border-bottom: 2px solid #e3f2fd;
+                    border-bottom: 2px solid var(--ch-primary-light);
                     padding-bottom: 10px;
                 }
 
@@ -2423,11 +2423,11 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .breakdown-table .value.good {
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 .breakdown-table .value.bad {
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
 
                 .breakdown-table .note {
@@ -2438,12 +2438,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .breakdown-table .subtotal {
                     border-top: 1px solid #bbb;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
 
                 .breakdown-table .total {
                     border-top: 2px solid #333;
-                    background: #e3f2fd;
+                    background: var(--ch-primary-light);
                     font-size: 14px;
                 }
 
@@ -2457,12 +2457,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .status-good {
                     background: #c8e6c9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
 
                 .status-bad {
                     background: #ffcdd2;
-                    color: #c62828;
+                    color: var(--ch-error);
                 }
 
                 .breakdown-note {
@@ -2499,9 +2499,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     justify-content: space-between;
                     align-items: center;
                     padding: 15px 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 8px;
-                    border-left: 4px solid #2196f3;
+                    border-left: 4px solid var(--ch-primary);
                 }
 
                 .stat-label {
@@ -2512,20 +2512,20 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 .stat-value {
                     font-size: 24px;
                     font-weight: bold;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
 
                 .stat-value.good {
-                    color: #4CAF50;
+                    color: var(--ch-success);
                 }
 
                 .stat-value.warning {
-                    color: #FF9800;
+                    color: var(--ch-warning);
                 }
 
                 .policy-reminder {
-                    background: #e3f2fd;
-                    border-left: 4px solid #2196f3;
+                    background: var(--ch-primary-light);
+                    border-left: 4px solid var(--ch-primary);
                     padding: 15px;
                     border-radius: 4px;
                     font-size: 13px;
@@ -2639,17 +2639,17 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .format-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     font-weight: 600;
                     color: #333;
                 }
 
                 .format-table tr:nth-child(even) {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                 }
 
                 .format-table code {
-                    background: #e3f2fd;
+                    background: var(--ch-primary-light);
                     padding: 2px 6px;
                     border-radius: 3px;
                     font-family: 'Courier New', monospace;
@@ -2657,8 +2657,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .info-box {
-                    background: #e3f2fd;
-                    border-left: 4px solid #2196f3;
+                    background: var(--ch-primary-light);
+                    border-left: 4px solid var(--ch-primary);
                     padding: 15px;
                     margin: 15px 0;
                     border-radius: 4px;
@@ -2667,7 +2667,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .info-box strong {
-                    color: #1976d2;
+                    color: var(--ch-primary-dark);
                 }
 
                 .warning-box {
@@ -2681,7 +2681,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .upload-area {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border: 2px dashed #2196f3;
                     border-radius: 8px;
                     padding: 30px;
@@ -2713,19 +2713,19 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .btn-select-file {
-                    background: #2196f3;
+                    background: var(--ch-primary);
                     color: white;
                     margin: 10px 0;
                 }
 
                 .btn-select-file:hover {
-                    background: #1976d2;
+                    background: var(--ch-primary-dark);
                     transform: translateY(-2px);
                     box-shadow: 0 4px 12px rgba(33,150,243,0.4);
                 }
 
                 .btn-process {
-                    background: #4CAF50;
+                    background: var(--ch-success);
                     color: white;
                 }
 
@@ -2742,7 +2742,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .btn-cancel {
-                    background: #f44336;
+                    background: var(--ch-error);
                     color: white;
                 }
 
@@ -2753,7 +2753,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .modal-footer {
                     padding: 20px 25px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 0 0 10px 10px;
                     display: flex;
                     justify-content: flex-end;
@@ -2783,7 +2783,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .factors-table tbody tr:hover {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
 
                 .factors-table td {
@@ -2803,19 +2803,19 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .factor-input:focus {
                     outline: none;
-                    border-color: #2196f3;
+                    border-color: var(--ch-primary);
                     box-shadow: 0 0 5px rgba(33,150,243,0.3);
                 }
 
                 .factors-info {
-                    background: #e3f2fd;
+                    background: var(--ch-primary-light);
                     padding: 15px;
                     border-radius: 6px;
-                    border-left: 4px solid #2196f3;
+                    border-left: 4px solid var(--ch-primary);
                 }
 
                 .btn-edit-factors {
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     padding: 10px 18px;
                     border: none;
@@ -2860,20 +2860,20 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .upload-status.success {
                     background: #c8e6c9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                     border-left: 4px solid #4CAF50;
                 }
 
                 .upload-status.error {
                     background: #ffcdd2;
-                    color: #c62828;
+                    color: var(--ch-error);
                     border-left: 4px solid #f44336;
                 }
 
                 .upload-status.info {
-                    background: #e3f2fd;
-                    color: #1976d2;
-                    border-left: 4px solid #2196f3;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
+                    border-left: 4px solid var(--ch-primary);
                 }
 
                 .upload-status.processing {
@@ -2963,7 +2963,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 /* Industry summary styling */
                 .industry-summary-row {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 8px;
                     margin-bottom: 20px;
                     padding: 20px;
@@ -3042,8 +3042,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .industry-pricing-flow .price-tag.lc {
-                    background: #e3f2fd;
-                    color: #1976d2;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
 
                 .industry-pricing-flow .price-tag.c0 {
@@ -3058,12 +3058,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .industry-pricing-flow .price-tag.cp {
                     background: #f3e5f5;
-                    color: #7b1fa2;
+                    color: var(--ch-primary);
                 }
 
                 .industry-pricing-flow .price-tag.realized {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                     font-size: 15px;
                     font-weight: 700;
                 }

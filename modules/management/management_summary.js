@@ -231,16 +231,16 @@ const ManagementSummary = {
                 }
                 
                 .production-card {
-                    border-color: #3498db;
+                    border-color: var(--ch-primary);
                     background: linear-gradient(135deg, #fff 0%, #e3f2fd 100%);
                 }
                 
                 .production-card:hover {
-                    border-color: #2196f3;
+                    border-color: var(--ch-primary);
                 }
                 
                 .sales-card {
-                    border-color: #27ae60;
+                    border-color: var(--ch-success);
                     background: linear-gradient(135deg, #fff 0%, #e8f5e9 100%);
                 }
                 
@@ -281,12 +281,12 @@ const ManagementSummary = {
                 .card-action {
                     margin-top: 20px;
                     text-align: right;
-                    color: #3498db;
+                    color: var(--ch-primary);
                     font-weight: 600;
                 }
                 
                 .production-card .card-action {
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
                 
                 .sales-card .card-action {
@@ -315,7 +315,7 @@ const ManagementSummary = {
                 .stat-item {
                     text-align: center;
                     padding: 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 10px;
                 }
                 
@@ -345,7 +345,7 @@ const ManagementSummary = {
                 top: 50%;
                 transform: translateY(-50%);
                 padding: 10px 20px;
-                background: #f8f9fa;
+                background: var(--ch-gray-100);
                 border: 1px solid #dee2e6;
                 border-radius: 8px;
                 cursor: pointer;
@@ -384,7 +384,7 @@ const ManagementSummary = {
             
             .btn-primary {
                 padding: 12px 30px;
-                background: #3498db;
+                background: var(--ch-primary);
                 color: white;
                 border: none;
                 border-radius: 8px;
@@ -394,7 +394,7 @@ const ManagementSummary = {
             }
             
             .btn-primary:hover {
-                background: #2980b9;
+                background: var(--ch-primary-dark);
                 transform: translateY(-2px);
             }
         `;

@@ -257,7 +257,7 @@ const StockRawMaterials = {
             <style>
                 .stock-raw-materials {
                     padding: 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     min-height: 100vh;
                 }
                 
@@ -295,7 +295,7 @@ const StockRawMaterials = {
                 }
                 
                 .tab-btn:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .tab-btn.active {
@@ -319,12 +319,12 @@ const StockRawMaterials = {
                 }
                 
                 .btn-order {
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 
                 .btn-order:hover {
-                    background: #2980b9;
+                    background: var(--ch-primary-dark);
                 }
                 
                 .sync-status {
@@ -335,17 +335,17 @@ const StockRawMaterials = {
                 
                 .sync-indicator {
                     font-size: 14px;
-                    color: #27ae60;
+                    color: var(--ch-success);
                     font-weight: 500;
                 }
                 
                 .btn-export {
-                    background: #8e44ad;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 
                 .btn-export:hover {
-                    background: #7d3c98;
+                    background: var(--ch-primary-dark);
                 }
                 
                 .stock-summary {
@@ -393,7 +393,7 @@ const StockRawMaterials = {
                 }
                 
                 .category-header {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 10px 15px;
                     border-left: 4px solid #e67e22;
                     margin-bottom: 15px;
@@ -407,7 +407,7 @@ const StockRawMaterials = {
                 }
                 
                 .stock-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     text-align: left;
                     font-weight: 600;
@@ -429,7 +429,7 @@ const StockRawMaterials = {
                 .stock-bar {
                     flex: 1;
                     height: 20px;
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     border-radius: 10px;
                     overflow: hidden;
                     position: relative;
@@ -463,22 +463,22 @@ const StockRawMaterials = {
                 
                 .status-critical {
                     background: #ffe5e5;
-                    color: #e74c3c;
+                    color: var(--ch-error);
                 }
                 
                 .status-warning {
                     background: #fff3cd;
-                    color: #f39c12;
+                    color: var(--ch-warning);
                 }
                 
                 .status-good {
                     background: #d4edda;
-                    color: #27ae60;
+                    color: var(--ch-success);
                 }
                 
                 .status-ordered {
                     background: #cce5ff;
-                    color: #3498db;
+                    color: var(--ch-primary);
                 }
                 
                 .editable {
@@ -489,7 +489,7 @@ const StockRawMaterials = {
                 }
                 
                 .editable:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .editing {

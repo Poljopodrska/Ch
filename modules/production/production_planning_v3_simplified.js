@@ -332,7 +332,7 @@ const ProductionPlanningV3 = {
                     gap: 20px;
                     margin: 15px 0;
                     padding: 10px;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     border-radius: 5px;
                     font-size: 13px;
                 }
@@ -350,14 +350,14 @@ const ProductionPlanningV3 = {
                     display: inline-block;
                 }
                 
-                .stock-critical { background: #f44336; }
-                .stock-low { background: #ff9800; }
-                .stock-normal { background: #4caf50; }
-                .stock-high { background: #2196f3; }
+                .stock-critical { background: var(--ch-error); }
+                .stock-low { background: var(--ch-warning); }
+                .stock-normal { background: var(--ch-success); }
+                .stock-high { background: var(--ch-primary); }
                 
                 .save-button {
                     padding: 10px 20px;
-                    background: #4CAF50;
+                    background: var(--ch-success);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -376,7 +376,7 @@ const ProductionPlanningV3 = {
                 
                 .calculate-button {
                     padding: 10px 20px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -386,7 +386,7 @@ const ProductionPlanningV3 = {
                 
                 .export-button {
                     padding: 10px 20px;
-                    background: #2196F3;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -396,7 +396,7 @@ const ProductionPlanningV3 = {
                 
                 .unsaved-indicator {
                     padding: 5px 10px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border-radius: 3px;
                     font-size: 12px;
@@ -421,7 +421,7 @@ const ProductionPlanningV3 = {
                 }
                 
                 .production-v3-table th {
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                     color: white;
                     padding: 8px 4px;
                     text-align: center;
@@ -436,31 +436,31 @@ const ProductionPlanningV3 = {
                 .production-v3-table th.product-header {
                     text-align: left;
                     min-width: 200px;
-                    background: #0d47a1;
+                    background: var(--ch-primary-dark);
                     padding: 8px;
                 }
                 
                 .production-v3-table th.row-type-header {
                     text-align: left;
                     min-width: 150px;
-                    background: #0d47a1;
+                    background: var(--ch-primary-dark);
                     padding: 8px;
                 }
                 
                 /* Month headers with expand/collapse */
                 .month-header {
-                    background: #1976d2 !important;
+                    background: var(--ch-primary-dark) !important;
                     cursor: pointer;
                     user-select: none;
                     position: relative;
                 }
                 
                 .month-header:hover {
-                    background: #1565c0 !important;
+                    background: var(--ch-primary-dark) !important;
                 }
                 
                 .week-header {
-                    background: #42a5f5 !important;
+                    background: var(--ch-primary-light) !important;
                     font-size: 11px;
                     cursor: pointer;
                 }
@@ -470,7 +470,7 @@ const ProductionPlanningV3 = {
                 }
                 
                 .day-header {
-                    background: #64b5f6 !important;
+                    background: var(--ch-primary-light) !important;
                     font-size: 10px;
                 }
                 
@@ -498,7 +498,7 @@ const ProductionPlanningV3 = {
                 .product-cell {
                     text-align: left !important;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -508,7 +508,7 @@ const ProductionPlanningV3 = {
                 
                 .row-type-cell {
                     text-align: left !important;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     position: sticky;
                     left: 200px;
                     z-index: 4;
@@ -519,49 +519,49 @@ const ProductionPlanningV3 = {
                 }
                 
                 /* Row type specific styling */
-                .row-sales { background: #e3f2fd; }
+                .row-sales { background: var(--ch-primary-light); }
                 .row-stock { background: #fff3e0; }
                 .row-production-plan { background: #e8f5e9; }
-                .row-actual { background: #f5f5f5; }
+                .row-actual { background: var(--ch-gray-100); }
                 
                 /* Cell styling based on data */
                 .cell-past { 
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     color: #7f8c8d;
                 }
                 
                 .cell-current {
                     background: #fff3e0;
-                    color: #e65100;
+                    color: var(--ch-warning);
                     font-weight: bold;
                     border: 2px solid #ff9800;
                 }
                 
                 .cell-future {
-                    background: #e3f2fd;
-                    color: #1565c0;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
                 
                 /* Stock level colors */
                 .stock-critical-cell {
                     background: #ffebee !important;
-                    color: #c62828;
+                    color: var(--ch-error);
                     font-weight: bold;
                 }
                 
                 .stock-low-cell {
                     background: #fff3e0 !important;
-                    color: #ef6c00;
+                    color: var(--ch-warning);
                 }
                 
                 .stock-normal-cell {
                     background: #e8f5e9 !important;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
                 
                 .stock-high-cell {
-                    background: #e3f2fd !important;
-                    color: #1565c0;
+                    background: var(--ch-primary-light) !important;
+                    color: var(--ch-primary-dark);
                 }
                 
                 .cell-total {
@@ -577,8 +577,8 @@ const ProductionPlanningV3 = {
                 }
                 
                 .editable-cell:hover {
-                    background: #bbdefb !important;
-                    box-shadow: inset 0 0 0 2px #2196f3;
+                    background: var(--ch-primary-light) !important;
+                    box-shadow: inset 0 0 0 2px var(--ch-primary);
                 }
                 
                 .editable-cell.editing {
@@ -607,7 +607,7 @@ const ProductionPlanningV3 = {
                 
                 .edited-cell::after {
                     content: '*';
-                    color: #4CAF50;
+                    color: var(--ch-success);
                     font-weight: bold;
                     position: absolute;
                     top: 1px;
@@ -617,13 +617,13 @@ const ProductionPlanningV3 = {
                 
                 .product-separator {
                     height: 3px;
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                 }
                 
                 /* Row labels */
-                .row-label-sales { color: #1565c0; font-weight: 600; }
-                .row-label-stock { color: #ef6c00; font-weight: 600; }
-                .row-label-production { color: #2e7d32; font-weight: 600; }
+                .row-label-sales { color: var(--ch-primary-dark); font-weight: 600; }
+                .row-label-stock { color: var(--ch-warning); font-weight: 600; }
+                .row-label-production { color: var(--ch-success); font-weight: 600; }
                 .row-label-actual { color: #616161; font-weight: 600; }
             </style>
             
@@ -665,7 +665,7 @@ const ProductionPlanningV3 = {
                     <button class="export-button" onclick="ProductionPlanningV3.exportData()">
                         [Folder] Export Data
                     </button>
-                    <button onclick="ProductionPlanningV3.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="ProductionPlanningV3.resetData()" style="padding: 10px 20px; background: var(--ch-error); color: white; border: none; border-radius: 5px; cursor: pointer;">
                         [Refresh] Reset
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
@@ -677,7 +677,7 @@ const ProductionPlanningV3 = {
                     ${this.renderTable()}
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>[Chart] Simplified Production Planning:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>[Up] <strong>Sales Plan:</strong> Expected sales (editable)</li>

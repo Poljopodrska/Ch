@@ -529,7 +529,7 @@ const BOMV2Advanced = {
                 .product-item {
                     padding: 10px;
                     margin-bottom: 5px;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     border-radius: 5px;
                     cursor: pointer;
                     transition: all 0.3s;
@@ -541,7 +541,7 @@ const BOMV2Advanced = {
                 }
                 
                 .product-item.active {
-                    background: #7b1fa2;
+                    background: var(--ch-primary);
                     color: white;
                     font-weight: bold;
                 }
@@ -562,7 +562,7 @@ const BOMV2Advanced = {
                 
                 .tab-button {
                     padding: 10px 20px;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     border: none;
                     border-radius: 5px 5px 0 0;
                     cursor: pointer;
@@ -571,11 +571,11 @@ const BOMV2Advanced = {
                 }
                 
                 .tab-button:hover {
-                    background: #e0e0e0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .tab-button.active {
-                    background: #7b1fa2;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 
@@ -645,17 +645,17 @@ const BOMV2Advanced = {
                 
                 .editable-input:focus {
                     outline: none;
-                    border-color: #7b1fa2;
+                    border-color: var(--ch-primary);
                     box-shadow: 0 0 0 2px rgba(123, 31, 162, 0.1);
                 }
                 
                 .editable-input:hover {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
                 
                 .add-button {
                     padding: 8px 16px;
-                    background: #4caf50;
+                    background: var(--ch-success);
                     color: white;
                     border: none;
                     border-radius: 4px;
@@ -670,7 +670,7 @@ const BOMV2Advanced = {
                 
                 .remove-button {
                     padding: 5px 10px;
-                    background: #f44336;
+                    background: var(--ch-error);
                     color: white;
                     border: none;
                     border-radius: 4px;
@@ -685,7 +685,7 @@ const BOMV2Advanced = {
                 .save-section {
                     margin-top: 20px;
                     padding: 15px;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     border-radius: 5px;
                     display: flex;
                     justify-content: space-between;
@@ -694,7 +694,7 @@ const BOMV2Advanced = {
                 
                 .save-button {
                     padding: 10px 25px;
-                    background: #7b1fa2;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -714,7 +714,7 @@ const BOMV2Advanced = {
                 
                 .export-button {
                     padding: 10px 25px;
-                    background: #2196f3;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -723,12 +723,12 @@ const BOMV2Advanced = {
                 }
                 
                 .export-button:hover {
-                    background: #1976d2;
+                    background: var(--ch-primary-dark);
                 }
                 
                 .unsaved-indicator {
                     padding: 5px 10px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border-radius: 3px;
                     font-size: 12px;
@@ -763,7 +763,7 @@ const BOMV2Advanced = {
                 .cost-total {
                     font-weight: bold;
                     font-size: 16px;
-                    color: #e65100;
+                    color: var(--ch-warning);
                     border-top: 2px solid #ffcc80;
                     padding-top: 10px;
                     margin-top: 10px;
@@ -903,7 +903,7 @@ const BOMV2Advanced = {
                     <button class="export-button" onclick="BOMV2Advanced.exportBOM()">
                         [Folder] Export to JSON
                     </button>
-                    <button class="export-button" onclick="BOMV2Advanced.exportToSQL()" style="background: #4caf50;">
+                    <button class="export-button" onclick="BOMV2Advanced.exportToSQL()" style="background: var(--ch-success);">
                         🗄️ Generate SQL
                     </button>
                 </div>
@@ -1025,7 +1025,7 @@ const BOMV2Advanced = {
                            onchange="BOMV2Advanced.updateEnergy('${item.id}', 'consumption', this.value)"
                            placeholder="Amount">
                     <input type="text" class="editable-input" value="${item.unit}" readonly
-                           style="background: #f5f5f5;">
+                           style="background: var(--ch-gray-100);">
                     <input type="number" class="editable-input" value="${item.costPerUnit}" step="0.001"
                            onchange="BOMV2Advanced.updateEnergy('${item.id}', 'costPerUnit', this.value)"
                            placeholder="Cost">
@@ -1087,7 +1087,7 @@ const BOMV2Advanced = {
                             Total Water (L)
                         </label>
                         <input type="number" class="editable-input" value="${water.total}" readonly
-                               style="width: 100%; background: #f0f0f0; font-weight: bold;">
+                               style="width: 100%; background: var(--ch-gray-200); font-weight: bold;">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 5px; color: #666; font-size: 13px;">

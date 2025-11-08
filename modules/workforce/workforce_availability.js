@@ -195,7 +195,7 @@ const WorkforceAvailability = {
             <style>
                 .workforce-availability {
                     padding: 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     min-height: 100vh;
                 }
                 
@@ -248,13 +248,13 @@ const WorkforceAvailability = {
                 }
                 
                 .tab-btn:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .tab-btn.active {
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
-                    border-color: #3498db;
+                    border-color: var(--ch-primary);
                 }
                 
                 .action-buttons {
@@ -272,7 +272,7 @@ const WorkforceAvailability = {
                 }
                 
                 .btn-nav {
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     color: #2c3e50;
                 }
                 
@@ -281,7 +281,7 @@ const WorkforceAvailability = {
                 }
                 
                 .btn-add {
-                    background: #27ae60;
+                    background: var(--ch-success);
                     color: white;
                 }
                 
@@ -290,12 +290,12 @@ const WorkforceAvailability = {
                 }
                 
                 .btn-export {
-                    background: #8e44ad;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 
                 .btn-export:hover {
-                    background: #7d3c98;
+                    background: var(--ch-primary-dark);
                 }
                 
                 .legend {
@@ -339,7 +339,7 @@ const WorkforceAvailability = {
                 }
                 
                 .workforce-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 10px;
                     text-align: left;
                     font-weight: 600;
@@ -377,7 +377,7 @@ const WorkforceAvailability = {
                 }
                 
                 .btn-remove {
-                    background: #e74c3c;
+                    background: var(--ch-error);
                     color: white;
                     border: none;
                     padding: 4px 8px;
@@ -508,7 +508,7 @@ const WorkforceAvailability = {
                 }
                 
                 .btn-save {
-                    background: #27ae60;
+                    background: var(--ch-success);
                     color: white;
                     width: 100%;
                     padding: 10px;
@@ -551,7 +551,7 @@ const WorkforceAvailability = {
                 }
                 
                 .availability-option:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .option-value {
@@ -578,7 +578,7 @@ const WorkforceAvailability = {
                 
                 .custom-value button {
                     padding: 4px 12px;
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 4px;
@@ -586,12 +586,12 @@ const WorkforceAvailability = {
                 }
                 
                 .summary-row {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     font-weight: 600;
                 }
                 
                 .weekend {
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                 }
             </style>
         `;

@@ -409,7 +409,7 @@ const ProductionPlanningV2 = {
                     gap: 20px;
                     margin: 15px 0;
                     padding: 10px;
-                    background: #e3f2fd;
+                    background: var(--ch-primary-light);
                     border-radius: 5px;
                     font-size: 13px;
                 }
@@ -422,12 +422,12 @@ const ProductionPlanningV2 = {
                 
                 .info-label {
                     font-weight: 600;
-                    color: #1565c0;
+                    color: var(--ch-primary-dark);
                 }
                 
                 .save-button {
                     padding: 10px 20px;
-                    background: #4CAF50;
+                    background: var(--ch-success);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -446,7 +446,7 @@ const ProductionPlanningV2 = {
                 
                 .export-button {
                     padding: 10px 20px;
-                    background: #2196F3;
+                    background: var(--ch-primary);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -456,7 +456,7 @@ const ProductionPlanningV2 = {
                 
                 .capacity-button {
                     padding: 10px 20px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border: none;
                     border-radius: 5px;
@@ -466,7 +466,7 @@ const ProductionPlanningV2 = {
                 
                 .unsaved-indicator {
                     padding: 5px 10px;
-                    background: #ff9800;
+                    background: var(--ch-warning);
                     color: white;
                     border-radius: 3px;
                     font-size: 12px;
@@ -491,7 +491,7 @@ const ProductionPlanningV2 = {
                 }
                 
                 .production-table th {
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                     color: white;
                     padding: 8px 4px;
                     text-align: center;
@@ -506,31 +506,31 @@ const ProductionPlanningV2 = {
                 .production-table th.product-header {
                     text-align: left;
                     min-width: 200px;
-                    background: #0d47a1;
+                    background: var(--ch-primary-dark);
                     padding: 8px;
                 }
                 
                 .production-table th.year-header {
                     text-align: left;
                     min-width: 100px;
-                    background: #0d47a1;
+                    background: var(--ch-primary-dark);
                     padding: 8px;
                 }
                 
                 /* Month headers with expand/collapse */
                 .month-header {
-                    background: #1976d2 !important;
+                    background: var(--ch-primary-dark) !important;
                     cursor: pointer;
                     user-select: none;
                     position: relative;
                 }
                 
                 .month-header:hover {
-                    background: #1565c0 !important;
+                    background: var(--ch-primary-dark) !important;
                 }
                 
                 .week-header {
-                    background: #42a5f5 !important;
+                    background: var(--ch-primary-light) !important;
                     font-size: 11px;
                     cursor: pointer;
                 }
@@ -540,7 +540,7 @@ const ProductionPlanningV2 = {
                 }
                 
                 .day-header {
-                    background: #64b5f6 !important;
+                    background: var(--ch-primary-light) !important;
                     font-size: 10px;
                 }
                 
@@ -568,7 +568,7 @@ const ProductionPlanningV2 = {
                 .product-cell {
                     text-align: left !important;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -579,7 +579,7 @@ const ProductionPlanningV2 = {
                 .year-cell {
                     text-align: left !important;
                     font-weight: 500;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     position: sticky;
                     left: 200px;
                     z-index: 4;
@@ -591,31 +591,31 @@ const ProductionPlanningV2 = {
                 
                 /* Cell type styling for production */
                 .cell-historical {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     color: #7f8c8d;
                 }
                 
                 .cell-actual {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                     font-weight: 600;
                 }
                 
                 .cell-current {
                     background: #fff3e0;
-                    color: #e65100;
+                    color: var(--ch-warning);
                     font-weight: bold;
                     border: 2px solid #ff9800;
                 }
                 
                 .cell-plan {
-                    background: #e3f2fd;
-                    color: #1565c0;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
                 
                 .cell-future {
                     background: #f3e5f5;
-                    color: #6a1b9a;
+                    color: var(--ch-primary-dark);
                 }
                 
                 .cell-total {
@@ -631,8 +631,8 @@ const ProductionPlanningV2 = {
                 }
                 
                 .editable-cell:hover {
-                    background: #bbdefb !important;
-                    box-shadow: inset 0 0 0 2px #2196f3;
+                    background: var(--ch-primary-light) !important;
+                    box-shadow: inset 0 0 0 2px var(--ch-primary);
                 }
                 
                 .editable-cell.editing {
@@ -661,7 +661,7 @@ const ProductionPlanningV2 = {
                 
                 .edited-cell::after {
                     content: '*';
-                    color: #4CAF50;
+                    color: var(--ch-success);
                     font-weight: bold;
                     position: absolute;
                     top: 1px;
@@ -678,7 +678,7 @@ const ProductionPlanningV2 = {
                 }
                 
                 .efficiency-good {
-                    color: #4CAF50;
+                    color: var(--ch-success);
                 }
                 
                 .efficiency-warning {
@@ -690,16 +690,16 @@ const ProductionPlanningV2 = {
                 }
                 
                 /* Year row styling */
-                .year-n-2 { background: #f5f5f5; }
-                .year-n-1 { background: #fafafa; }
+                .year-n-2 { background: var(--ch-gray-100); }
+                .year-n-1 { background: var(--ch-gray-100); }
                 .year-n { background: #fff8e1; font-weight: 600; }
-                .year-n-plan { background: #e3f2fd; font-style: italic; }
+                .year-n-plan { background: var(--ch-primary-light); font-style: italic; }
                 .year-n1 { background: #f1f8e9; }
                 .year-n2 { background: #e8f5e9; }
                 
                 .product-separator {
                     height: 3px;
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                 }
             </style>
             
@@ -744,7 +744,7 @@ const ProductionPlanningV2 = {
                     <button onclick="ProductionPlanningV2.optimizePlan()" style="padding: 10px 20px; background: #9c27b0; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                         [Target] Optimize Plan
                     </button>
-                    <button onclick="ProductionPlanningV2.resetData()" style="padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    <button onclick="ProductionPlanningV2.resetData()" style="padding: 10px 20px; background: var(--ch-error); color: white; border: none; border-radius: 5px; cursor: pointer;">
                         [Refresh] Reset
                     </button>
                     <span class="unsaved-indicator" id="unsaved-indicator">
@@ -756,7 +756,7 @@ const ProductionPlanningV2 = {
                     ${this.renderTable()}
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>[Chart] Production Planning Features:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>[Calendar] <strong>Expandable Hierarchy:</strong> Click months to see weeks, click weeks to see days</li>

@@ -832,7 +832,7 @@ const CustomerCRM = {
                 }
                 
                 .customer-table thead {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .customer-table th {
@@ -855,11 +855,11 @@ const CustomerCRM = {
                 }
                 
                 .customer-row:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .customer-row.expanded {
-                    background: #e3f2fd;
+                    background: var(--ch-primary-light);
                 }
                 
                 .customer-name {
@@ -902,7 +902,7 @@ const CustomerCRM = {
                 }
                 
                 .customer-details td {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 0;
                 }
                 
@@ -998,12 +998,12 @@ const CustomerCRM = {
                 }
                 
                 .net-price {
-                    color: #27ae60;
+                    color: var(--ch-success);
                     font-weight: 600;
                 }
                 
                 .discount-badge {
-                    background: #e74c3c;
+                    background: var(--ch-error);
                     color: white;
                     padding: 2px 6px;
                     border-radius: 4px;
@@ -1017,7 +1017,7 @@ const CustomerCRM = {
                     border: 1px solid #ddd;
                     border-radius: 3px;
                     overflow: hidden;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
                 
                 .mini-segment {
@@ -1054,7 +1054,7 @@ const CustomerCRM = {
                 }
                 
                 .view-all-link a {
-                    color: #2196f3;
+                    color: var(--ch-primary);
                     text-decoration: none;
                     font-size: 13px;
                     font-weight: 600;
@@ -1068,7 +1068,7 @@ const CustomerCRM = {
                 .customer-pricing-integration {
                     margin-top: 15px;
                     padding: 15px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 8px;
                 }
                 
@@ -1114,7 +1114,7 @@ const CustomerCRM = {
                 }
                 
                 .price-info .discount {
-                    background: #e74c3c;
+                    background: var(--ch-error);
                     color: white;
                     padding: 2px 4px;
                     border-radius: 3px;
@@ -1122,7 +1122,7 @@ const CustomerCRM = {
                 }
                 
                 .price-info .net {
-                    color: #27ae60;
+                    color: var(--ch-success);
                     font-weight: bold;
                 }
             </style>

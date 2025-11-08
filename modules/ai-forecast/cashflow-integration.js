@@ -403,7 +403,7 @@ const AIForecastIntegration = {
 
             .action-btn {
                 padding: 10px;
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 border: 1px solid #ddd;
                 border-radius: 6px;
                 cursor: pointer;
@@ -412,17 +412,17 @@ const AIForecastIntegration = {
             }
 
             .action-btn:hover {
-                background: #e0e0e0;
+                background: var(--ch-gray-200);
             }
 
             .action-btn.primary {
-                background: #2196f3;
+                background: var(--ch-primary);
                 color: white;
-                border-color: #2196f3;
+                border-color: var(--ch-primary);
             }
 
             .action-btn.primary:hover {
-                background: #1976d2;
+                background: var(--ch-primary-dark);
             }
 
             .forecast-summary, .risk-summary {
@@ -441,7 +441,7 @@ const AIForecastIntegration = {
             }
 
             .forecast-table th {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 padding: 6px;
                 text-align: left;
                 border-bottom: 2px solid #ddd;
@@ -467,7 +467,7 @@ const AIForecastIntegration = {
             }
 
             .risk-badge {
-                background: #f44336;
+                background: var(--ch-error);
                 color: white;
                 padding: 2px 6px;
                 border-radius: 10px;
@@ -488,23 +488,23 @@ const AIForecastIntegration = {
             }
 
             .loading {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 color: #666;
             }
 
             .error-msg {
                 background: #ffebee;
-                color: #c62828;
+                color: var(--ch-error);
             }
 
             .info-msg {
-                background: #e3f2fd;
-                color: #1565c0;
+                background: var(--ch-primary-light);
+                color: var(--ch-primary-dark);
             }
 
             .success-msg {
                 background: #e8f5e9;
-                color: #2e7d32;
+                color: var(--ch-success);
             }
         `;
 

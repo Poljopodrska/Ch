@@ -583,19 +583,19 @@ const ProductionFeasibility = {
                 }
                 
                 .summary-card.status-ok {
-                    border-left-color: #27ae60;
+                    border-left-color: var(--ch-success);
                 }
                 
                 .summary-card.status-warning {
-                    border-left-color: #f39c12;
+                    border-left-color: var(--ch-warning);
                 }
                 
                 .summary-card.status-critical {
-                    border-left-color: #e74c3c;
+                    border-left-color: var(--ch-error);
                 }
                 
                 .summary-card.status-info {
-                    border-left-color: #3498db;
+                    border-left-color: var(--ch-primary);
                 }
                 
                 .card-value {
@@ -673,12 +673,12 @@ const ProductionFeasibility = {
                 
                 .status-indicator.status-ok {
                     background: #d4edda;
-                    color: #27ae60;
+                    color: var(--ch-success);
                 }
                 
                 .status-indicator.status-warning {
                     background: #fff3cd;
-                    color: #f39c12;
+                    color: var(--ch-warning);
                 }
                 
                 .periods {
@@ -703,17 +703,17 @@ const ProductionFeasibility = {
                 
                 .period-card.feasible {
                     background: #d4edda;
-                    border-color: #27ae60;
+                    border-color: var(--ch-success);
                 }
                 
                 .period-card.warning {
                     background: #fff3cd;
-                    border-color: #f39c12;
+                    border-color: var(--ch-warning);
                 }
                 
                 .period-card.critical {
                     background: #ffe5e5;
-                    border-color: #e74c3c;
+                    border-color: var(--ch-error);
                 }
                 
                 .period-month {
@@ -735,7 +735,7 @@ const ProductionFeasibility = {
                 
                 .period-issues {
                     font-size: 11px;
-                    color: #e74c3c;
+                    color: var(--ch-error);
                     margin-top: 5px;
                     font-weight: 600;
                 }
@@ -749,7 +749,7 @@ const ProductionFeasibility = {
                 
                 .alerts-section h3 {
                     margin: 0 0 15px 0;
-                    color: #e74c3c;
+                    color: var(--ch-error);
                 }
                 
                 .alerts-list {

@@ -306,7 +306,7 @@ class ModelTraining {
             .train-btn {
                 width: 100%;
                 padding: 12px;
-                background: #4caf50;
+                background: var(--ch-success);
                 color: white;
                 border: none;
                 border-radius: 4px;
@@ -417,7 +417,7 @@ class ModelTraining {
             }
 
             .active-badge {
-                background: #4caf50;
+                background: var(--ch-success);
                 color: white;
                 padding: 3px 8px;
                 border-radius: 10px;
@@ -439,7 +439,7 @@ class ModelTraining {
             }
 
             .activate-btn {
-                background: #2196f3;
+                background: var(--ch-primary);
                 color: white;
             }
 
@@ -474,7 +474,7 @@ class ModelTraining {
 
             .model-metrics summary {
                 cursor: pointer;
-                color: #2196f3;
+                color: var(--ch-primary);
                 font-size: 13px;
             }
 
@@ -542,7 +542,7 @@ class ModelTraining {
             .details-table th {
                 text-align: left;
                 padding: 8px;
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 width: 40%;
             }
 
@@ -552,7 +552,7 @@ class ModelTraining {
             }
 
             .metrics-json {
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 padding: 15px;
                 border-radius: 4px;
                 font-size: 12px;

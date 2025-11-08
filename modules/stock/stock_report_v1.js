@@ -301,7 +301,7 @@ const StockReportV1 = {
                 
                 .stock-level-bar {
                     height: 30px;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     border-radius: 4px;
                     position: relative;
                     overflow: hidden;
@@ -355,12 +355,12 @@ const StockReportV1 = {
                 }
                 
                 .stock-table tr:hover {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
                 
                 .movement-in { color: #388e3c; font-weight: bold; }
                 .movement-out { color: #d32f2f; font-weight: bold; }
-                .movement-production { color: #1976d2; font-weight: bold; }
+                .movement-production { color: var(--ch-primary-dark); font-weight: bold; }
                 .movement-adjustment { color: #f57c00; }
             </style>
             

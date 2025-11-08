@@ -191,7 +191,7 @@ const StockReadyProducts = {
             <style>
                 .stock-ready-products {
                     padding: 20px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     min-height: 100vh;
                 }
                 
@@ -229,13 +229,13 @@ const StockReadyProducts = {
                 }
                 
                 .tab-btn:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .tab-btn.active {
-                    background: #3498db;
+                    background: var(--ch-primary);
                     color: white;
-                    border-color: #3498db;
+                    border-color: var(--ch-primary);
                 }
                 
                 .action-buttons {
@@ -260,17 +260,17 @@ const StockReadyProducts = {
                 
                 .sync-indicator {
                     font-size: 14px;
-                    color: #27ae60;
+                    color: var(--ch-success);
                     font-weight: 500;
                 }
                 
                 .btn-export {
-                    background: #8e44ad;
+                    background: var(--ch-primary);
                     color: white;
                 }
                 
                 .btn-export:hover {
-                    background: #7d3c98;
+                    background: var(--ch-primary-dark);
                 }
                 
                 .stock-summary {
@@ -306,11 +306,11 @@ const StockReadyProducts = {
                 }
                 
                 .positive {
-                    color: #27ae60;
+                    color: var(--ch-success);
                 }
                 
                 .negative {
-                    color: #e74c3c;
+                    color: var(--ch-error);
                 }
                 
                 .stock-content {
@@ -326,7 +326,7 @@ const StockReadyProducts = {
                 }
                 
                 .stock-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     text-align: left;
                     font-weight: 600;
@@ -348,7 +348,7 @@ const StockReadyProducts = {
                 .stock-bar {
                     flex: 1;
                     height: 20px;
-                    background: #ecf0f1;
+                    background: var(--ch-gray-100);
                     border-radius: 10px;
                     overflow: hidden;
                     position: relative;
@@ -356,20 +356,20 @@ const StockReadyProducts = {
                 
                 .stock-fill {
                     height: 100%;
-                    background: linear-gradient(90deg, #3498db, #2980b9);
+                    background: linear-gradient(90deg, var(--ch-primary), var(--ch-primary-dark));
                     transition: width 0.3s;
                 }
                 
                 .stock-critical {
-                    background: linear-gradient(90deg, #e74c3c, #c0392b);
+                    background: linear-gradient(90deg, var(--ch-error), var(--ch-error));
                 }
                 
                 .stock-warning {
-                    background: linear-gradient(90deg, #f39c12, #e67e22);
+                    background: linear-gradient(90deg, var(--ch-warning), var(--ch-warning));
                 }
                 
                 .stock-good {
-                    background: linear-gradient(90deg, #27ae60, #229954);
+                    background: linear-gradient(90deg, var(--ch-success), var(--ch-success));
                 }
                 
                 .status-badge {
@@ -380,18 +380,18 @@ const StockReadyProducts = {
                 }
                 
                 .status-critical {
-                    background: #ffe5e5;
-                    color: #e74c3c;
+                    background: var(--ch-error-light);
+                    color: var(--ch-error);
                 }
                 
                 .status-warning {
                     background: #fff3cd;
-                    color: #f39c12;
+                    color: var(--ch-warning);
                 }
                 
                 .status-good {
-                    background: #d4edda;
-                    color: #27ae60;
+                    background: var(--ch-success-light);
+                    color: var(--ch-success);
                 }
                 
                 .movement-type {
@@ -402,18 +402,18 @@ const StockReadyProducts = {
                 }
                 
                 .movement-production {
-                    background: #d4edda;
-                    color: #27ae60;
+                    background: var(--ch-success-light);
+                    color: var(--ch-success);
                 }
                 
                 .movement-sale {
-                    background: #ffe5e5;
-                    color: #e74c3c;
+                    background: var(--ch-error-light);
+                    color: var(--ch-error);
                 }
                 
                 .movement-adjustment {
                     background: #fff3cd;
-                    color: #f39c12;
+                    color: var(--ch-warning);
                 }
                 
                 .editable {
@@ -424,7 +424,7 @@ const StockReadyProducts = {
                 }
                 
                 .editable:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .editing {

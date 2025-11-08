@@ -944,7 +944,7 @@ const ProductionFeasibility = {
                 .product-cell {
                     text-align: left !important;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -952,7 +952,7 @@ const ProductionFeasibility = {
                 
                 .type-cell {
                     text-align: left !important;
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     position: sticky;
                     left: 200px;
                     z-index: 4;
@@ -966,13 +966,13 @@ const ProductionFeasibility = {
                 }
                 
                 .type-label.workforce {
-                    background: #e3f2fd;
-                    color: #1976d2;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
                 
                 .type-label.materials {
                     background: #f3e5f5;
-                    color: #7b1fa2;
+                    color: var(--ch-primary);
                 }
                 
                 /* Status cells */
@@ -993,7 +993,7 @@ const ProductionFeasibility = {
                 }
                 
                 .cell-none {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     opacity: 0.5;
                 }
                 
@@ -1091,7 +1091,7 @@ const ProductionFeasibility = {
                     display: flex;
                     justify-content: space-between;
                     padding: 10px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 4px;
                 }
                 
@@ -1119,7 +1119,7 @@ const ProductionFeasibility = {
                 }
                 
                 .materials-detail-table th {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 10px;
                     text-align: left;
                     font-weight: 600;

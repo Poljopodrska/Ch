@@ -66,7 +66,7 @@ const FinanceMatching = {
                 <div id="results-section" class="results-section" style="display: none;">
                     <div class="results-header">
                         <h2>[Clipboard] Matching Results</h2>
-                        <div id="suspicious-warning" style="display: none; background: #ffebee; color: #c62828; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ef5350;">
+                        <div id="suspicious-warning" style="display: none; background: #ffebee; color: var(--ch-error); padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #ef5350;">
                             <strong>[!] Warning: Suspicious Matches Detected!</strong>
                             <div id="suspicious-details"></div>
                         </div>
@@ -293,12 +293,12 @@ const FinanceMatching = {
                     padding: 12px;
                     border: 2px dashed #ddd;
                     border-radius: 8px;
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     cursor: pointer;
                 }
                 
                 input[type="file"]:hover {
-                    border-color: #667eea;
+                    border-color: var(--ch-primary);
                     background: #f5f6ff;
                 }
                 
@@ -340,12 +340,12 @@ const FinanceMatching = {
                 }
                 
                 .btn-secondary {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                     color: #333;
                 }
                 
                 .btn-secondary:hover {
-                    background: #e0e0e0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .results-section {
@@ -419,12 +419,12 @@ const FinanceMatching = {
                 }
                 
                 .tab-btn:hover {
-                    color: #667eea;
+                    color: var(--ch-primary);
                 }
                 
                 .tab-btn.active {
-                    color: #667eea;
-                    border-bottom-color: #667eea;
+                    color: var(--ch-primary);
+                    border-bottom-color: var(--ch-primary);
                 }
                 
                 .tab-content {
@@ -444,7 +444,7 @@ const FinanceMatching = {
                 }
                 
                 .results-table thead {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .results-table th {
@@ -476,7 +476,7 @@ const FinanceMatching = {
                 
                 .status-matched {
                     background: #e8f5e9;
-                    color: #2e7d32;
+                    color: var(--ch-success);
                 }
                 
                 .export-section {
@@ -489,7 +489,7 @@ const FinanceMatching = {
                     margin: 0 10px;
                     background: white;
                     border: 2px solid #667eea;
-                    color: #667eea;
+                    color: var(--ch-primary);
                     border-radius: 6px;
                     font-weight: 600;
                     cursor: pointer;
@@ -497,7 +497,7 @@ const FinanceMatching = {
                 }
                 
                 .btn-export:hover {
-                    background: #667eea;
+                    background: var(--ch-primary);
                     color: white;
                 }
             </style>

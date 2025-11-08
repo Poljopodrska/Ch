@@ -97,7 +97,7 @@ class AIForecastModule {
         style.textContent = `
             .ai-forecast-module {
                 min-height: 100vh;
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
             }
 
             .ai-forecast-nav {
@@ -130,7 +130,7 @@ class AIForecastModule {
 
             .nav-tab {
                 padding: 12px 24px;
-                background: #f5f5f5;
+                background: var(--ch-gray-100);
                 border: 2px solid transparent;
                 border-radius: 8px;
                 cursor: pointer;
@@ -140,13 +140,13 @@ class AIForecastModule {
             }
 
             .nav-tab:hover {
-                background: #e0e0e0;
+                background: var(--ch-gray-200);
             }
 
             .nav-tab.active {
                 background: white;
-                border-color: #2196f3;
-                color: #2196f3;
+                border-color: var(--ch-primary);
+                color: var(--ch-primary);
             }
 
             .ai-forecast-content {

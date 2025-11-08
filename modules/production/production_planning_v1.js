@@ -449,7 +449,7 @@ const ProductionPlanningV1 = {
                 }
                 
                 .production-table th {
-                    background: #1565c0;
+                    background: var(--ch-primary-dark);
                     color: white;
                     padding: 8px 4px;
                     text-align: center;
@@ -472,7 +472,7 @@ const ProductionPlanningV1 = {
                 .product-cell {
                     text-align: left !important;
                     font-weight: 600;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     position: sticky;
                     left: 0;
                     z-index: 5;
@@ -486,16 +486,16 @@ const ProductionPlanningV1 = {
                     border-radius: 3px;
                     font-size: 11px;
                     margin-top: 4px;
-                    background: #e3f2fd;
-                    color: #1565c0;
+                    background: var(--ch-primary-light);
+                    color: var(--ch-primary-dark);
                 }
                 
                 /* Cell type styling */
-                .cell-historical { background: #fafafa; color: #7f8c8d; }
-                .cell-actual { background: #e8f5e9; color: #2e7d32; font-weight: 600; }
-                .cell-current { background: #fff3e0; color: #e65100; font-weight: bold; }
-                .cell-plan { background: #e3f2fd; color: #1565c0; }
-                .cell-future { background: #f3e5f5; color: #6a1b9a; }
+                .cell-historical { background: var(--ch-gray-100); color: #7f8c8d; }
+                .cell-actual { background: #e8f5e9; color: var(--ch-success); font-weight: 600; }
+                .cell-current { background: #fff3e0; color: var(--ch-warning); font-weight: bold; }
+                .cell-plan { background: var(--ch-primary-light); color: var(--ch-primary-dark); }
+                .cell-future { background: #f3e5f5; color: var(--ch-primary-dark); }
             </style>
             
             <div class="production-planning-container">
@@ -536,7 +536,7 @@ const ProductionPlanningV1 = {
                     ${this.renderTable()}
                 </div>
                 
-                <div style="margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px;">
+                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
                     <h4>Stage 4 Features:</h4>
                     <ul style="margin: 10px 0; line-height: 1.6;">
                         <li>[OK] Product Groups (Marketing categories)</li>
@@ -598,7 +598,7 @@ const ProductionPlanningV1 = {
                 html += this.renderProductRows(product);
                 
                 if (index < this.state.products.length - 1) {
-                    html += '<tr style="height: 3px; background: #1565c0;"><td colspan="100"></td></tr>';
+                    html += '<tr style="height: 3px; background: var(--ch-primary-dark);"><td colspan="100"></td></tr>';
                 }
             });
         } else if (this.state.groupView === 'product') {
@@ -615,7 +615,7 @@ const ProductionPlanningV1 = {
                     groupProducts.forEach((product, index) => {
                         html += this.renderProductRows(product);
                         if (index < groupProducts.length - 1) {
-                            html += '<tr style="height: 1px; background: #e0e0e0;"><td colspan="100"></td></tr>';
+                            html += '<tr style="height: 1px; background: var(--ch-gray-200);"><td colspan="100"></td></tr>';
                         }
                     });
                 }
@@ -635,7 +635,7 @@ const ProductionPlanningV1 = {
                     lineProducts.forEach((product, index) => {
                         html += this.renderProductRows(product);
                         if (index < lineProducts.length - 1) {
-                            html += '<tr style="height: 1px; background: #e0e0e0;"><td colspan="100"></td></tr>';
+                            html += '<tr style="height: 1px; background: var(--ch-gray-200);"><td colspan="100"></td></tr>';
                         }
                     });
                 }
@@ -696,7 +696,7 @@ const ProductionPlanningV1 = {
         }
         
         // Year cell
-        html += `<td style="background: #f0f0f0; font-weight: 500;">
+        html += `<td style="background: var(--ch-gray-200); font-weight: 500;">
             ${year}<br><small>${yearData.shortLabel}</small>
         </td>`;
         

@@ -237,23 +237,23 @@ const PricingV3 = {
                     <h3>[Chart] Legenda stroškov / Cost Legend:</h3>
                     <div class="legend-items">
                         <span class="legend-item">
-                            <span class="legend-color" style="background: #4CAF50;"></span>
+                            <span class="legend-color" style="background: var(--ch-success);"></span>
                             Proizvodna cena / Production Cost
                         </span>
                         <span class="legend-item">
-                            <span class="legend-color" style="background: #2196F3;"></span>
+                            <span class="legend-color" style="background: var(--ch-primary);"></span>
                             GOH (General Overheads)
                         </span>
                         <span class="legend-item">
-                            <span class="legend-color" style="background: #FF9800;"></span>
+                            <span class="legend-color" style="background: var(--ch-warning);"></span>
                             MOH (Marketing Overheads)
                         </span>
                         <span class="legend-item">
-                            <span class="legend-color" style="background: #9C27B0;"></span>
+                            <span class="legend-color" style="background: var(--ch-primary);"></span>
                             LOH (Logistics Overheads)
                         </span>
                         <span class="legend-item">
-                            <span class="legend-color" style="background: #F44336;"></span>
+                            <span class="legend-color" style="background: var(--ch-error);"></span>
                             Profit / Dobiček
                         </span>
                     </div>
@@ -450,40 +450,40 @@ const PricingV3 = {
         
         // Calculate percentages for each segment
         const segments = [
-            { 
-                type: 'production', 
+            {
+                type: 'production',
                 label: 'Prod',
                 needed: pricing.productionCost,
                 covered: pricing.cumulativeCoverage.production,
-                color: '#4CAF50'
+                color: 'var(--ch-success)'
             },
-            { 
+            {
                 type: 'goh',
-                label: 'GOH', 
+                label: 'GOH',
                 needed: pricing.goh,
                 covered: pricing.cumulativeCoverage.goh,
-                color: '#2196F3'
+                color: 'var(--ch-primary)'
             },
-            { 
+            {
                 type: 'moh',
-                label: 'MOH', 
+                label: 'MOH',
                 needed: pricing.moh,
                 covered: pricing.cumulativeCoverage.moh,
-                color: '#FF9800'
+                color: 'var(--ch-warning)'
             },
-            { 
+            {
                 type: 'loh',
-                label: 'LOH', 
+                label: 'LOH',
                 needed: pricing.loh,
                 covered: pricing.cumulativeCoverage.loh,
-                color: '#9C27B0'
+                color: 'var(--ch-primary)'
             },
-            { 
+            {
                 type: 'profit',
-                label: 'Profit', 
+                label: 'Profit',
                 needed: pricing.profit,
                 covered: pricing.cumulativeCoverage.profit,
-                color: '#F44336'
+                color: 'var(--ch-error)'
             }
         ];
         
@@ -548,7 +548,7 @@ const PricingV3 = {
         if (!window.CRMData) {
             return `
                 <tr class="customer-pricing-row">
-                    <td colspan="10" style="padding: 20px; text-align: center; background: #f8f9fa;">
+                    <td colspan="10" style="padding: 20px; text-align: center; background: var(--ch-gray-100);">
                         <em>CRM module not loaded. Go to Sales → CRM to load customer data.</em>
                     </td>
                 </tr>
@@ -560,7 +560,7 @@ const PricingV3 = {
         
         let html = `
             <tr class="customer-pricing-header">
-                <td colspan="10" style="background: #e3f2fd; padding: 10px;">
+                <td colspan="10" style="background: var(--ch-primary-light); padding: 10px;">
                     <strong>[Users] Customer-Specific Pricing</strong>
                 </td>
             </tr>
@@ -588,7 +588,7 @@ const PricingV3 = {
                     <td class="selling">
                         <span style="text-decoration: line-through; color: #999;">€${customerPricing.basePrice.toFixed(2)}</span>
                         <br>
-                        <strong style="color: #27ae60;">€${customerPricing.netPrice.toFixed(2)}</strong>
+                        <strong style="color: var(--ch-success);">€${customerPricing.netPrice.toFixed(2)}</strong>
                         <span class="discount-badge">-${customerPricing.discount}%</span>
                     </td>
                     <td class="coverage ${coverageClass}">
@@ -688,7 +688,7 @@ const PricingV3 = {
                 }
                 
                 .pricing-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, var(--ch-primary) 0%, var(--ch-primary-dark) 100%);
                     color: white;
                     padding: 25px;
                     border-radius: 10px;
@@ -725,7 +725,7 @@ const PricingV3 = {
                 }
                 
                 .header-controls button.active {
-                    background: #4caf50;
+                    background: var(--ch-success);
                 }
                 
                 .pricing-legend {
@@ -778,7 +778,7 @@ const PricingV3 = {
                 }
                 
                 .group-header {
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     padding: 15px;
                     cursor: pointer;
                     display: flex;
@@ -790,7 +790,7 @@ const PricingV3 = {
                 }
                 
                 .group-header:hover {
-                    background: #eeeeee;
+                    background: var(--ch-gray-200);
                 }
                 
                 .group-content {
@@ -814,7 +814,7 @@ const PricingV3 = {
                 }
                 
                 .subgroup-header {
-                    background: #fafafa;
+                    background: var(--ch-gray-100);
                     padding: 12px;
                     cursor: pointer;
                     display: flex;
@@ -826,7 +826,7 @@ const PricingV3 = {
                 }
                 
                 .subgroup-header:hover {
-                    background: #f0f0f0;
+                    background: var(--ch-gray-200);
                 }
                 
                 .subgroup-content {
@@ -855,7 +855,7 @@ const PricingV3 = {
                 }
                 
                 .pricing-table thead {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .pricing-table th {
@@ -872,11 +872,11 @@ const PricingV3 = {
                     min-width: 60px;
                 }
                 
-                .cost-header.production { background: #4CAF5010; }
-                .cost-header.goh { background: #2196F310; }
-                .cost-header.moh { background: #FF980010; }
-                .cost-header.loh { background: #9C27B010; }
-                .cost-header.profit { background: #F4433610; }
+                .cost-header.production { background: var(--ch-success)10; }
+                .cost-header.goh { background: var(--ch-primary)10; }
+                .cost-header.moh { background: var(--ch-warning)10; }
+                .cost-header.loh { background: var(--ch-primary)10; }
+                .cost-header.profit { background: var(--ch-error)10; }
                 
                 .pricing-table td {
                     padding: 8px;
@@ -885,12 +885,12 @@ const PricingV3 = {
                 }
                 
                 .product-row:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
                 
                 .product-row .code {
                     font-weight: 600;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
                 
                 .product-row .name small {
@@ -911,7 +911,7 @@ const PricingV3 = {
                     border-radius: 4px;
                 }
                 
-                .coverage.full { background: #4CAF50; color: white; }
+                .coverage.full { background: var(--ch-success); color: white; }
                 .coverage.good { background: #8BC34A; color: white; }
                 .coverage.medium { background: #FFC107; color: #333; }
                 .coverage.low { background: #FF5722; color: white; }
@@ -919,7 +919,7 @@ const PricingV3 = {
                 .pricing-table input {
                     width: 60px;
                     padding: 4px;
-                    border: 1px solid #2196f3;
+                    border: 1px solid var(--ch-primary);
                     border-radius: 4px;
                     text-align: right;
                     font-size: 12px;
@@ -933,7 +933,7 @@ const PricingV3 = {
                     border-radius: 4px;
                     overflow: hidden;
                     position: relative;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                 }
                 
                 .chart-segment {
@@ -1003,9 +1003,9 @@ const PricingV3 = {
                     justify-content: space-between;
                     align-items: center;
                     padding: 15px;
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     border-radius: 8px;
-                    border-left: 4px solid #2196f3;
+                    border-left: 4px solid var(--ch-primary);
                 }
                 
                 .stat-label {
@@ -1016,7 +1016,7 @@ const PricingV3 = {
                 .stat-value {
                     font-size: 24px;
                     font-weight: bold;
-                    color: #2196f3;
+                    color: var(--ch-primary);
                 }
                 
                 .group-content.collapsed,

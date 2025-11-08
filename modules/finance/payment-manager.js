@@ -87,7 +87,7 @@ const PaymentManager = {
 
                 .pm-tab {
                     padding: 12px 24px;
-                    background: #f5f5f5;
+                    background: var(--ch-gray-100);
                     border: none;
                     border-radius: 8px 8px 0 0;
                     cursor: pointer;
@@ -97,7 +97,7 @@ const PaymentManager = {
                 }
 
                 .pm-tab:hover {
-                    background: #e0e0e0;
+                    background: var(--ch-gray-200);
                 }
 
                 .pm-tab.active {
@@ -169,7 +169,7 @@ const PaymentManager = {
                 }
 
                 .pm-table tr:hover {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                 }
 
                 .urgency-buttons {
@@ -241,7 +241,7 @@ const PaymentManager = {
                 }
 
                 .settings-panel {
-                    background: #f8f9fa;
+                    background: var(--ch-gray-100);
                     padding: 20px;
                     border-radius: 8px;
                     margin-top: 20px;
