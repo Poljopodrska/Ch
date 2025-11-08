@@ -58,7 +58,7 @@
         
         /* Header */
         header {
-            background: var(--ch-primary);
+            background: var(--ch-gray-800);
             color: white;
             padding: 20px;
             box-shadow: var(--shadow-md);
@@ -99,7 +99,7 @@
             align-items: center;
             justify-content: center;
             padding: 10px 20px;
-            background: rgba(255,255,255,0.1);
+            background: var(--ch-primary);
             color: white;
             text-decoration: none;
             border-radius: var(--radius-md, 8px);
@@ -114,25 +114,25 @@
             font-size: 16px;
             font-weight: 600;
             padding: 12px 25px;
-            background: rgba(255,255,255,0.15);
+            background: var(--ch-primary);
         }
 
         .nav-link:hover {
-            background: rgba(255,255,255,0.2);
+            background: var(--ch-primary-dark);
             transform: translateY(-1px);
             box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.1));
         }
 
         .nav-link.active {
-            background: white;
-            color: var(--ch-primary);
+            background: var(--ch-primary-dark);
+            color: white;
             font-weight: 600;
             box-shadow: var(--shadow-sm);
         }
 
         .nav-link.main-tab.active {
-            background: rgba(255,255,255,0.95);
-            color: var(--ch-primary);
+            background: var(--ch-primary-dark);
+            color: white;
         }
 
         .sub-tabs .nav-link {
