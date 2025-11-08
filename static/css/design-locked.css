@@ -1,52 +1,52 @@
-/* 
- * DESIGN LOCKED CSS - DO NOT MODIFY
- * Locked on: 2025-08-18
- * Version: 0.5.5
- * Status: User approved - "the design is nice now"
- * 
- * This file preserves the exact design that was approved.
- * Any changes must be explicitly requested by the user.
+/*
+ * DESIGN LOCKED CSS - CONSTITUTIONAL DESIGN SYSTEM
+ * Updated: 2025-11-08
+ * Version: 0.6.0
+ * Status: User approved - Orange constitutional design with NO emojis
+ *
+ * This file locks the constitutional design system colors.
+ * Colors can be changed in design-system.css but this ensures consistency.
  */
 
 :root {
-    /* LOCKED COLOR PALETTE - DO NOT CHANGE */
-    --primary-color: #1976d2 !important;
-    --primary-dark: #0d47a1 !important;
-    --primary-light: #42a5f5 !important;
+    /* LOCKED CONSTITUTIONAL COLOR PALETTE */
+    --primary-color: #E8640B !important;
+    --primary-dark: #C45309 !important;
+    --primary-light: #FF8835 !important;
     --secondary-color: #424242 !important;
-    --accent-color: #ff6f00 !important;
+    --accent-color: #E8640B !important;
     --success-color: #388e3c !important;
     --warning-color: #f57c00 !important;
     --error-color: #d32f2f !important;
-    --bg-color: #f5f5f5 !important;
+    --bg-color: #fafafa !important;
     --card-bg: #ffffff !important;
     --text-primary: #212121 !important;
     --text-secondary: #757575 !important;
     --border-color: #e0e0e0 !important;
 }
 
-/* LOCKED GRADIENTS - THESE ARE PERFECT */
+/* LOCKED ORANGE GRADIENTS */
 .locked-gradient-header {
-    background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%) !important;
+    background: linear-gradient(135deg, #E8640B 0%, #C45309 100%) !important;
 }
 
 .locked-gradient-production {
-    background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%) !important;
+    background: linear-gradient(135deg, #FF8835 0%, #E8640B 100%) !important;
 }
 
 .locked-gradient-stock {
-    background: linear-gradient(135deg, #5c6bc0 0%, #3949ab 100%) !important;
+    background: linear-gradient(135deg, #FFB366 0%, #FF8835 100%) !important;
 }
 
 .locked-gradient-bom {
-    background: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%) !important;
+    background: linear-gradient(135deg, #E8640B 0%, #C45309 100%) !important;
 }
 
 /* LOCKED LAYOUT - OPTIMAL AS IS */
 .locked-layout {
     max-width: 1400px !important;
     padding: 20px !important;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 /* LOCKED NAVIGATION STYLE */
@@ -55,11 +55,11 @@
     border-radius: 8px !important;
     gap: 8px !important;
     font-size: 14px !important;
-    transition: all 0.3s !important;
+    transition: all 0.2s ease-in-out !important;
 }
 
 .locked-nav-link:hover {
-    transform: translateY(-2px) !important;
+    transform: translateY(-1px) !important;
 }
 
 /* LOCKED CARD STYLE */
@@ -69,9 +69,9 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
-/* LOCKED TABLE STYLE */
+/* LOCKED TABLE STYLE - ORANGE THEME */
 .locked-table th {
-    background: #1565c0 !important;
+    background: #E8640B !important;
     color: white !important;
     padding: 10px !important;
     font-weight: 600 !important;
@@ -83,7 +83,7 @@
 }
 
 .locked-table tr:hover {
-    background: #f5f5f5 !important;
+    background: #fff4ed !important;
 }
 
 /* PRESERVE VERSION DISPLAY */
