@@ -9,10 +9,10 @@
  */
 
 :root {
-    /* LOCKED CONSTITUTIONAL COLOR PALETTE */
-    --primary-color: #E8640B !important;
-    --primary-dark: #C45309 !important;
-    --primary-light: #FF8835 !important;
+    /* LOCKED CONSTITUTIONAL COLOR PALETTE - LIGHTER ORANGE */
+    --primary-color: #FFB84D !important;   /* Light orange for surfaces */
+    --primary-dark: #E8640B !important;    /* Dark orange for text only */
+    --primary-light: #FFC978 !important;   /* Very light orange */
     --secondary-color: #424242 !important;
     --accent-color: #E8640B !important;
     --success-color: #388e3c !important;
@@ -25,21 +25,21 @@
     --border-color: #e0e0e0 !important;
 }
 
-/* LOCKED ORANGE GRADIENTS */
+/* LOCKED ORANGE GRADIENTS - LIGHTER */
 .locked-gradient-header {
-    background: linear-gradient(135deg, #E8640B 0%, #C45309 100%) !important;
+    background: linear-gradient(135deg, #FFB84D 0%, #FFA726 100%) !important;
 }
 
 .locked-gradient-production {
-    background: linear-gradient(135deg, #FF8835 0%, #E8640B 100%) !important;
+    background: linear-gradient(135deg, #FFC978 0%, #FFB84D 100%) !important;
 }
 
 .locked-gradient-stock {
-    background: linear-gradient(135deg, #FFB366 0%, #FF8835 100%) !important;
+    background: linear-gradient(135deg, #FFD699 0%, #FFC978 100%) !important;
 }
 
 .locked-gradient-bom {
-    background: linear-gradient(135deg, #E8640B 0%, #C45309 100%) !important;
+    background: linear-gradient(135deg, #FFB84D 0%, #FFA726 100%) !important;
 }
 
 /* LOCKED LAYOUT - OPTIMAL AS IS */
@@ -69,10 +69,10 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
-/* LOCKED TABLE STYLE - ORANGE THEME */
+/* LOCKED TABLE STYLE - LIGHTER ORANGE */
 .locked-table th {
-    background: #E8640B !important;
-    color: white !important;
+    background: #FFB84D !important;
+    color: #333 !important;  /* Dark text on light background */
     padding: 10px !important;
     font-weight: 600 !important;
 }

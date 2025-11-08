@@ -14,11 +14,11 @@
    COLOR SYSTEM - CHANGE PRIMARY COLOR HERE
    ======================================================================== */
 :root {
-  /* PRIMARY COLOR - CHANGE THIS TO CHANGE ENTIRE THEME */
-  --ch-primary: #E8640B;
-  --ch-primary-dark: #C45309;
-  --ch-primary-light: #FF8835;
-  --ch-primary-pale: #FFF4ED;
+  /* PRIMARY COLOR - LIGHTER ORANGE FOR SURFACES */
+  --ch-primary: #FFB84D;        /* Light orange - main surfaces, buttons */
+  --ch-primary-dark: #E8640B;   /* Dark orange - text only, NOT backgrounds */
+  --ch-primary-light: #FFC978;  /* Very light orange - hover states */
+  --ch-primary-pale: #FFF3CD;   /* Pale orange - subtle backgrounds */
 
   /* NEUTRAL COLORS */
   --ch-black: #1a1a1a;
