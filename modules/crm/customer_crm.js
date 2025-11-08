@@ -542,44 +542,13 @@ const CustomerCRM = {
                         </button>
                     </div>
                 </div>
-                
-                <div class="crm-stats">
-                    ${this.renderStats()}
-                </div>
-                
+
                 <div class="crm-content">
                     ${this.renderCustomerList()}
                 </div>
             </div>
             
             ${this.getStyles()}
-        `;
-    },
-    
-    renderStats() {
-        const totalRevenue = this.state.customers.reduce((sum, c) => sum + (c.totalRevenue || 0), 0);
-        const activeCustomers = this.state.customers.filter(c => c.status === 'active').length;
-        const avgOrderValue = totalRevenue / this.state.customers.reduce((sum, c) => sum + (c.orderCount || 1), 0);
-        
-        return `
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">${this.state.customers.length}</div>
-                    <div class="stat-label">Total Customers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">${activeCustomers}</div>
-                    <div class="stat-label">Active Customers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">€${(totalRevenue / 1000).toFixed(0)}k</div>
-                    <div class="stat-label">Total Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">€${avgOrderValue.toFixed(0)}</div>
-                    <div class="stat-label">Avg Order Value</div>
-                </div>
-            </div>
         `;
     },
     
