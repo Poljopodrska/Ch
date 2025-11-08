@@ -40,6 +40,7 @@ class Supplier(Base):
     # ========================================================================
     supplier_type = Column(String(50))  # "Raw Materials", "Packaging", "Services", "Equipment", "Logistics", etc.
     industry_segment = Column(String(100))  # What they supply (e.g., "Poultry", "Fish", "Packaging Materials")
+    supplies = Column(String(500))  # Short description of what supplier provides (e.g., "Surovine za proizvodnjo")
     tax_id = Column(String(50))  # VAT/Tax number (DDV number in Slovenia)
     registration_number = Column(String(50))  # Company registration number
 
@@ -47,6 +48,7 @@ class Supplier(Base):
     # Payment Terms (what WE owe THEM)
     # ========================================================================
     payment_terms_days = Column(Integer, default=30)  # How many days we have to pay (Net 30, Net 60, etc.)
+    additional_delay_days = Column(Integer, default=0)  # Additional days we can delay beyond payment terms without consequences
     currency = Column(String(3), default="EUR")
 
     # ========================================================================

@@ -316,10 +316,12 @@ const SuppliersModule = {
 
     async loadSuppliers() {
         try {
-            const response = await fetch('/api/suppliers');
+            const response = await fetch('/api/v1/suppliers/');
             if (response.ok) {
                 this.suppliers = await response.json();
+                console.log('Loaded suppliers from database:', this.suppliers);
             } else {
+                console.warn('API not available, using sample data');
                 // If API not ready, use sample data
                 this.suppliers = this.getSampleSuppliers();
             }
@@ -467,18 +469,23 @@ const SuppliersModule = {
             notes: document.getElementById('supplier-notes').value
         };
 
+        // For new suppliers, generate a supplier_code
+        if (!supplierId) {
+            supplierData.supplier_code = 'SUP' + Date.now();
+        }
+
         try {
             let response;
             if (supplierId) {
                 // Update existing supplier
-                response = await fetch(`/api/suppliers/${supplierId}`, {
+                response = await fetch(`/api/v1/suppliers/${supplierId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(supplierData)
                 });
             } else {
                 // Create new supplier
-                response = await fetch('/api/suppliers', {
+                response = await fetch('/api/v1/suppliers/', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(supplierData)
@@ -490,7 +497,8 @@ const SuppliersModule = {
                 this.closeModal();
                 alert('Dobavitelj uspešno shranjen!');
             } else {
-                alert('Napaka pri shranjevanju dobavitelja');
+                const errorData = await response.json();
+                alert(`Napaka pri shranjevanju dobavitelja: ${errorData.detail || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error saving supplier:', error);
@@ -516,7 +524,7 @@ const SuppliersModule = {
         }
 
         try {
-            const response = await fetch(`/api/suppliers/${id}`, {
+            const response = await fetch(`/api/v1/suppliers/${id}`, {
                 method: 'DELETE'
             });
 
@@ -524,7 +532,8 @@ const SuppliersModule = {
                 await this.loadSuppliers();
                 alert('Dobavitelj izbrisan!');
             } else {
-                alert('Napaka pri brisanju dobavitelja');
+                const errorData = await response.json();
+                alert(`Napaka pri brisanju dobavitelja: ${errorData.detail || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error deleting supplier:', error);
