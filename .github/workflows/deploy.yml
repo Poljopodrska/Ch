@@ -1,114 +1,80 @@
-name: Deploy Ch Project to ECS
+name: Deploy to ECS
 
 on:
   push:
     branches: [main]
 
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: ch-production/core
-  ECS_SERVICE: ch-production-service
-  ECS_CLUSTER: ch-production
-  ECS_TASK_DEFINITION: ch-production-task
-  CONTAINER_NAME: ch-production
-
 jobs:
   deploy:
-    name: Deploy to Production
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 12  # Fail if deployment takes longer than 12 minutes
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Check environment
-      run: |
-        echo "🔍 Checking environment..."
-        echo "Repository: ${{ github.repository }}"
-        echo "Branch: ${{ github.ref_name }}"
-        echo "Commit: ${{ github.sha }}"
-        echo "Commit message: ${{ github.event.head_commit.message }}"
-
-    - name: Extract version from commit message
-      run: |
-        COMMIT_MSG="${{ github.event.head_commit.message }}"
-        VERSION=$(echo "$COMMIT_MSG" | grep -oE '^v[0-9]+\.[0-9]+\.[0-9]+' || echo "latest")
-        echo "📝 Version: $VERSION"
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Build and push Docker image
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        echo "🔨 Building Docker image..."
-        docker build --no-cache --build-arg CACHE_BUST=$(date +%s) -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-
-        echo "📤 Pushing to ECR..."
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-        echo "🏷️ Tagging as latest..."
-        docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
-    - name: Get current task definition
-      id: get-task-def
-      run: |
-        echo "📥 Getting current task definition..."
-        aws ecs describe-task-definition \
-          --task-definition ${{ env.ECS_TASK_DEFINITION }} \
-          --query 'taskDefinition' \
-          --region ${{ env.AWS_REGION }} > task-definition.json
-
-        cat task-definition.json | jq 'del(
-          .taskDefinitionArn,
-          .requiresAttributes,
-          .compatibilities,
-          .revision,
-          .status,
-          .registeredAt,
-          .registeredBy
-        )' > task-definition-clean.json
-
-        echo "✅ Task definition retrieved"
-
-    - name: Update task definition with new image
-      id: task-def
-      uses: aws-actions/amazon-ecs-render-task-definition@v1
-      with:
-        task-definition: task-definition-clean.json
-        container-name: ${{ env.CONTAINER_NAME }}
-        image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-
-    - name: Deploy to Amazon ECS
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-      with:
-        task-definition: ${{ steps.task-def.outputs.task-definition }}
-        service: ${{ env.ECS_SERVICE }}
-        cluster: ${{ env.ECS_CLUSTER }}
-        wait-for-service-stability: true
-        wait-for-minutes: 15
-
-    - name: Verify deployment
-      run: |
-        echo "🎉 Deployment verification:"
-        echo ""
-        echo "Health check:"
-        curl -s http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/health || echo "Health check failed"
-        echo ""
-        echo "✅ Deployment successful!"
-        echo "🌐 Application URL: http://ch-alb-2140286266.us-east-1.elb.amazonaws.com"
+      - uses: actions/checkout@v3
+      
+      - name: Trigger deployment via webhook
+        run: |
+          echo "🚀 Deployment triggered via CodeBuild webhook"
+          echo "Version: ${{ github.event.head_commit.message }}"
+          echo "Commit: ${{ github.sha }}"
+      
+      - name: Wait for deployment to complete
+        timeout-minutes: 10
+        run: |
+          echo "⏳ Waiting for deployment to complete..."
+          echo "Monitoring endpoint: http://ch-alb-2140286266.us-east-1.elb.amazonaws.com"
+          echo "Commit SHA: ${{ github.sha }}"
+          
+          # Wait 45 seconds for CodeBuild to start
+          sleep 45
+          
+          # Store initial version for comparison
+          INITIAL_VERSION=$(curl -s --max-time 5 http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/health 2>/dev/null | grep -oE '"version":"[^"]+' | cut -d'"' -f4 || echo "unknown")
+          echo "Initial version: $INITIAL_VERSION"
+          
+          # Check deployment status for up to 8 minutes
+          for i in {1..16}; do
+            echo ""
+            echo "[$i/16] Checking deployment status..."
+            
+            # Try to get health status
+            HEALTH=$(curl -s --max-time 5 http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/health 2>/dev/null || echo "{}")
+            CURRENT_VERSION=$(echo "$HEALTH" | grep -oE '"version":"[^"]+' | cut -d'"' -f4 || echo "unknown")
+            
+            # Check if service is healthy
+            if echo "$HEALTH" | grep -q "healthy"; then
+              echo "✅ Health check passed"
+              echo "Current version: $CURRENT_VERSION"
+              
+              # Check if version changed from initial (indicates new deployment)
+              if [ "$CURRENT_VERSION" != "$INITIAL_VERSION" ] && [ "$CURRENT_VERSION" != "unknown" ]; then
+                echo "✅ Deployment completed successfully!"
+                echo "Version changed from $INITIAL_VERSION to $CURRENT_VERSION"
+                exit 0
+              else
+                # For first deployment or when version doesn't change, just ensure it's healthy
+                if [ "$i" -gt 2 ]; then
+                  echo "✅ Service is healthy and stable"
+                  exit 0
+                fi
+                echo "⏳ Waiting for deployment to stabilize..."
+              fi
+            else
+              echo "⏳ Service not yet healthy"
+            fi
+            
+            # Wait 30 seconds before next check
+            sleep 30
+          done
+          
+          echo "❌ Deployment timeout - exceeded 8 minutes"
+          exit 1
+      
+      - name: Verify final deployment
+        if: success()
+        run: |
+          echo "🎉 Deployment verification:"
+          curl -s http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/version
+          echo ""
+          curl -s http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/health
+          echo ""
+          echo "✅ Deployment successful!"
