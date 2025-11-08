@@ -1,8 +1,13 @@
 // Ch Project Main Application
 const ChApp = {
+    // ===== CONFIGURATION =====
+    FINANCE_PASSWORD_ENABLED: false,  // Set to true to enable Finance password protection
+    FINANCE_PASSWORD: 'Marina',       // Password for Finance module
+    // =========================
+
     config: null,
     currentView: 'pricing',
-    
+
     // Initialize application
     init(options) {
         console.log(`Ch Project ${ChConfig.version} - Initializing...`);
@@ -19,9 +24,13 @@ const ChApp = {
     
     // Set up navigation handlers
     setupNavigation() {
-        this.currentMainTab = 'production';
-        this.currentSubTab = 'production-planning';
-        
+        // Try to restore previous state from localStorage (page refresh persistence)
+        const savedMainTab = localStorage.getItem('chCurrentMainTab');
+        const savedSubTab = localStorage.getItem('chCurrentSubTab');
+
+        this.currentMainTab = savedMainTab || 'production';
+        this.currentSubTab = savedSubTab || 'production-planning';
+
         // Handle main tab clicks
         const mainTabs = document.querySelectorAll('.main-tab');
         mainTabs.forEach(tab => {
@@ -31,19 +40,25 @@ const ChApp = {
                 this.switchMainTab(mainCategory);
             });
         });
-        
+
         // Handle sub-tab clicks
         this.setupSubTabHandlers();
-        
+
         // Handle browser back/forward
         window.addEventListener('popstate', (e) => {
             if (e.state && e.state.view) {
                 this.loadView(e.state.view, false);
             }
         });
-        
-        // Initialize with default view
-        this.loadView('production-planning');
+
+        // Initialize with saved or default view
+        if (savedMainTab && savedSubTab) {
+            console.log(`Restoring previous state: ${savedMainTab} -> ${savedSubTab}`);
+            this.switchMainTab(savedMainTab);
+            // The switchMainTab will load the appropriate sub-tab
+        } else {
+            this.loadView('production-planning');
+        }
     },
     
     setupSubTabHandlers() {
@@ -63,15 +78,15 @@ const ChApp = {
     },
     
     switchMainTab(mainCategory) {
-        // Special handling for Finance module
-        if (mainCategory === 'finance') {
+        // Special handling for Finance module - PASSWORD PROTECTION (can be disabled above)
+        if (mainCategory === 'finance' && this.FINANCE_PASSWORD_ENABLED) {
             console.log('Finance tab clicked, checking authentication...');
             // Check if user is authenticated for Finance module
             if (!this.checkFinanceAuth()) {
                 console.log('Not authenticated, showing password prompt...');
                 // Show password prompt
                 const password = prompt('Prosim, vnesite geslo za dostop do finančnega modula:');
-                if (password !== 'Marina') {
+                if (password !== this.FINANCE_PASSWORD) {
                     alert('Napačno geslo. Dostop zavrnjen.');
                     // Don't change tab
                     return;
@@ -86,7 +101,10 @@ const ChApp = {
         
         // Now update the current tab
         this.currentMainTab = mainCategory;
-        
+
+        // Save state to localStorage for page refresh persistence
+        localStorage.setItem('chCurrentMainTab', mainCategory);
+
         // Update main tab active state
         const mainTabs = document.querySelectorAll('.main-tab');
         mainTabs.forEach(tab => {
@@ -95,7 +113,7 @@ const ChApp = {
                 tab.classList.add('active');
             }
         });
-        
+
         // Update sub-tabs based on main category
         this.renderSubTabs(mainCategory);
     },
@@ -211,7 +229,11 @@ const ChApp = {
             // Update content
             mainContent.innerHTML = content;
             this.currentView = viewName;
-            
+            this.currentSubTab = viewName;
+
+            // Save sub-tab state to localStorage for page refresh persistence
+            localStorage.setItem('chCurrentSubTab', viewName);
+
             // Update URL
             if (pushState) {
                 history.pushState({ view: viewName }, '', `#${viewName}`);
