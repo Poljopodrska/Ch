@@ -268,9 +268,9 @@ const CashFlow = {
                 .cashflow-header {
                     margin-bottom: 20px;
                     padding: 15px;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--ch-primary);
                     color: white;
-                    border-radius: 8px;
+                    border-radius: var(--radius-md);
                 }
 
                 .cashflow-controls {
@@ -292,11 +292,11 @@ const CashFlow = {
                 }
 
                 .save-button:hover {
-                    background: #45a049;
+                    opacity: 0.9;
                 }
 
                 .save-button:disabled {
-                    background: #cccccc;
+                    background: var(--ch-gray-400);
                     cursor: not-allowed;
                 }
 
@@ -352,7 +352,7 @@ const CashFlow = {
                     padding: 8px 4px;
                     text-align: center;
                     font-weight: 600;
-                    border: 1px solid #5568d3;
+                    border: 1px solid var(--ch-primary-dark);
                     position: sticky;
                     top: 0;
                     z-index: 10;
@@ -362,7 +362,7 @@ const CashFlow = {
                 .cashflow-table th.row-type-header {
                     text-align: left;
                     min-width: 200px;
-                    background: #5568d3;
+                    background: var(--ch-primary-dark);
                     padding: 8px;
                 }
 
@@ -375,22 +375,23 @@ const CashFlow = {
                 }
 
                 .month-header:hover {
-                    background: #5568d3 !important;
+                    background: var(--ch-primary-dark) !important;
                 }
 
                 .week-header {
-                    background: #8b9dea !important;
+                    background: var(--ch-primary-light) !important;
                     font-size: 11px;
                     cursor: pointer;
                 }
 
                 .week-header:hover {
-                    background: #7688e8 !important;
+                    background: var(--ch-primary) !important;
                 }
 
                 .day-header {
-                    background: #abb7f0 !important;
+                    background: var(--ch-primary-pale) !important;
                     font-size: 10px;
+                    color: var(--ch-text-primary);
                 }
 
                 .expand-icon {
@@ -407,7 +408,7 @@ const CashFlow = {
 
                 .cashflow-table td {
                     padding: 6px 4px;
-                    border: 1px solid #ddd;
+                    border: 1px solid var(--ch-border-light);
                     text-align: center;
                     min-width: 50px;
                     font-size: 12px;
@@ -422,20 +423,20 @@ const CashFlow = {
                     z-index: 4;
                     padding: 6px !important;
                     min-width: 200px;
-                    border-right: 2px solid #666;
+                    border-right: 2px solid var(--ch-gray-600);
                     font-size: 11px;
                     font-weight: 600;
                 }
 
                 /* Row type specific styling */
-                .row-cashBeginning { background: var(--ch-primary-light); }
-                .row-receipts { background: #e8f5e9; }
-                .row-disbursements { background: #ffe0e0; }
+                .row-cashBeginning { background: var(--ch-primary-pale); }
+                .row-receipts { background: var(--ch-success-pale); }
+                .row-disbursements { background: var(--ch-error-pale); }
                 .row-disbursementsNujni { background: #ffebee; }
-                .row-disbursementsPogojnoNujni { background: #fff3e0; }
+                .row-disbursementsPogojnoNujni { background: var(--ch-warning-pale); }
                 .row-disbursementsNenujni { background: #fce4ec; }
-                .row-netCashFlow { background: #f3e5f5; }
-                .row-cashEnding { background: #e0f2f1; }
+                .row-netCashFlow { background: var(--ch-gray-100); }
+                .row-cashEnding { background: var(--ch-primary-pale); }
 
                 /* Expandable row styling */
                 .row-expandable {
@@ -444,7 +445,8 @@ const CashFlow = {
                 }
 
                 .row-expandable:hover {
-                    background: #ffd0d0 !important;
+                    background: var(--ch-error-light) !important;
+                    opacity: 0.8;
                 }
 
                 .row-child {
@@ -454,14 +456,14 @@ const CashFlow = {
                 /* Cell styling based on data */
                 .cell-past {
                     background: var(--ch-gray-100);
-                    color: #7f8c8d;
+                    color: var(--ch-text-secondary);
                 }
 
                 .cell-current {
-                    background: #fff3e0;
-                    color: var(--ch-warning);
+                    background: var(--ch-warning-pale);
+                    color: var(--ch-warning-dark);
                     font-weight: bold;
-                    border: 2px solid #ff9800;
+                    border: 2px solid var(--ch-warning);
                 }
 
                 .cell-future {
@@ -470,9 +472,9 @@ const CashFlow = {
                 }
 
                 .cell-total {
-                    background: #fff8e1;
+                    background: var(--ch-warning-pale);
                     font-weight: bold;
-                    border-left: 2px solid #666;
+                    border-left: 2px solid var(--ch-gray-600);
                 }
 
                 /* Editable cells */
@@ -498,7 +500,7 @@ const CashFlow = {
                     text-align: center;
                     font-size: 11px;
                     padding: 6px 4px;
-                    box-shadow: inset 0 0 0 2px #4CAF50;
+                    box-shadow: inset 0 0 0 2px var(--ch-success);
                 }
 
                 .cell-input:focus {
@@ -506,7 +508,7 @@ const CashFlow = {
                 }
 
                 .edited-cell {
-                    background: #c8e6c9 !important;
+                    background: var(--ch-success-pale) !important;
                     font-weight: bold;
                 }
 
@@ -546,10 +548,10 @@ const CashFlow = {
                     <button class="export-button" onclick="CashFlow.exportData()">
                         Export
                     </button>
-                    <button onclick="CashFlow.loadBankForecast()" style="padding: 10px 20px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);">
+                    <button onclick="CashFlow.loadBankForecast()" style="padding: 10px 20px; background: var(--ch-success); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
                         Load Bank Forecast
                     </button>
-                    <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                    <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: var(--ch-primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
                         AI Forecast
                     </button>
                 </div>
