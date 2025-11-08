@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ch Project v0.6.0</title>
     
+    <!-- Constitutional Design System - Orange Theme (Change color in design-system.css) -->
+    <link rel="stylesheet" href="static/css/design-system.css">
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="static/css/main.css">
     <link rel="stylesheet" href="static/css/components.css">
@@ -20,22 +23,23 @@
     <!-- SheetJS XLSX Library for Excel file parsing -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     
-    <!-- Modern Navigation CSS -->
+    <!-- Modern Navigation CSS - Orange Theme -->
     <style>
         :root {
-            --primary-color: #1976d2;
-            --primary-dark: #0d47a1;
-            --primary-light: #42a5f5;
-            --secondary-color: #424242;
-            --accent-color: #ff6f00;
-            --success-color: #388e3c;
-            --warning-color: #f57c00;
-            --error-color: #d32f2f;
-            --bg-color: #f5f5f5;
-            --card-bg: #ffffff;
-            --text-primary: #212121;
-            --text-secondary: #757575;
-            --border-color: #e0e0e0;
+            /* Use design system colors */
+            --primary-color: var(--ch-primary, #E8640B);
+            --primary-dark: var(--ch-primary-dark, #C45309);
+            --primary-light: var(--ch-primary-light, #FF8835);
+            --secondary-color: var(--ch-gray-800, #424242);
+            --accent-color: var(--ch-primary, #E8640B);
+            --success-color: var(--ch-success, #388e3c);
+            --warning-color: var(--ch-warning, #f57c00);
+            --error-color: var(--ch-error, #d32f2f);
+            --bg-color: var(--ch-bg-base, #fafafa);
+            --card-bg: var(--ch-bg-card, #ffffff);
+            --text-primary: var(--ch-text-primary, #212121);
+            --text-secondary: var(--ch-text-secondary, #757575);
+            --border-color: var(--ch-border-light, #e0e0e0);
         }
         
         * {
@@ -106,50 +110,49 @@
         }
         
         .nav-link {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
             padding: 10px 20px;
             background: rgba(255,255,255,0.1);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s;
+            border-radius: var(--radius-md, 8px);
+            transition: all 0.2s ease-in-out;
             font-size: 14px;
             cursor: pointer;
             border: none;
+            font-family: var(--font-primary);
         }
-        
+
         .nav-link.main-tab {
             font-size: 16px;
             font-weight: 600;
             padding: 12px 25px;
             background: rgba(255,255,255,0.15);
         }
-        
+
         .nav-link:hover {
             background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md, 0 2px 8px rgba(0,0,0,0.1));
         }
-        
+
         .nav-link.active {
             background: white;
             color: var(--primary-color);
             font-weight: 600;
+            box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
         }
-        
+
         .nav-link.main-tab.active {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             color: var(--primary-color);
         }
-        
+
         .sub-tabs .nav-link {
             font-size: 13px;
-            padding: 8px 15px;
-        }
-        
-        .nav-icon {
-            font-size: 18px;
+            padding: 8px 16px;
         }
         
         /* Main Content */
@@ -228,24 +231,20 @@
     <!-- Main Application -->
     <div id="app">
         <header>
-            <h1>🏭 Ch Project - Poslovni informacijski sistem</h1>
+            <h1>Ch Project - Poslovni informacijski sistem</h1>
             <nav id="main-nav">
                 <!-- Main Category Tabs -->
                 <div class="nav-row main-tabs">
                     <button class="nav-link main-tab" data-main="sales">
-                        <span class="nav-icon">💰</span>
                         <span class="nav-text">Prodaja</span>
                     </button>
                     <button class="nav-link main-tab active" data-main="production">
-                        <span class="nav-icon">🏭</span>
                         <span class="nav-text">Proizvodnja</span>
                     </button>
                     <button class="nav-link main-tab" data-main="management">
-                        <span class="nav-icon">📊</span>
                         <span class="nav-text">Vodenje</span>
                     </button>
                     <button class="nav-link main-tab" data-main="finance">
-                        <span class="nav-icon">💳</span>
                         <span class="nav-text">Finance</span>
                     </button>
                 </div>
@@ -254,27 +253,21 @@
                 <div class="nav-row sub-tabs" id="sub-tabs">
                     <!-- Production sub-tabs (default) -->
                     <button class="nav-link" data-view="production-planning">
-                        <span class="nav-icon">🏭</span>
                         <span class="nav-text">Načrtovanje proizvodnje</span>
                     </button>
                     <button class="nav-link" data-view="stock-report">
-                        <span class="nav-icon">📦</span>
                         <span class="nav-text">Poročilo o zalogi</span>
                     </button>
                     <button class="nav-link" data-view="bom">
-                        <span class="nav-icon">📋</span>
                         <span class="nav-text">Kosovnica</span>
                     </button>
                     <button class="nav-link" data-view="workforce">
-                        <span class="nav-icon">👥</span>
                         <span class="nav-text">Delovna sila</span>
                     </button>
                     <button class="nav-link" data-view="feasibility">
-                        <span class="nav-icon">🎯</span>
                         <span class="nav-text">Izvedljivost</span>
                     </button>
                     <button class="nav-link" onclick="window.open('static/ai-chicken-production-enhanced-weekdays.html', '_blank')">
-                        <span class="nav-icon">🐔</span>
                         <span class="nav-text">AI Piščančja Proizvodnja</span>
                     </button>
                 </div>

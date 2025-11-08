@@ -108,15 +108,12 @@ const ChApp = {
             case 'sales':
                 subTabsHTML = `
                     <button class="nav-link active" data-view="crm">
-                        <span class="nav-icon">👥</span>
                         <span class="nav-text">CRM</span>
                     </button>
                     <button class="nav-link" data-view="pricing">
-                        <span class="nav-icon">💰</span>
                         <span class="nav-text">Cene</span>
                     </button>
                     <button class="nav-link" data-view="planning">
-                        <span class="nav-icon">📈</span>
                         <span class="nav-text">Načrtovanje prodaje</span>
                     </button>
                 `;
@@ -126,23 +123,18 @@ const ChApp = {
             case 'production':
                 subTabsHTML = `
                     <button class="nav-link active" data-view="production-planning">
-                        <span class="nav-icon">🏭</span>
                         <span class="nav-text">Načrtovanje proizvodnje</span>
                     </button>
                     <button class="nav-link" data-view="stock-report">
-                        <span class="nav-icon">📦</span>
                         <span class="nav-text">Poročilo o zalogi</span>
                     </button>
                     <button class="nav-link" data-view="bom">
-                        <span class="nav-icon">📋</span>
                         <span class="nav-text">Kosovnica</span>
                     </button>
                     <button class="nav-link" data-view="workforce">
-                        <span class="nav-icon">👥</span>
                         <span class="nav-text">Delovna sila</span>
                     </button>
                     <button class="nav-link" data-view="feasibility">
-                        <span class="nav-icon">🎯</span>
                         <span class="nav-text">Izvedljivost</span>
                     </button>
                 `;
@@ -152,11 +144,9 @@ const ChApp = {
             case 'management':
                 subTabsHTML = `
                     <button class="nav-link active" data-view="management-production">
-                        <span class="nav-icon">🏭</span>
                         <span class="nav-text">Analitika proizvodnje</span>
                     </button>
                     <button class="nav-link" data-view="management-sales">
-                        <span class="nav-icon">💰</span>
                         <span class="nav-text">Prodaja in marža</span>
                     </button>
                 `;
@@ -167,15 +157,12 @@ const ChApp = {
                 // Finance is already authenticated in switchMainTab
                 subTabsHTML = `
                     <button class="nav-link active" data-view="finance-overview">
-                        <span class="nav-icon">💰</span>
                         <span class="nav-text">Pregled</span>
                     </button>
                     <button class="nav-link" data-view="finance-cf">
-                        <span class="nav-icon">💸</span>
                         <span class="nav-text">Denarni tok</span>
                     </button>
                     <button class="nav-link" data-view="finance-payments">
-                        <span class="nav-icon">📊</span>
                         <span class="nav-text">Plačila</span>
                     </button>
                 `;
@@ -499,10 +486,10 @@ const ChApp = {
             <div class="stock-module-container">
                 <div class="stock-tabs">
                     <button class="stock-tab-btn active" onclick="ChApp.switchStockView('ready')">
-                        📦 Ready Products
+                        Ready Products
                     </button>
                     <button class="stock-tab-btn" onclick="ChApp.switchStockView('raw')">
-                        🏭 Raw Materials
+                        Raw Materials
                     </button>
                 </div>
                 <div id="stock-report-container">
@@ -913,24 +900,23 @@ const ChApp = {
             <div id="management-container">
                 <div class="coming-soon-container">
                     <div class="coming-soon-header">
-                        <h1>💰 Sales & Margin Analytics</h1>
+                        <h1>Sales & Margin Analytics</h1>
                         <p class="header-subtitle">Comprehensive sales performance and margin analysis</p>
                     </div>
                     
                     <div class="coming-soon-content">
-                        <div class="coming-soon-icon">🚧</div>
                         <h2>Coming Soon</h2>
                         <p>Sales & Margin analytics module is under development</p>
-                        
+
                         <div class="planned-features">
                             <h3>Planned Features:</h3>
                             <ul>
-                                <li>📊 Revenue tracking and analysis</li>
-                                <li>💹 Margin analysis by product and category</li>
-                                <li>👥 Customer insights and segmentation</li>
-                                <li>📈 Sales trend analysis</li>
-                                <li>🎯 Performance vs targets</li>
-                                <li>💼 Profitability reports</li>
+                                <li>Revenue tracking and analysis</li>
+                                <li>Margin analysis by product and category</li>
+                                <li>Customer insights and segmentation</li>
+                                <li>Sales trend analysis</li>
+                                <li>Performance vs targets</li>
+                                <li>Profitability reports</li>
                             </ul>
                         </div>
                         
