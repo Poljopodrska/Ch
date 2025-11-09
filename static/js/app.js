@@ -175,13 +175,10 @@ const ChApp = {
                 // Finance is already authenticated in switchMainTab
                 subTabsHTML = `
                     <button class="nav-link active" data-view="finance-overview">
-                        <span class="nav-text">Pregled</span>
+                        <span class="nav-text">V delu</span>
                     </button>
                     <button class="nav-link" data-view="finance-cf">
                         <span class="nav-text">Denarni tok</span>
-                    </button>
-                    <button class="nav-link" data-view="finance-payments">
-                        <span class="nav-text">Plačila</span>
                     </button>
                 `;
                 this.currentSubTab = 'finance-overview';

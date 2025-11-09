@@ -554,6 +554,9 @@ const CashFlow = {
                     <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: var(--ch-primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
                         AI napoved
                     </button>
+                    <button onclick="CashFlow.switchToPayments()" style="padding: 10px 20px; background: var(--ch-primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
+                        Plačila
+                    </button>
                 </div>
 
                 <div class="cashflow-table-wrapper">
@@ -1496,6 +1499,17 @@ const CashFlow = {
               `Months Updated: ${monthNames}\n\n` +
               `Note: Months have been auto-expanded to show the data.\n` +
               `Note: Click month headers to expand weeks, then weeks to see daily values.`);
+    },
+
+    // Switch to Payment Management view
+    switchToPayments() {
+        console.log('Switching to Payment Management...');
+        // Use the global app object to load the payments view
+        if (typeof window.app !== 'undefined') {
+            window.app.loadView('finance-payments');
+        } else {
+            console.error('App object not found');
+        }
     }
 };
 
