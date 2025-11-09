@@ -52,7 +52,7 @@ const PaymentManager = {
      */
     saveSettings() {
         localStorage.setItem('paymentManagerSettings', JSON.stringify(this.state.settings));
-        alert('[Success] Settings saved successfully!');
+        alert('Nastavitve uspešno shranjene!');
     },
 
     /**
@@ -342,24 +342,24 @@ const PaymentManager = {
 
             <div class="payment-manager">
                 <div class="pm-header">
-                    <h2>Payment Management</h2>
+                    <h2>Upravljanje plačil</h2>
                     <div style="margin-top: 8px; font-size: 14px; opacity: 0.95;">
-                        Manage customer receivables and payment obligations with urgency classification
+                        Upravljanje terjatev do strank in plačilnih obveznosti z razvrstitvijo nujnosti
                     </div>
                 </div>
 
                 <div class="pm-tabs">
                     <button class="pm-tab ${this.state.currentView === 'receivables' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('receivables')">
-                        Customer Receivables
+                        Terjatve do strank
                     </button>
                     <button class="pm-tab ${this.state.currentView === 'obligations' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('obligations')">
-                        Payment Obligations
+                        Plačilne obveznosti
                     </button>
                     <button class="pm-tab ${this.state.currentView === 'settings' ? 'active' : ''}"
                             onclick="PaymentManager.switchView('settings')">
-                        Settings
+                        Nastavitve
                     </button>
                 </div>
 
@@ -521,16 +521,16 @@ const PaymentManager = {
             return `
                 <div class="pm-toolbar">
                     <button class="pm-button" onclick="PaymentManager.loadObligations()">
-                        Load Payment Obligations
+                        Naloži plačilne obveznosti
                     </button>
                     <button class="pm-button secondary" onclick="PaymentManager.exportObligations()">
-                        Export to Excel
+                        Izvozi v Excel
                     </button>
                 </div>
                 <div class="empty-state">
-                    <div class="empty-state-icon">[Obligations]</div>
-                    <h3>No Payment Obligations Loaded</h3>
-                    <p>Click "Load Payment Obligations" to import payables data</p>
+                    <div class="empty-state-icon">[Obveznosti]</div>
+                    <h3>Ni naloženih plačilnih obveznosti</h3>
+                    <p>Kliknite "Naloži plačilne obveznosti" za uvoz podatkov o plačilih</p>
                 </div>
             `;
         }
@@ -547,35 +547,35 @@ const PaymentManager = {
         return `
             <div class="summary-cards">
                 <div class="summary-card">
-                    <h4>[Urgent] Pay on time</h4>
+                    <h4>[Nujno] Plačaj pravočasno</h4>
                     <div class="value" style="color: #dc3545;">€${this.formatCurrency(urgentTotal)}</div>
-                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${urgent.length} invoices</div>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${urgent.length} računov</div>
                 </div>
                 <div class="summary-card">
-                    <h4>[Conditional] ±${this.state.settings.pogojnoNujniDays}d</h4>
+                    <h4>[Pogojno] ±${this.state.settings.pogojnoNujniDays}d</h4>
                     <div class="value" style="color: #ffc107;">€${this.formatCurrency(conditionalTotal)}</div>
-                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${conditional.length} invoices</div>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${conditional.length} računov</div>
                 </div>
                 <div class="summary-card">
-                    <h4>[Flexible] ±${this.state.settings.nenujniDays}d</h4>
+                    <h4>[Prilagodljivo] ±${this.state.settings.nenujniDays}d</h4>
                     <div class="value" style="color: #17a2b8;">€${this.formatCurrency(flexibleTotal)}</div>
-                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${flexible.length} invoices</div>
+                    <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${flexible.length} računov</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Total Payables</h4>
+                    <h4>Skupaj obveznosti</h4>
                     <div class="value">€${this.formatCurrency(urgentTotal + conditionalTotal + flexibleTotal)}</div>
                 </div>
             </div>
 
             <div class="pm-toolbar">
                 <button class="pm-button" onclick="PaymentManager.loadObligations()">
-                    Refresh Data
+                    Osveži podatke
                 </button>
                 <button class="pm-button secondary" onclick="PaymentManager.saveUrgencySettings()">
-                    Save Urgency Classifications
+                    Shrani razvrstitev nujnosti
                 </button>
                 <button class="pm-button secondary" onclick="PaymentManager.exportObligations()">
-                    Export to Excel
+                    Izvozi v Excel
                 </button>
             </div>
 
@@ -583,13 +583,13 @@ const PaymentManager = {
                 <table class="pm-table">
                     <thead>
                         <tr>
-                            <th>Supplier</th>
-                            <th>Invoice</th>
-                            <th style="text-align: right;">Amount</th>
-                            <th>Due Date</th>
+                            <th>Dobavitelj</th>
+                            <th>Račun</th>
+                            <th style="text-align: right;">Znesek</th>
+                            <th>Rok plačila</th>
                             <th style="text-align: center;">Status</th>
-                            <th style="text-align: center;">Urgency Classification</th>
-                            <th style="text-align: center;">Actual Pay Date</th>
+                            <th style="text-align: center;">Razvrstitev nujnosti</th>
+                            <th style="text-align: center;">Dejanski datum plačila</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -605,10 +605,10 @@ const PaymentManager = {
      */
     renderSupplierRow(supplier) {
         const statusBadge = supplier.daysOverdue > 0
-            ? `<span class="badge badge-overdue">Overdue ${supplier.daysOverdue}d</span>`
+            ? `<span class="badge badge-overdue">Zamuda ${supplier.daysOverdue}d</span>`
             : supplier.daysUntilDue <= 7
-            ? `<span class="badge badge-due-soon">Due in ${supplier.daysUntilDue}d</span>`
-            : `<span class="badge badge-ok">On track</span>`;
+            ? `<span class="badge badge-due-soon">Rok čez ${supplier.daysUntilDue}d</span>`
+            : `<span class="badge badge-ok">V redu</span>`;
 
         return `
             <tr>
@@ -621,18 +621,18 @@ const PaymentManager = {
                     <div class="urgency-buttons">
                         <button class="urgency-btn urgent ${supplier.urgency === 'urgent' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'urgent')"
-                                title="Pay on time">
-                            [U] Urgent
+                                title="Plačaj pravočasno">
+                            [N] Nujno
                         </button>
                         <button class="urgency-btn conditional ${supplier.urgency === 'conditional' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'conditional')"
-                                title="Can delay up to ${this.state.settings.pogojnoNujniDays} days">
-                            [C] ±${this.state.settings.pogojnoNujniDays}d
+                                title="Zamuda do ${this.state.settings.pogojnoNujniDays} dni">
+                            [P] ±${this.state.settings.pogojnoNujniDays}d
                         </button>
                         <button class="urgency-btn flexible ${supplier.urgency === 'flexible' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'flexible')"
-                                title="Pay when CF available, max ${this.state.settings.nenujniDays} days">
-                            [F] ±${this.state.settings.nenujniDays}d
+                                title="Plačaj ko je denar na voljo, max ${this.state.settings.nenujniDays} dni">
+                            [Pr] ±${this.state.settings.nenujniDays}d
                         </button>
                     </div>
                 </td>
@@ -745,7 +745,7 @@ const PaymentManager = {
 
         } catch (error) {
             console.error('Error loading receivables:', error);
-            alert(`[Error] Error loading receivables:\n\n${error.message}\n\nMake sure receivables_data.json exists in BankData folder.`);
+            alert(`Napaka pri nalaganju terjatev:\n\n${error.message}\n\nProverite, da receivables_data.json obstaja v mapi BankData.`);
             this.render();
         }
     },
@@ -789,7 +789,7 @@ const PaymentManager = {
 
         } catch (error) {
             console.error('Error loading obligations:', error);
-            alert(`[Error] Error loading obligations:\n\n${error.message}\n\nMake sure payables_data.json exists in BankData folder.`);
+            alert(`Napaka pri nalaganju obveznosti:\n\n${error.message}\n\nProverite, da payables_data.json obstaja v mapi BankData.`);
             this.render();
         }
     },
@@ -852,7 +852,7 @@ const PaymentManager = {
             urgency: s.urgency,
             actualPayDate: s.actualPayDate
         }))));
-        alert('[Success] Urgency classifications saved!');
+        alert('Razvrstitve nujnosti shranjene!');
     },
 
     /**
@@ -876,14 +876,14 @@ const PaymentManager = {
      * Export receivables to Excel
      */
     exportReceivables() {
-        alert('[Export] Export to Excel functionality - integrate with your Excel export library');
+        alert('Izvoz v Excel - integrirajte knjižnico za izvoz Excel');
     },
 
     /**
      * Export obligations to Excel
      */
     exportObligations() {
-        alert('[Export] Export to Excel functionality - integrate with your Excel export library');
+        alert('Izvoz v Excel - integrirajte knjižnico za izvoz Excel');
     },
 
     /**
