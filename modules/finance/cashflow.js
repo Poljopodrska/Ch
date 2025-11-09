@@ -538,7 +538,7 @@ const CashFlow = {
 
             <div class="cashflow-container">
                 <div class="cashflow-header">
-                    <h2>Cash Flow Planning</h2>
+                    <h2>Načrtovanje denarnega toka</h2>
                     <div style="margin-top: 10px; font-size: 14px; opacity: 0.95;">
                         V1.1.0 - Razširljiv časovno-osnovni denarni tok | Klikni mesece → tedne → dneve
                     </div>
@@ -546,34 +546,18 @@ const CashFlow = {
 
                 <div class="cashflow-controls">
                     <button class="export-button" onclick="CashFlow.exportData()">
-                        Export
+                        Izvozi
                     </button>
                     <button onclick="CashFlow.loadBankForecast()" style="padding: 10px 20px; background: var(--ch-success); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
-                        Load Bank Forecast
+                        Naloži napoved banke
                     </button>
                     <button onclick="window.open('/ai-forecast.html', '_blank')" style="padding: 10px 20px; background: var(--ch-primary); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: bold; box-shadow: var(--shadow-md);">
-                        AI Forecast
+                        AI napoved
                     </button>
                 </div>
 
                 <div class="cashflow-table-wrapper">
                     ${this.renderTable()}
-                </div>
-
-                <div style="margin-top: 20px; padding: 15px; background: var(--ch-gray-200); border-radius: 8px;">
-                    <h4>Cash Flow Planning:</h4>
-                    <ul style="margin: 10px 0; line-height: 1.6;">
-                        <li><strong>Začetno stanje:</strong> Začetna gotovina za obdobje (samodejno izračunano)</li>
-                        <li><strong>Prejemki:</strong> Prilivi gotovine iz prodaje in drugih virov (urejanje)</li>
-                        <li><strong>Izplačila:</strong> Skupna izplačila (klikni za razširitev na kategorije)</li>
-                        <li style="margin-left: 20px;"><strong>Nujni:</strong> Nujni stroški in obveznosti (urejanje)</li>
-                        <li style="margin-left: 20px;"><strong>Pogojno nujni:</strong> Pogojno nujni izdatki (urejanje)</li>
-                        <li style="margin-left: 20px;"><strong>Nenujni:</strong> Nenujni izdatki (urejanje)</li>
-                        <li><strong>Neto denarni tok:</strong> Prejemki - Vsa izplačila (samodejno izračunano)</li>
-                        <li><strong>Končno stanje:</strong> Začetno stanje + Neto denarni tok (samodejno izračunano)</li>
-                        <li><strong>Razširljivo:</strong> Klikni mesece → tedne → dneve in vrstice za podroben pogled</li>
-                        <li><strong>Napoved banke:</strong> Uvozi napovedi plačil na podlagi analiz vedenja strank (AI)</li>
-                    </ul>
                 </div>
             </div>
         `;
