@@ -11,7 +11,8 @@ const PaymentManager = {
         suppliers: [],
         settings: {
             pogojnoNujniDays: 15,  // Can delay up to 15 days
-            nenujniDays: 45        // Can delay up to 45 days
+            nenujniDays: 45,       // Can delay up to 45 days
+            useSupplierDelays: false  // If true, use supplier-specific delays from DB instead of manual settings
         },
         currentView: 'receivables' // 'receivables' or 'obligations'
     },
@@ -271,6 +272,59 @@ const PaymentManager = {
                     border: 1px solid #ced4da;
                     border-radius: 4px;
                     font-size: 14px;
+                }
+
+                .setting-item input:disabled {
+                    background: var(--ch-gray-200);
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+
+                /* Toggle Switch Styles */
+                .toggle-switch {
+                    position: relative;
+                    display: inline-block;
+                    width: 60px;
+                    height: 34px;
+                    flex-shrink: 0;
+                }
+
+                .toggle-switch input {
+                    opacity: 0;
+                    width: 0;
+                    height: 0;
+                }
+
+                .toggle-slider {
+                    position: absolute;
+                    cursor: pointer;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: var(--ch-gray-400);
+                    transition: 0.4s;
+                    border-radius: 34px;
+                }
+
+                .toggle-slider:before {
+                    position: absolute;
+                    content: "";
+                    height: 26px;
+                    width: 26px;
+                    left: 4px;
+                    bottom: 4px;
+                    background-color: white;
+                    transition: 0.4s;
+                    border-radius: 50%;
+                }
+
+                .toggle-switch input:checked + .toggle-slider {
+                    background-color: var(--ch-primary);
+                }
+
+                .toggle-switch input:checked + .toggle-slider:before {
+                    transform: translateX(26px);
                 }
 
                 .summary-cards {
@@ -647,15 +701,42 @@ const PaymentManager = {
     renderSettingsView() {
         return `
             <div class="settings-panel">
-                <h3>Payment Urgency Settings</h3>
-                <p>Configure the delay parameters for payment classifications</p>
+                <h3>Nastavitve nujnosti plačil</h3>
+                <p>Konfigurirajte parametre zamude za klasifikacijo plačil</p>
 
-                <div class="settings-grid">
+                <!-- Delay Source Toggle -->
+                <div style="margin: 25px 0; padding: 20px; background: var(--ch-primary-pale); border-radius: var(--radius-md); border: 2px solid var(--ch-primary-light);">
+                    <h4 style="margin-bottom: 15px; color: var(--ch-text-primary);">Vir podatkov o dovoljenih zamuditvah</h4>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <label class="toggle-switch">
+                            <input type="checkbox"
+                                   id="use-supplier-delays"
+                                   ${this.state.settings.useSupplierDelays ? 'checked' : ''}
+                                   onchange="PaymentManager.toggleDelaySource(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div>
+                            <strong style="display: block; margin-bottom: 5px;">
+                                ${this.state.settings.useSupplierDelays
+                                    ? '✓ Uporablja se: Podatki iz baze za vsakega dobavitelja'
+                                    : '✓ Uporablja se: Splošne nastavitve s te strani'}
+                            </strong>
+                            <span style="font-size: 12px; color: var(--ch-text-secondary);">
+                                ${this.state.settings.useSupplierDelays
+                                    ? 'Sistem uporablja polje "additional_delay_days" iz tabele dobaviteljev v bazi podatkov'
+                                    : 'Sistem uporablja spodnje ročno nastavljene vrednosti za vse dobavitelje'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manual Settings (disabled when using supplier delays) -->
+                <div class="settings-grid" style="opacity: ${this.state.settings.useSupplierDelays ? '0.5' : '1'};">
                     <div class="setting-item">
                         <label>
-                            [Conditional] Pogojno Nujni - Maximum Delay
+                            [Pogojno] Pogojno Nujni - Največja zamuda
                             <span style="font-weight: normal; font-size: 11px; color: #6c757d;">
-                                (Can be paid this many days after due date)
+                                (Plačilo lahko zamudi toliko dni po roku)
                             </span>
                         </label>
                         <input type="number"
@@ -663,14 +744,15 @@ const PaymentManager = {
                                value="${this.state.settings.pogojnoNujniDays}"
                                min="1"
                                max="60"
+                               ${this.state.settings.useSupplierDelays ? 'disabled' : ''}
                                onchange="PaymentManager.updateSetting('pogojnoNujniDays', this.value)">
                     </div>
 
                     <div class="setting-item">
                         <label>
-                            [Flexible] Nenujni - Maximum Delay
+                            [Prilagodljivo] Nenujni - Največja zamuda
                             <span style="font-weight: normal; font-size: 11px; color: #6c757d;">
-                                (Pay when CF available, but no later than this many days)
+                                (Plačaj ko je denar na voljo, ne pozneje kot toliko dni)
                             </span>
                         </label>
                         <input type="number"
@@ -678,29 +760,30 @@ const PaymentManager = {
                                value="${this.state.settings.nenujniDays}"
                                min="1"
                                max="90"
+                               ${this.state.settings.useSupplierDelays ? 'disabled' : ''}
                                onchange="PaymentManager.updateSetting('nenujniDays', this.value)">
                     </div>
                 </div>
 
                 <div style="margin-top: 20px;">
                     <button class="pm-button" onclick="PaymentManager.saveSettings()">
-                        Save Settings
+                        Shrani nastavitve
                     </button>
                     <button class="pm-button secondary" onclick="PaymentManager.resetSettings()">
-                        Reset to Defaults
+                        Ponastavi na privzeto
                     </button>
                 </div>
 
                 <div style="margin-top: 30px; padding: 15px; background: white; border-radius: 8px;">
-                    <h4>[Info] How Urgency Classifications Work</h4>
+                    <h4>ℹ️ Kako delujejo klasifikacije nujnosti</h4>
                     <ul style="line-height: 1.8;">
-                        <li><strong>[Urgent]:</strong> Must be paid exactly on the due date. No flexibility.</li>
-                        <li><strong>[Conditional] (Pogojno Nujni):</strong> Can be delayed up to <strong>${this.state.settings.pogojnoNujniDays} days</strong> after due date if needed for cash flow management.</li>
-                        <li><strong>[Flexible] (Nenujni):</strong> Pay when cash flow allows, but no later than <strong>${this.state.settings.nenujniDays} days</strong> after due date.</li>
+                        <li><strong>[Nujno]:</strong> Mora biti plačano točno na rok. Brez prilagodljivosti.</li>
+                        <li><strong>[Pogojno] (Pogojno Nujni):</strong> Lahko zamudi do <strong>${this.state.settings.useSupplierDelays ? 'X dni (glede na dobavitelja)' : this.state.settings.pogojnoNujniDays + ' dni'}</strong> po roku, če je potrebno za upravljanje denarnega toka.</li>
+                        <li><strong>[Prilagodljivo] (Nenujni):</strong> Plačaj, ko denarni tok dopušča, ne pozneje kot <strong>${this.state.settings.useSupplierDelays ? 'Y dni (glede na dobavitelja)' : this.state.settings.nenujniDays + ' dni'}</strong> po roku.</li>
                     </ul>
                     <p style="margin-top: 15px; color: #6c757d; font-size: 13px;">
-                        These classifications help you prioritize payments based on supplier relationships and cash flow availability.
-                        The forecast system will adjust payment dates accordingly.
+                        Te klasifikacije vam pomagajo določiti prednost plačil glede na odnose z dobavitelji in razpoložljivost denarnega toka.
+                        Napovednik bo ustrezno prilagodil datume plačil.
                     </p>
                 </div>
             </div>
@@ -830,13 +913,29 @@ const PaymentManager = {
     },
 
     /**
+     * Toggle delay source between manual and supplier-specific
+     */
+    toggleDelaySource(useSupplierDelays) {
+        this.state.settings.useSupplierDelays = useSupplierDelays;
+        this.render();
+
+        // Show info message
+        const message = useSupplierDelays
+            ? 'Sistem bo sedaj uporabljal podatke o dovoljenih zamuditvah iz baze podatkov za vsakega dobavitelja posebej (polje "additional_delay_days").'
+            : 'Sistem bo sedaj uporabljal splošne nastavitve s te strani za vse dobavitelje.';
+
+        setTimeout(() => alert(message), 100);
+    },
+
+    /**
      * Reset settings to defaults
      */
     resetSettings() {
-        if (confirm('Reset settings to default values?')) {
+        if (confirm('Ponastaviti nastavitve na privzete vrednosti?')) {
             this.state.settings = {
                 pogojnoNujniDays: 15,
-                nenujniDays: 45
+                nenujniDays: 45,
+                useSupplierDelays: false
             };
             this.saveSettings();
             this.render();
