@@ -601,17 +601,17 @@ const PaymentManager = {
         return `
             <div class="summary-cards">
                 <div class="summary-card">
-                    <h4>[Nujno] Plačaj pravočasno</h4>
+                    <h4>Nujno - Plačaj pravočasno</h4>
                     <div class="value" style="color: #dc3545;">€${this.formatCurrency(urgentTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${urgent.length} računov</div>
                 </div>
                 <div class="summary-card">
-                    <h4>[Pogojno] ±${this.state.settings.pogojnoNujniDays}d</h4>
+                    <h4>Pogojno ±${this.state.settings.pogojnoNujniDays}d</h4>
                     <div class="value" style="color: #ffc107;">€${this.formatCurrency(conditionalTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${conditional.length} računov</div>
                 </div>
                 <div class="summary-card">
-                    <h4>[Prilagodljivo] ±${this.state.settings.nenujniDays}d</h4>
+                    <h4>Prilagodljivo ±${this.state.settings.nenujniDays}d</h4>
                     <div class="value" style="color: #17a2b8;">€${this.formatCurrency(flexibleTotal)}</div>
                     <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">${flexible.length} računov</div>
                 </div>
@@ -676,17 +676,17 @@ const PaymentManager = {
                         <button class="urgency-btn urgent ${supplier.urgency === 'urgent' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'urgent')"
                                 title="Plačaj pravočasno">
-                            [N] Nujno
+                            Nujno
                         </button>
                         <button class="urgency-btn conditional ${supplier.urgency === 'conditional' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'conditional')"
                                 title="Zamuda do ${this.state.settings.pogojnoNujniDays} dni">
-                            [P] ±${this.state.settings.pogojnoNujniDays}d
+                            Pogojno ±${this.state.settings.pogojnoNujniDays}d
                         </button>
                         <button class="urgency-btn flexible ${supplier.urgency === 'flexible' ? 'selected' : ''}"
                                 onclick="PaymentManager.setUrgency('${supplier.id}', 'flexible')"
                                 title="Plačaj ko je denar na voljo, max ${this.state.settings.nenujniDays} dni">
-                            [Pr] ±${this.state.settings.nenujniDays}d
+                            Prilagodljivo ±${this.state.settings.nenujniDays}d
                         </button>
                     </div>
                 </td>
