@@ -1206,6 +1206,14 @@ const ChApp = {
         `;
 
         setTimeout(async () => {
+            // Remove any existing suppliers module scripts to force fresh load
+            document.querySelectorAll('script[src*="suppliers.js"]').forEach(s => s.remove());
+
+            // Clear the module from memory if it exists
+            if (typeof SuppliersModule !== 'undefined') {
+                delete window.SuppliersModule;
+            }
+
             const script = document.createElement('script');
             script.src = 'modules/procurement/suppliers.js?v=' + Date.now();
             script.onload = () => {

@@ -6,14 +6,20 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
-import sentry_sdk
-from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+    SENTRY_AVAILABLE = True
+except ImportError:
+    SENTRY_AVAILABLE = False
+    print("Warning: sentry_sdk not installed, monitoring disabled")
 
 from app.core.config import settings
 from app.api.v1 import api_router
 
-# Initialize Sentry if DSN is provided
-if settings.SENTRY_DSN:
+# Initialize Sentry if DSN is provided and sentry is available
+if SENTRY_AVAILABLE and settings.SENTRY_DSN:
     sentry_sdk.init(
         dsn=settings.SENTRY_DSN,
         environment=settings.ENVIRONMENT,
@@ -39,7 +45,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-if settings.SENTRY_DSN:
+if SENTRY_AVAILABLE and settings.SENTRY_DSN:
     app.add_middleware(SentryAsgiMiddleware)
 
 # Include API routes
