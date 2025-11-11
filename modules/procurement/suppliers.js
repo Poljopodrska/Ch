@@ -3,11 +3,17 @@
  * Manages supplier information including payment terms
  */
 
+// API Base URL - dynamically set based on environment
+const API_BASE_URL = window.location.protocol === 'file:'
+    ? '' // Will use mock API
+    : `${window.location.protocol}//${window.location.hostname}:8000`;
+
 const SuppliersModule = {
     suppliers: [],
 
     init() {
         console.log('Initializing Suppliers module...');
+        console.log('API Base URL:', API_BASE_URL);
         this.render();
         this.loadSuppliers();
     },
@@ -385,7 +391,7 @@ const SuppliersModule = {
 
     async loadSuppliers() {
         try {
-            const response = await fetch('/api/v1/suppliers/');
+            const response = await fetch(`${API_BASE_URL}/api/v1/suppliers/`);
             if (response.ok) {
                 this.suppliers = await response.json();
                 console.log('Loaded suppliers from database:', this.suppliers);
@@ -514,14 +520,14 @@ const SuppliersModule = {
             let response;
             if (supplierId) {
                 // Update existing supplier
-                response = await fetch(`/api/v1/suppliers/${supplierId}`, {
+                response = await fetch(`${API_BASE_URL}/api/v1/suppliers/${supplierId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(supplierData)
                 });
             } else {
                 // Create new supplier
-                response = await fetch('/api/v1/suppliers/', {
+                response = await fetch(`${API_BASE_URL}/api/v1/suppliers/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(supplierData)
@@ -560,7 +566,7 @@ const SuppliersModule = {
         }
 
         try {
-            const response = await fetch(`/api/v1/suppliers/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/suppliers/${id}`, {
                 method: 'DELETE'
             });
 

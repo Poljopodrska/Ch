@@ -1,7 +1,13 @@
 // Customer CRM Module - Integrated with Pricing and Sales
+
+// API Base URL - dynamically set based on environment
+const CRM_API_BASE_URL = window.location.protocol === 'file:'
+    ? '' // Will use mock API
+    : `${window.location.protocol}//${window.location.hostname}:8000`;
+
 const CustomerCRM = {
     VERSION: '1.0.0',
-    
+
     state: {
         customers: [],
         customerPricing: {},
@@ -35,7 +41,7 @@ const CustomerCRM = {
         console.log('[CRM] Loading customers from database API...');
         try {
             // Fetch customers from database API
-            const response = await fetch('/api/v1/customers/');
+            const response = await fetch(`${CRM_API_BASE_URL}/api/v1/customers/`);
 
             if (!response.ok) {
                 throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -194,7 +200,7 @@ const CustomerCRM = {
     async deleteCustomer(customerId) {
         console.log('[CRM] Deleting customer:', customerId);
         try {
-            const response = await fetch(`/api/v1/customers/${customerId}`, {
+            const response = await fetch(`${CRM_API_BASE_URL}/api/v1/customers/${customerId}`, {
                 method: 'DELETE'
             });
 
@@ -1619,7 +1625,7 @@ const CustomerCRM = {
         // Upload each customer
         for (const customerData of this.uploadedData) {
             try {
-                const response = await fetch('/api/v1/customers/', {
+                const response = await fetch(`${CRM_API_BASE_URL}/api/v1/customers/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(customerData)

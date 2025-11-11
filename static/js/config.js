@@ -4,7 +4,7 @@ const ChConfig = {
     mode: window.location.protocol === 'file:' ? 'development' : 'production',
     api: {
         development: 'mock://', // Uses mock_api.js
-        production: '/api/v1'   // Future ECS endpoint
+        production: window.location.protocol === 'file:' ? 'mock://' : `${window.location.protocol}//${window.location.hostname}:8000/api/v1`   // Backend on port 8000
     },
     features: {
         modules: true,
