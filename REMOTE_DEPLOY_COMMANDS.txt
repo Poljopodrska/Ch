@@ -1,0 +1,77 @@
+=================================================================
+COPY AND PASTE THESE COMMANDS INTO YOUR AWS EC2 INSTANCE
+=================================================================
+
+# Step 1: Go to your deployment directory
+cd /home/ubuntu/Ch  # Or wherever your Ch directory is
+
+# Step 2: Pull latest code
+git pull origin main
+
+# Step 3: Install nginx (if not already installed)
+sudo apt update
+sudo apt install -y nginx
+
+# Step 4: Backup existing nginx config (if exists)
+if [ -f /etc/nginx/sites-available/ch-app ]; then
+    sudo cp /etc/nginx/sites-available/ch-app /etc/nginx/sites-available/ch-app.backup.$(date +%Y%m%d_%H%M%S)
+fi
+
+# Step 5: Copy and configure nginx
+sudo cp nginx.conf /etc/nginx/sites-available/ch-app
+
+# Step 6: Fix the root path in nginx config
+sudo sed -i "s|root /mnt/c/Users/HP/Ch|root $(pwd)|g" /etc/nginx/sites-available/ch-app
+
+# Step 7: Enable the site
+sudo ln -sf /etc/nginx/sites-available/ch-app /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+# Step 8: Test nginx configuration
+sudo nginx -t
+
+# Step 9: Reload nginx
+sudo systemctl reload nginx
+sudo systemctl enable nginx
+
+# Step 10: Stop any existing backend processes
+pkill -f "uvicorn app.main:app"
+
+# Step 11: Start backend on port 8000 (internal only)
+cd backend
+nohup python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000 > /tmp/backend.log 2>&1 &
+
+# Step 12: Wait a moment for backend to start
+sleep 3
+
+# Step 13: Test the deployment
+echo "==================================="
+echo "Testing Backend..."
+echo "==================================="
+curl -s http://localhost:8000/health | python3 -m json.tool
+
+echo ""
+echo "==================================="
+echo "Testing Nginx Proxy..."
+echo "==================================="
+curl -s http://localhost/health | python3 -m json.tool
+
+echo ""
+echo "==================================="
+echo "Deployment Status"
+echo "==================================="
+sudo systemctl status nginx --no-pager | head -5
+
+echo ""
+echo "Backend process:"
+ps aux | grep uvicorn | grep -v grep
+
+echo ""
+echo "==================================="
+echo "DEPLOYMENT COMPLETE!"
+echo "==================================="
+echo "Your application should now be accessible at:"
+echo "http://ch-alb-2140286266.us-east-1.elb.amazonaws.com"
+echo ""
+echo "IMPORTANT: Hard refresh your browser (Ctrl+Shift+R)"
+echo "==================================="
