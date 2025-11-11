@@ -4,9 +4,18 @@
  */
 
 // API Base URL - dynamically set based on environment
-const API_BASE_URL = window.location.protocol === 'file:'
-    ? '' // Will use mock API
-    : `${window.location.protocol}//${window.location.hostname}:8000`;
+const API_BASE_URL = (() => {
+    if (window.location.protocol === 'file:') {
+        return ''; // Will use mock API
+    }
+    // Check if we're on a standard port (80/443) - use /api proxy
+    const port = window.location.port;
+    if (!port || port === '80' || port === '443') {
+        return ''; // Use relative URLs - assumes reverse proxy
+    }
+    // Otherwise use explicit port 8000
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+})();
 
 const SuppliersModule = {
     suppliers: [],
