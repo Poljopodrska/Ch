@@ -1,11 +1,11 @@
 # Multi-stage build for Ch Application
 # Stage 1: Frontend
-FROM nginx:alpine as frontend
+FROM public.ecr.aws/nginx/nginx:alpine AS frontend
 COPY . /usr/share/nginx/html/
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Stage 2: Backend
-FROM python:3.12-slim
+FROM public.ecr.aws/docker/library/python:3.12-slim
 
 # Set working directory
 WORKDIR /app
