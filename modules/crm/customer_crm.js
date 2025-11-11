@@ -409,6 +409,111 @@ const CustomerCRM = {
                 </div>
             </div>
 
+            <!-- Customer Add/Edit Modal -->
+            <div id="customer-modal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
+                    <div class="modal-header">
+                        <h2 id="modal-title">Dodaj stranko</h2>
+                        <button class="close-btn" onclick="CustomerCRM.closeModal()">&times;</button>
+                    </div>
+
+                    <form id="customer-form" onsubmit="CustomerCRM.handleFormSubmit(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="customer-code">Šifra stranke *</label>
+                                <input type="text" id="customer-code" required placeholder="npr. CU001">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-name">Ime stranke *</label>
+                                <input type="text" id="customer-name" required placeholder="npr. Poslovni partner d.o.o.">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-type">Tip stranke</label>
+                                <select id="customer-type">
+                                    <option value="Retail">Retail</option>
+                                    <option value="Wholesale">Wholesale</option>
+                                    <option value="Distribution">Distribution</option>
+                                    <option value="Food Service">Food Service</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-email">Email</label>
+                                <input type="email" id="customer-email" placeholder="npr. info@stranka.si">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-phone">Telefon</label>
+                                <input type="tel" id="customer-phone" placeholder="npr. +386 1 234 5678">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-contact">Kontaktna oseba</label>
+                                <input type="text" id="customer-contact" placeholder="npr. Janez Novak">
+                            </div>
+
+                            <!-- Address Fields -->
+                            <div class="form-group">
+                                <label for="customer-address">Ulica in hišna številka</label>
+                                <input type="text" id="customer-address" placeholder="npr. Slovenska cesta 123">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-postal-code">Poštna številka</label>
+                                <input type="text" id="customer-postal-code" placeholder="npr. 10000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-city">Mesto</label>
+                                <input type="text" id="customer-city" placeholder="npr. Zagreb">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-country">Država</label>
+                                <input type="text" id="customer-country" value="Croatia" placeholder="Croatia">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-tax-id">Davčna številka</label>
+                                <input type="text" id="customer-tax-id" placeholder="npr. SI12345678">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-payment-terms">Plačilni pogoji (dni)</label>
+                                <input type="number" id="customer-payment-terms" value="30" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-credit-limit">Kreditni limit (€)</label>
+                                <input type="number" id="customer-credit-limit" value="10000" min="0" step="100">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-discount">Popust (%)</label>
+                                <input type="number" id="customer-discount" value="0" min="0" max="100" step="0.1">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="customer-responsible">Odgovorna oseba</label>
+                                <input type="text" id="customer-responsible" placeholder="npr. Marko Horvat">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="customer-notes">Opombe</label>
+                                <textarea id="customer-notes" rows="3" placeholder="Dodatne opombe o stranki"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn-cancel" onclick="CustomerCRM.closeModal()">Prekliči</button>
+                            <button type="submit" class="btn-save">Shrani</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             ${this.getStyles()}
         `;
     },
@@ -645,10 +750,70 @@ const CustomerCRM = {
     },
     
     showAddCustomer() {
-        // Would open a modal to add new customer
-        alert('Add Customer form would open here');
+        // Open modal to add new customer
+        const modal = document.getElementById('customer-modal');
+        modal.style.display = 'flex';
+        document.getElementById('modal-title').textContent = 'Dodaj stranko';
+        document.getElementById('customer-form').reset();
+        document.getElementById('customer-form').dataset.customerId = '';
+        document.getElementById('customer-country').value = 'Croatia'; // Default to Croatia
     },
-    
+
+    closeModal() {
+        const modal = document.getElementById('customer-modal');
+        modal.style.display = 'none';
+        document.getElementById('customer-form').reset();
+    },
+
+    async handleFormSubmit(event) {
+        event.preventDefault();
+
+        try {
+            // Collect form data
+            const customerData = {
+                id: document.getElementById('customer-form').dataset.customerId || null,
+                code: document.getElementById('customer-code').value,
+                name: document.getElementById('customer-name').value,
+                type: document.getElementById('customer-type').value,
+                email: document.getElementById('customer-email').value,
+                phone: document.getElementById('customer-phone').value,
+                contactPerson: document.getElementById('customer-contact').value,
+                address: document.getElementById('customer-address').value,
+                postal_code: document.getElementById('customer-postal-code').value,
+                city: document.getElementById('customer-city').value,
+                country: document.getElementById('customer-country').value,
+                taxId: document.getElementById('customer-tax-id').value,
+                paymentTerms: parseInt(document.getElementById('customer-payment-terms').value) || 30,
+                creditLimit: parseFloat(document.getElementById('customer-credit-limit').value) || 10000,
+                discount: parseFloat(document.getElementById('customer-discount').value) || 0,
+                responsiblePerson: document.getElementById('customer-responsible').value,
+                notes: document.getElementById('customer-notes').value,
+                status: 'active',
+                rating: 'B', // Default rating
+                totalRevenue: 0,
+                orderCount: 0,
+                lastOrder: null,
+                website: ''
+            };
+
+            console.log('[CRM] Submitting customer data:', customerData);
+
+            // Save to database
+            await this.saveCustomer(customerData);
+
+            // Close modal and refresh
+            this.closeModal();
+            await this.loadCustomers();
+            this.render();
+
+            alert('Stranka uspešno shranjena!');
+
+        } catch (error) {
+            console.error('[CRM] Error saving customer:', error);
+            alert(`Napaka pri shranjevanju stranke: ${error.message}`);
+        }
+    },
+
     editCustomer(customerId) {
         const customer = this.state.customers.find(c => c.id === customerId);
         alert(`Edit customer: ${customer.name}`);
@@ -1113,6 +1278,156 @@ const CustomerCRM = {
                 .price-info .net {
                     color: var(--ch-success);
                     font-weight: bold;
+                }
+
+                /* Modal Styles */
+                .modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.6);
+                    z-index: 2000;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .modal-content {
+                    background: white;
+                    border-radius: 12px;
+                    padding: 0;
+                    max-width: 800px;
+                    width: 90%;
+                    max-height: 90vh;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                }
+
+                .modal-header {
+                    background: var(--ch-primary);
+                    color: white;
+                    padding: 20px 30px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+
+                .modal-header h2 {
+                    margin: 0;
+                    font-size: 22px;
+                }
+
+                .close-btn {
+                    background: none;
+                    border: none;
+                    color: white;
+                    font-size: 32px;
+                    cursor: pointer;
+                    padding: 0;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    transition: background 0.2s;
+                }
+
+                .close-btn:hover {
+                    background: rgba(255, 255, 255, 0.2);
+                }
+
+                #customer-form {
+                    padding: 30px;
+                    overflow-y: auto;
+                    max-height: calc(90vh - 160px);
+                }
+
+                .form-grid {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 20px;
+                }
+
+                .form-group {
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .form-group.full-width {
+                    grid-column: 1 / -1;
+                }
+
+                .form-group label {
+                    font-weight: 600;
+                    margin-bottom: 8px;
+                    color: var(--ch-text-primary);
+                    font-size: 14px;
+                }
+
+                .form-group input,
+                .form-group select,
+                .form-group textarea {
+                    padding: 10px 12px;
+                    border: 2px solid var(--ch-border-medium);
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-family: inherit;
+                    transition: border-color 0.2s;
+                }
+
+                .form-group input:focus,
+                .form-group select:focus,
+                .form-group textarea:focus {
+                    outline: none;
+                    border-color: var(--ch-primary);
+                }
+
+                .form-group textarea {
+                    resize: vertical;
+                    min-height: 80px;
+                }
+
+                .modal-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    padding: 20px 30px;
+                    background: var(--ch-gray-50);
+                    border-top: 1px solid var(--ch-border-light);
+                }
+
+                .btn-cancel,
+                .btn-save {
+                    padding: 12px 24px;
+                    border: none;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .btn-cancel {
+                    background: var(--ch-gray-200);
+                    color: var(--ch-text-primary);
+                }
+
+                .btn-cancel:hover {
+                    background: var(--ch-gray-300);
+                }
+
+                .btn-save {
+                    background: var(--ch-primary);
+                    color: white;
+                }
+
+                .btn-save:hover {
+                    background: var(--ch-primary-dark);
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 }
             </style>
         `;
