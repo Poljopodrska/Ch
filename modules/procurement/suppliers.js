@@ -221,13 +221,14 @@ const SuppliersModule = {
                             <th>Telefon</th>
                             <th>Plačilni pogoji (dni)</th>
                             <th>Dopustna dodatna zamuda (dni)</th>
-                            <th>Naslov</th>
+                            <th>Mesto</th>
+                            <th>Država</th>
                             <th>Dejanja</th>
                         </tr>
                     </thead>
                     <tbody id="suppliers-tbody">
                         <tr>
-                            <td colspan="9" style="text-align: center; padding: 40px;">
+                            <td colspan="10" style="text-align: center; padding: 40px;">
                                 Nalaganje dobaviteljev...
                             </td>
                         </tr>
@@ -293,8 +294,23 @@ const SuppliersModule = {
                             </div>
 
                             <div class="form-group">
-                                <label for="supplier-address">Naslov</label>
-                                <textarea id="supplier-address" rows="3"></textarea>
+                                <label for="supplier-address">Ulica in hišna številka</label>
+                                <input type="text" id="supplier-address" placeholder="npr. Slovenska cesta 123">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier-postal-code">Poštna številka</label>
+                                <input type="text" id="supplier-postal-code" placeholder="npr. 1000">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier-city">Mesto</label>
+                                <input type="text" id="supplier-city" placeholder="npr. Ljubljana">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier-country">Država</label>
+                                <input type="text" id="supplier-country" value="Slovenia" placeholder="Slovenia">
                             </div>
 
                             <div class="form-group">
@@ -395,7 +411,7 @@ const SuppliersModule = {
         if (suppliers.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
+                    <td colspan="10" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
                         Ni najdenih dobaviteljev
                     </td>
                 </tr>
@@ -412,7 +428,8 @@ const SuppliersModule = {
                 <td>${supplier.phone || '-'}</td>
                 <td class="payment-delay">${supplier.payment_terms_days} dni</td>
                 <td class="payment-delay">${supplier.additional_delay_days || 0} dni</td>
-                <td>${supplier.address || '-'}</td>
+                <td>${supplier.city || '-'}</td>
+                <td>${supplier.country || '-'}</td>
                 <td>
                     <button class="btn-edit" onclick="SuppliersModule.editSupplier(${supplier.id})">
                         Uredi
@@ -455,6 +472,9 @@ const SuppliersModule = {
         document.getElementById('supplier-payment-terms').value = supplier.payment_terms_days;
         document.getElementById('supplier-additional-delay').value = supplier.additional_delay_days || 0;
         document.getElementById('supplier-address').value = supplier.address || '';
+        document.getElementById('supplier-postal-code').value = supplier.postal_code || '';
+        document.getElementById('supplier-city').value = supplier.city || '';
+        document.getElementById('supplier-country').value = supplier.country || 'Slovenia';
         document.getElementById('supplier-notes').value = supplier.notes || '';
         document.getElementById('supplier-form').dataset.supplierId = id;
         document.getElementById('supplier-modal').classList.add('active');
@@ -479,6 +499,9 @@ const SuppliersModule = {
             payment_terms_days: parseInt(document.getElementById('supplier-payment-terms').value),
             additional_delay_days: parseInt(document.getElementById('supplier-additional-delay').value),
             address: document.getElementById('supplier-address').value,
+            postal_code: document.getElementById('supplier-postal-code').value,
+            city: document.getElementById('supplier-city').value,
+            country: document.getElementById('supplier-country').value,
             notes: document.getElementById('supplier-notes').value
         };
 
@@ -568,7 +591,10 @@ const SuppliersModule = {
                 'Telefon': '+386 1 234 5678',
                 'Plačilni pogoji (dni)': 30,
                 'Dopustna dodatna zamuda (dni)': 15,
-                'Naslov': 'Primerjeva ulica 1, 1000 Ljubljana',
+                'Ulica in hišna številka': 'Slovenska cesta 123',
+                'Poštna številka': '1000',
+                'Mesto': 'Ljubljana',
+                'Država': 'Slovenia',
                 'Opombe': 'To je vzorec - izbrišite to vrstico in dodajte svoje dobavitelje'
             }
         ];
@@ -585,7 +611,10 @@ const SuppliersModule = {
             { wch: 18 }, // Telefon
             { wch: 20 }, // Plačilni pogoji
             { wch: 28 }, // Dopustna dodatna zamuda
-            { wch: 35 }, // Naslov
+            { wch: 30 }, // Ulica in hišna številka
+            { wch: 15 }, // Poštna številka
+            { wch: 20 }, // Mesto
+            { wch: 15 }, // Država
             { wch: 40 }  // Opombe
         ];
 
@@ -639,7 +668,10 @@ const SuppliersModule = {
                         phone: row['Telefon'] || '',
                         payment_terms_days: parseInt(row['Plačilni pogoji (dni)']) || 30,
                         additional_delay_days: parseInt(row['Dopustna dodatna zamuda (dni)']) || 0,
-                        address: row['Naslov'] || '',
+                        address: row['Ulica in hišna številka'] || '',
+                        postal_code: row['Poštna številka'] || '',
+                        city: row['Mesto'] || '',
+                        country: row['Država'] || 'Slovenia',
                         notes: row['Opombe'] || '',
                         supplier_code: 'SUP' + Date.now() + '_' + index
                     };
