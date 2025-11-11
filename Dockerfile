@@ -1,33 +1,63 @@
-FROM public.ecr.aws/docker/library/python:3.11-slim
+# Multi-stage build for Ch Application
+# Stage 1: Frontend
+FROM nginx:alpine as frontend
+COPY . /usr/share/nginx/html/
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Accept version as build argument
-ARG VERSION=0.2.0
-ENV APP_VERSION=${VERSION}
+# Stage 2: Backend
+FROM python:3.12-slim
 
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy backend requirements and install
+COPY backend/requirements.txt ./backend/
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Copy application
+# Copy entire application
 COPY . .
 
-# Remove development files
-RUN rm -rf development/ scripts/build-dev-modules.js protection_system/tests/
+# Copy nginx configuration
+RUN cp nginx.conf /etc/nginx/sites-available/default
+RUN sed -i "s|root /mnt/c/Users/HP/Ch|root /app|g" /etc/nginx/sites-available/default
 
-# Ensure proper permissions
-RUN chmod -R 755 /app
+# Create supervisor config to run both nginx and backend
+RUN mkdir -p /var/log/supervisor
+COPY <<'EOF' /etc/supervisor/conf.d/supervisord.conf
+[supervisord]
+nodaemon=true
+logfile=/var/log/supervisor/supervisord.log
+pidfile=/var/run/supervisord.pid
 
-EXPOSE 8080
+[program:nginx]
+command=/usr/sbin/nginx -g "daemon off;"
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/nginx.err.log
+stdout_logfile=/var/log/supervisor/nginx.out.log
+
+[program:backend]
+command=python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+directory=/app/backend
+autostart=true
+autorestart=true
+stderr_logfile=/var/log/supervisor/backend.err.log
+stdout_logfile=/var/log/supervisor/backend.out.log
+EOF
+
+# Expose port 80 (nginx)
+EXPOSE 80
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost/health || exit 1
 
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Start supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
