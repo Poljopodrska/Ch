@@ -43,16 +43,20 @@ pidfile=/var/run/supervisord.pid
 command=/usr/sbin/nginx -g "daemon off;"
 autostart=true
 autorestart=true
-stderr_logfile=/var/log/supervisor/nginx.err.log
-stdout_logfile=/var/log/supervisor/nginx.out.log
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
 
 [program:backend]
 command=python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 directory=/app/backend
 autostart=true
 autorestart=true
-stderr_logfile=/var/log/supervisor/backend.err.log
-stdout_logfile=/var/log/supervisor/backend.out.log
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
 EOF
 
 # Expose port 80 (nginx)
