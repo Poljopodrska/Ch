@@ -44,6 +44,10 @@
         {
           "name": "DB_PASSWORD",
           "value": "LLJW8cLuLv1yyJlRt6aUioSzq"
+        },
+        {
+          "name": "SECRET_KEY",
+          "value": "ch-production-secret-key-2024-secure-random-string"
         }
       ],
       "logConfiguration": {
