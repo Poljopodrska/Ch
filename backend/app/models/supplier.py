@@ -49,6 +49,7 @@ class Supplier(Base):
     # ========================================================================
     payment_terms_days = Column(Integer, default=30)  # How many days we have to pay (Net 30, Net 60, etc.)
     additional_delay_days = Column(Integer, default=0)  # Additional days we can delay beyond payment terms without consequences
+    payment_priority = Column(Integer, default=2)  # Payment priority: 1=highest, 2=medium, 3=lowest
     currency = Column(String(3), default="EUR")
 
     # ========================================================================

@@ -18,6 +18,7 @@ class SupplierBase(BaseModel):
     country: Optional[str] = Field("Slovenia", max_length=100)
     payment_terms_days: int = Field(30, ge=0, description="Payment terms in days")
     additional_delay_days: int = Field(0, ge=0, description="Additional acceptable delay beyond payment terms")
+    payment_priority: int = Field(2, ge=1, le=3, description="Payment priority: 1=highest, 2=medium, 3=lowest")
     notes: Optional[str] = Field(None, max_length=1000)
 
 
@@ -39,6 +40,7 @@ class SupplierUpdate(BaseModel):
     country: Optional[str] = Field(None, max_length=100)
     payment_terms_days: Optional[int] = Field(None, ge=0)
     additional_delay_days: Optional[int] = Field(None, ge=0)
+    payment_priority: Optional[int] = Field(None, ge=1, le=3)
     notes: Optional[str] = Field(None, max_length=1000)
     is_active: Optional[bool] = None
 

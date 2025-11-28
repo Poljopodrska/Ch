@@ -236,6 +236,7 @@ const SuppliersModule = {
                             <th>Telefon</th>
                             <th>Plačilni pogoji (dni)</th>
                             <th>Dopustna dodatna zamuda (dni)</th>
+                            <th>Prioriteta plačil</th>
                             <th>Mesto</th>
                             <th>Država</th>
                             <th>Dejanja</th>
@@ -243,7 +244,7 @@ const SuppliersModule = {
                     </thead>
                     <tbody id="suppliers-tbody">
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 40px;">
+                            <td colspan="11" style="text-align: center; padding: 40px;">
                                 Nalaganje dobaviteljev...
                             </td>
                         </tr>
@@ -305,6 +306,18 @@ const SuppliersModule = {
                                        placeholder="npr. 10, 15, 30">
                                 <small style="color: var(--ch-text-secondary); margin-top: 5px;">
                                     Koliko dni lahko dodatno zamudimo s plačilom brez posledic
+                                </small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="supplier-payment-priority">Prioriteta plačil *</label>
+                                <select id="supplier-payment-priority" required>
+                                    <option value="1">1 - Najvišja prioriteta</option>
+                                    <option value="2" selected>2 - Srednja prioriteta</option>
+                                    <option value="3">3 - Najnižja prioriteta</option>
+                                </select>
+                                <small style="color: var(--ch-text-secondary); margin-top: 5px;">
+                                    Prioriteta pri razporejanju plačil (1 = najprej plačamo)
                                 </small>
                             </div>
 
@@ -426,7 +439,7 @@ const SuppliersModule = {
         if (suppliers.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="10" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
+                    <td colspan="11" style="text-align: center; padding: 40px; color: var(--ch-text-secondary);">
                         Ni najdenih dobaviteljev
                     </td>
                 </tr>
@@ -443,6 +456,7 @@ const SuppliersModule = {
                 <td>${supplier.phone || '-'}</td>
                 <td class="payment-delay">${supplier.payment_terms_days} dni</td>
                 <td class="payment-delay">${supplier.additional_delay_days || 0} dni</td>
+                <td class="payment-delay">${supplier.payment_priority || 2}</td>
                 <td>${supplier.city || '-'}</td>
                 <td>${supplier.country || '-'}</td>
                 <td>
@@ -486,6 +500,7 @@ const SuppliersModule = {
         document.getElementById('supplier-phone').value = supplier.phone || '';
         document.getElementById('supplier-payment-terms').value = supplier.payment_terms_days;
         document.getElementById('supplier-additional-delay').value = supplier.additional_delay_days || 0;
+        document.getElementById('supplier-payment-priority').value = supplier.payment_priority || 2;
         document.getElementById('supplier-address').value = supplier.address || '';
         document.getElementById('supplier-postal-code').value = supplier.postal_code || '';
         document.getElementById('supplier-city').value = supplier.city || '';
@@ -513,6 +528,7 @@ const SuppliersModule = {
             phone: document.getElementById('supplier-phone').value,
             payment_terms_days: parseInt(document.getElementById('supplier-payment-terms').value),
             additional_delay_days: parseInt(document.getElementById('supplier-additional-delay').value),
+            payment_priority: parseInt(document.getElementById('supplier-payment-priority').value),
             address: document.getElementById('supplier-address').value,
             postal_code: document.getElementById('supplier-postal-code').value,
             city: document.getElementById('supplier-city').value,
@@ -606,6 +622,7 @@ const SuppliersModule = {
                 'Telefon': '+386 1 234 5678',
                 'Plačilni pogoji (dni)': 30,
                 'Dopustna dodatna zamuda (dni)': 15,
+                'Prioriteta plačil (1-3)': 2,
                 'Ulica in hišna številka': 'Slovenska cesta 123',
                 'Poštna številka': '1000',
                 'Mesto': 'Ljubljana',
@@ -626,6 +643,7 @@ const SuppliersModule = {
             { wch: 18 }, // Telefon
             { wch: 20 }, // Plačilni pogoji
             { wch: 28 }, // Dopustna dodatna zamuda
+            { wch: 20 }, // Prioriteta plačil
             { wch: 30 }, // Ulica in hišna številka
             { wch: 15 }, // Poštna številka
             { wch: 20 }, // Mesto
@@ -675,6 +693,11 @@ const SuppliersModule = {
 
                 // Validate and map columns
                 this.uploadedData = jsonData.map((row, index) => {
+                    // Parse priority, ensuring it's 1, 2, or 3
+                    let priority = parseInt(row['Prioriteta plačil (1-3)']) || 2;
+                    if (priority < 1) priority = 1;
+                    if (priority > 3) priority = 3;
+
                     const supplier = {
                         name: row['Naziv dobavitelja'] || '',
                         supplies: row['Kaj dobavlja'] || '',
@@ -683,6 +706,7 @@ const SuppliersModule = {
                         phone: row['Telefon'] || '',
                         payment_terms_days: parseInt(row['Plačilni pogoji (dni)']) || 30,
                         additional_delay_days: parseInt(row['Dopustna dodatna zamuda (dni)']) || 0,
+                        payment_priority: priority,
                         address: row['Ulica in hišna številka'] || '',
                         postal_code: row['Poštna številka'] || '',
                         city: row['Mesto'] || '',
@@ -710,6 +734,7 @@ const SuppliersModule = {
                                 <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Naziv</th>
                                 <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Kaj dobavlja</th>
                                 <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Plačilni pogoji</th>
+                                <th style="padding: 5px; text-align: left; border: 1px solid var(--ch-border-medium);">Prioriteta</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -718,11 +743,12 @@ const SuppliersModule = {
                                     <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.name}</td>
                                     <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.supplies}</td>
                                     <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.payment_terms_days} + ${s.additional_delay_days} dni</td>
+                                    <td style="padding: 5px; border: 1px solid var(--ch-border-medium);">${s.payment_priority}</td>
                                 </tr>
                             `).join('')}
                             ${this.uploadedData.length > 5 ? `
                                 <tr>
-                                    <td colspan="3" style="padding: 5px; text-align: center; font-style: italic;">
+                                    <td colspan="4" style="padding: 5px; text-align: center; font-style: italic;">
                                         ... in še ${this.uploadedData.length - 5} dobaviteljev
                                     </td>
                                 </tr>
