@@ -30,6 +30,7 @@ COPY . .
 # Copy nginx configuration
 RUN cp nginx.conf /etc/nginx/sites-available/default
 RUN sed -i "s|root /mnt/c/Users/HP/Ch|root /app|g" /etc/nginx/sites-available/default
+RUN sed -i "s|listen 80;|listen 8080;|g" /etc/nginx/sites-available/default
 
 # Create supervisor config to run both nginx and backend
 RUN mkdir -p /var/log/supervisor
@@ -59,12 +60,12 @@ stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 EOF
 
-# Expose port 80 (nginx)
-EXPOSE 80
+# Expose port 8080 (nginx)
+EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost/health || exit 1
+    CMD curl -f http://localhost:8080/health || exit 1
 
 # Start supervisor
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
