@@ -1645,8 +1645,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
             // Check for simplified format: has article code, name, and LC price, but NOT full complex format
             // Also handle __EMPTY columns (when Excel has no headers for first columns)
-            const hasCode = headers.some(h => h.match(/šifra|artikel|article|number|broj|__EMPTY$/i));
-            const hasName = headers.some(h => h.match(/naziv|name|ime|__EMPTY_1/i));
+            const hasCode = headers.some(h => h.match(/šifra|artikel|article|number|broj/i) || h === '__EMPTY');
+            const hasName = headers.some(h => h.match(/naziv|name|ime/i) || h === '__EMPTY_1');
             const hasLC = headers.some(h => h.match(/^lc$|cena|price|cijena/i));
             const isSimpleFormat = hasCode && hasName && hasLC && !hasAllComplexCols;
 
@@ -1660,8 +1660,8 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 console.log('Detected simple 3-column format');
                 // Use simple format validation - just need article code, name, and LC price
                 // Handle __EMPTY columns (when Excel has no headers)
-                const codeCol = headers.find(h => h.match(/šifra|artikel|article|number|broj|__EMPTY$/i));
-                const nameCol = headers.find(h => h.match(/naziv|name|ime|__EMPTY_1/i));
+                const codeCol = headers.find(h => h.match(/šifra|artikel|article|number|broj/i) || h === '__EMPTY');
+                const nameCol = headers.find(h => h.match(/naziv|name|ime/i) || h === '__EMPTY_1');
                 const lcCol = headers.find(h => h.match(/^lc$|cena|price|cijena/i));
 
                 if (!codeCol || !nameCol || !lcCol) {
