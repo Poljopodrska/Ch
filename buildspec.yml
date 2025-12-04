@@ -3,22 +3,36 @@ version: 0.2
 phases:
   pre_build:
     commands:
+      - echo "=== Pre-Build Phase ==="
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 127679825789.dkr.ecr.us-east-1.amazonaws.com
       - export VERSION=$(grep '"version"' package.json | cut -d '"' -f 4)
-      - echo "Building version $VERSION"
-      
+      - export GIT_COMMIT=$(git rev-parse --short HEAD)
+      - echo "Version from package.json:$VERSION"
+      - echo "Git commit:$GIT_COMMIT"
+      - echo "Build number:$CODEBUILD_BUILD_NUMBER"
+
   build:
     commands:
+      - echo "=== Build Phase ==="
       - echo Build started on `date`
+      - echo "Building Docker image with version $VERSION..."
       - docker build -t ch-production --build-arg VERSION=$VERSION .
       - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
       - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v$VERSION
-      
+      - docker tag ch-production:latest 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:build-$CODEBUILD_BUILD_NUMBER
+      - echo "Docker images tagged successfully"
+
   post_build:
     commands:
+      - echo "=== Post-Build Phase ==="
       - echo Pushing the Docker images...
       - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:latest
       - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:v$VERSION
-      - echo Build completed on `date` for version v$VERSION
+      - docker push 127679825789.dkr.ecr.us-east-1.amazonaws.com/ch-production/core:build-$CODEBUILD_BUILD_NUMBER
+      - echo "Images pushed to ECR successfully"
+      - echo "Triggering ECS service update..."
       - aws ecs update-service --cluster ch-production --service ch-production-service --force-new-deployment --region us-east-1
+      - echo "=== Build completed on `date` ==="
+      - echo "Version:v$VERSION | Build:$CODEBUILD_BUILD_NUMBER | Commit:$GIT_COMMIT"
+      - echo "✅ Deployment triggered successfully!"
