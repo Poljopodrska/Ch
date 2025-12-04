@@ -506,6 +506,9 @@ const PricingV4 = {
                         <h1>${this.getText('title')}</h1>
                     </div>
                     <div class="header-controls">
+                        <button class="btn-factors" onclick="PricingV4.showFactorsModal()">
+                            ⚙️ ${this.getText('industryFactors')}
+                        </button>
                         <button class="btn-upload" onclick="PricingV4.showUploadModal()">
                             ${this.getText('uploadData')}
                         </button>
