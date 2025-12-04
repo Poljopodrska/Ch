@@ -60,8 +60,21 @@ async def health_check():
     """
     return {
         "status": "healthy",
-        "version": "1.0.0",
+        "version": "0.6.1",
         "environment": settings.ENVIRONMENT,
+    }
+
+
+# Version endpoint
+@app.get("/version", tags=["Health"])
+async def version():
+    """
+    Version endpoint for deployment tracking.
+    """
+    return {
+        "version": "0.6.1",
+        "api_version": "1.0.0",
+        "frontend_version": "0.6.1"
     }
 
 
@@ -86,8 +99,9 @@ async def root():
     Root endpoint with API information.
     """
     return {
-        "message": "AI Forecasting Platform API",
-        "version": "1.0.0",
+        "message": "Ch Project API",
+        "version": "0.6.1",
+        "api_version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
     }
