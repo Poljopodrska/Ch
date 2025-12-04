@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ch Project v0.6.1</title>
+  <title>Ch Project v0.6.2</title>
     
     <!-- Constitutional Design System - Orange Theme (Change color in design-system.css) -->
     <link rel="stylesheet" href="static/css/design-system.css">
@@ -266,7 +266,7 @@
             <!-- Dynamic content loads here -->
             <div class="loading">
                 <h2>Nalaganje Ch Project...</h2>
-                <p>Inicializacija sistema v0.6.1 z poenostavljenim modulom za cene</p>
+                <p>Inicializacija sistema v0.6.2 - Excel upload debugging</p>
             </div>
         </main>
 
@@ -276,7 +276,7 @@
                 <span class="separator">|</span>
                 <span class="status">Pripravljen</span>
                 <span class="separator">|</span>
-                <span class="version">Verzija 0.6.1</span>
+                <span class="version">Verzija 0.6.2</span>
             </div>
         </footer>
     </div>
@@ -293,7 +293,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             // Update config version
             if (window.ChConfig) {
-                window.ChConfig.version = '0.6.1';
+                window.ChConfig.version = '0.6.2';
             }
 
             // Initialize app
@@ -304,7 +304,7 @@
             // Update version display
             const versionDisplay = document.querySelector('.version-display');
             if (versionDisplay) {
-                versionDisplay.textContent = 'v0.6.1 - PRICING SIMPLIFIED';
+                versionDisplay.textContent = 'v0.6.2 - EXCEL DEBUG';
             }
         });
     </script>

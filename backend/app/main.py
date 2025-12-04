@@ -60,7 +60,7 @@ async def health_check():
     """
     return {
         "status": "healthy",
-        "version": "0.6.1",
+        "version": "0.6.2",
         "environment": settings.ENVIRONMENT,
     }
 
@@ -72,9 +72,9 @@ async def version():
     Version endpoint for deployment tracking.
     """
     return {
-        "version": "0.6.1",
+        "version": "0.6.2",
         "api_version": "1.0.0",
-        "frontend_version": "0.6.1"
+        "frontend_version": "0.6.2"
     }
 
 
@@ -100,7 +100,7 @@ async def root():
     """
     return {
         "message": "Ch Project API",
-        "version": "0.6.1",
+        "version": "0.6.2",
         "api_version": "1.0.0",
         "docs": "/docs",
         "health": "/health",
