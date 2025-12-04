@@ -320,7 +320,7 @@ const ChApp = {
 
                 // Load pricing_v4_price_levels.js module (with price level system)
                 const script = document.createElement('script');
-                script.src = 'modules/pricing/pricing_v4_price_levels.js';
+                script.src = `modules/pricing/pricing_v4_price_levels.js?v=${ChConfig.version}`;
                 script.onload = () => {
                     console.log('Pricing V4 script loaded');
                     if (typeof PricingV4 !== 'undefined') {
