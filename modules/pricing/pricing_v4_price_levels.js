@@ -35,13 +35,11 @@ const PricingV4 = {
     t: {
         sl: {
             // Header
-            title: 'Nova cjenovna politika',
-            subtitle: 'Sistem cjenovnih nivoa: LC → C0 → Cmin → CP',
-            uploadData: 'Naloži podatke',
-            expandAll: 'Razširi vse',
-            collapseAll: 'Skrči vse',
-            policyInfo: 'Informacije o politiki',
-            editFactors: 'Uredi faktorje industrije',
+            title: 'Cene',
+            uploadData: 'Naloži LC cene',
+            articleNumber: 'Številka artikla',
+            articleName: 'Ime artikla',
+            lcPrice: 'LC cena',
 
             // Price levels
             priceLevels: 'Nivoi cijena',
@@ -158,13 +156,11 @@ const PricingV4 = {
         },
         hr: {
             // Header
-            title: 'Nova cijenovna politika',
-            subtitle: 'Sustav cjenovnih razina: LC → C0 → Cmin → CP',
-            uploadData: 'Učitaj podatke',
-            expandAll: 'Proširi sve',
-            collapseAll: 'Sažmi sve',
-            policyInfo: 'Informacije o politici',
-            editFactors: 'Uredi faktore industrije',
+            title: 'Cene',
+            uploadData: 'Učitaj LC cijene',
+            articleNumber: 'Broj artikla',
+            articleName: 'Naziv artikla',
+            lcPrice: 'LC cijena',
 
             // Price levels
             priceLevels: 'Razine cijena',
@@ -507,73 +503,12 @@ const PricingV4 = {
             <div class="pricing-v4-container">
                 <div class="pricing-header">
                     <div>
-                        <h1>[Money] ${this.getText('title')}</h1>
-                        <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">
-                            ${this.getText('subtitle')}
-                        </p>
+                        <h1>${this.getText('title')}</h1>
                     </div>
                     <div class="header-controls">
-                        <button class="language-btn ${this.state.language === 'sl' ? 'active' : ''}"
-                                onclick="PricingV4.switchLanguage('sl')"
-                                title="Slovenščina">
-                            
-                        </button>
-                        <button class="language-btn ${this.state.language === 'hr' ? 'active' : ''}"
-                                onclick="PricingV4.switchLanguage('hr')"
-                                title="Hrvatski">
-                            
-                        </button>
                         <button class="btn-upload" onclick="PricingV4.showUploadModal()">
-                            [Upload] ${this.getText('uploadData')}
+                            ${this.getText('uploadData')}
                         </button>
-                        <button class="btn-expand-all" onclick="PricingV4.expandAll()">
-                            📂 ${this.getText('expandAll')}
-                        </button>
-                        <button class="btn-collapse-all" onclick="PricingV4.collapseAll()">
-                            [Folder] ${this.getText('collapseAll')}
-                        </button>
-                        <button class="btn-info" onclick="PricingV4.showPolicyInfo()">
-                            [Info] ${this.getText('policyInfo')}
-                        </button>
-                        <button class="btn-edit-factors" onclick="PricingV4.showFactorsModal()">
-                            [Settings] ${this.getText('editFactors')}
-                        </button>
-                    </div>
-                </div>
-
-                <div class="pricing-legend">
-                    <h3>[Chart] ${this.getText('priceLevels')}:</h3>
-                    <div class="legend-items">
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: var(--ch-success);"></span>
-                            <div class="legend-text">
-                                <strong>${this.getText('lcLabel')}</strong> - ${this.getText('lcDesc')}
-                            </div>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: var(--ch-primary);"></span>
-                            <div class="legend-text">
-                                <strong>${this.getText('c0Label')}</strong> - ${this.getText('c0Desc')}
-                            </div>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: var(--ch-warning);"></span>
-                            <div class="legend-text">
-                                <strong>${this.getText('cminLabel')}</strong> - ${this.getText('cminDesc')}
-                            </div>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: var(--ch-primary);"></span>
-                            <div class="legend-text">
-                                <strong>${this.getText('bufferLabel')}</strong> - ${this.getText('bufferDesc')}
-                            </div>
-                        </div>
-                        <div class="legend-item">
-                            <span class="legend-color" style="background: var(--ch-error);"></span>
-                            <div class="legend-text">
-                                <strong>${this.getText('discountsLabel')}</strong> - ${this.getText('discountsDesc')}
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -585,57 +520,45 @@ const PricingV4 = {
                 <div id="upload-modal" class="upload-modal" style="display: none;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h2>[Upload] ${this.getText('uploadTitle')}</h2>
+                            <h2>${this.getText('uploadData')}</h2>
                             <button class="modal-close" onclick="PricingV4.closeUploadModal()">✕</button>
                         </div>
                         <div class="modal-body">
                             <div class="upload-info">
-                                <h3>[Clipboard] ${this.getText('excelFormatRequired')}:</h3>
-                                <div class="format-section">
-                                    <h4>${this.getText('sheet1')}: "Izdelki" (${this.getText('products')})</h4>
-                                    <table class="format-table">
+                                <p style="margin-bottom: 20px; color: var(--ch-text-secondary);">
+                                    ${this.state.language === 'sl' ? 'Naložite Excel datoteko s 3 stolpci' : 'Učitajte Excel datoteku sa 3 stupca'}:
+                                </p>
+                                <table class="format-table">
+                                    <thead>
                                         <tr>
-                                            <th>šifra</th>
-                                            <th>naziv</th>
-                                            <th>enota</th>
-                                            <th>industrija</th>
-                                            <th>lc</th>
-                                            <th>aktiven</th>
+                                            <th>${this.getText('articleNumber')}</th>
+                                            <th>${this.getText('articleName')}</th>
+                                            <th>${this.getText('lcPrice')}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2143</td>
+                                            <td>Piščančja klobasa debrecinka</td>
+                                            <td>1.76</td>
                                         </tr>
                                         <tr>
-                                            <td colspan="6" style="text-align: center; font-style: italic; color: #666;">
-                                                (${this.state.language === 'sl' ? 'aktiven: DA ali NE' : 'aktiven: DA ili NE'})
+                                            <td>641</td>
+                                            <td>Pileči file - gastro</td>
+                                            <td>4.05</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="3" style="text-align: center; font-style: italic; color: var(--ch-text-muted);">
+                                                ${this.state.language === 'sl' ? 'Sortirano po številkah artiklov' : 'Sortirano po brojevima artikala'}
                                             </td>
                                         </tr>
-                                    </table>
-                                    <p class="format-note"><strong>${this.getText('industrijaOptions')}:</strong> ${this.getName({nameSl: this.t.sl.freshMeat, nameHr: this.t.hr.freshMeat})}, ${this.getName({nameSl: this.t.sl.meatProducts, nameHr: this.t.hr.meatProducts})}, ${this.getText('delamaris')}</p>
-                                </div>
-                                <div class="format-section">
-                                    <h4>${this.getText('sheet2')}: "Cene_Kupci" (${this.getText('customerPricing')})</h4>
-                                    <table class="format-table">
-                                        <tr>
-                                            <th>šifra</th>
-                                            <th>kupec_id</th>
-                                            <th>kupec_naziv</th>
-                                            <th>kupec_tip</th>
-                                            <th>strategic_cmin</th>
-                                            <th>popust_faktura</th>
-                                            <th>popust_marketing</th>
-                                            <th>popust_letni</th>
-                                            <th>aktiven</th>
-                                        </tr>
-                                        <tr>
-                                            <td colspan="9" style="text-align: center; font-style: italic; color: #666;">
-                                                (${this.state.language === 'sl' ? 'rabati v %, aktiven: DA ali NE' : 'rabati u %, aktiven: DA ili NE'})
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                    </tbody>
+                                </table>
                             </div>
                             <div class="upload-area">
                                 <input type="file" id="excel-file-input" accept=".xlsx,.xls" style="display: none;" onchange="PricingV4.handleFileSelect(event)">
                                 <button class="btn-select-file" onclick="document.getElementById('excel-file-input').click()">
-                                    [Folder] ${this.getText('selectFile')}
+                                    ${this.getText('selectFile')}
                                 </button>
                                 <div id="file-name" class="file-name"></div>
                                 <div id="upload-status" class="upload-status"></div>
@@ -1825,22 +1748,22 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             <style>
                 .pricing-v4-container {
                     padding: 20px;
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    font-family: var(--font-primary);
                     max-width: 1800px;
                     margin: 0 auto;
-                    background: #f5f7fa;
+                    background: var(--ch-bg-base);
                 }
 
                 .pricing-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--ch-primary);
                     color: white;
                     padding: 25px;
-                    border-radius: 10px;
+                    border-radius: var(--radius-md);
                     margin-bottom: 20px;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                    box-shadow: var(--shadow-md);
                 }
 
                 .pricing-header h1 {
@@ -1948,7 +1871,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .group-header {
-                    background: linear-gradient(135deg, #f5f5f5 0%, #eeeeee 100%);
+                    background: var(--ch-gray-100);
                     padding: 15px;
                     cursor: pointer;
                     display: flex;
@@ -1957,11 +1880,11 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     font-size: 18px;
                     font-weight: 600;
                     transition: all 0.3s;
-                    border-bottom: 2px solid #e0e0e0;
+                    border-bottom: 2px solid var(--ch-border-medium);
                 }
 
                 .group-header:hover {
-                    background: linear-gradient(135deg, #eeeeee 0%, #e8e8e8 100%);
+                    background: var(--ch-gray-200);
                 }
 
                 .group-content {
@@ -2028,7 +1951,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .pricing-table thead {
-                    background: #263238;
+                    background: var(--ch-primary);
                     color: white;
                 }
 
@@ -2037,12 +1960,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     text-align: left;
                     font-size: 12px;
                     font-weight: 600;
-                    border: 1px solid #37474f;
+                    border: 1px solid var(--ch-primary-dark);
                 }
 
                 .status-columns-header {
                     text-align: center !important;
-                    background: #455a64 !important;
+                    background: var(--ch-primary-dark) !important;
                 }
 
                 .status-header-small {
@@ -2126,7 +2049,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .customer-header-row {
-                    background: #37474f !important;
+                    background: var(--ch-primary-dark) !important;
                     color: white;
                     font-weight: 600;
                 }
@@ -2135,7 +2058,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     padding: 8px;
                     font-size: 11px;
                     text-align: center;
-                    border: 1px solid #546e7a;
+                    border: 1px solid var(--ch-primary);
                 }
 
                 .status-header {
@@ -2400,9 +2323,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 .breakdown-section h5 {
                     margin: 0 0 10px 0;
-                    color: #37474f;
+                    color: var(--ch-text-primary);
                     font-size: 15px;
-                    border-bottom: 1px solid #e0e0e0;
+                    border-bottom: 1px solid var(--ch-border-medium);
                     padding-bottom: 5px;
                 }
 
@@ -2575,10 +2498,10 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .modal-header {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--ch-primary);
                     color: white;
                     padding: 20px 25px;
-                    border-radius: 10px 10px 0 0;
+                    border-radius: var(--radius-md) var(--radius-md) 0 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
@@ -2730,9 +2653,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .btn-process:hover {
-                    background: #45a049;
+                    background: var(--ch-success-light);
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(76,175,80,0.4);
+                    box-shadow: var(--shadow-md);
                 }
 
                 .btn-process:disabled {
@@ -2768,7 +2691,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 }
 
                 .factors-table thead {
-                    background: #37474f;
+                    background: var(--ch-primary);
                     color: white;
                 }
 
@@ -2884,12 +2807,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
                 /* Top-level summary styling */
                 .top-level-summary {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: var(--ch-primary);
                     color: white;
                     padding: 24px;
-                    border-radius: 12px;
+                    border-radius: var(--radius-lg);
                     margin-bottom: 24px;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    box-shadow: var(--shadow-lg);
                 }
 
                 .top-level-summary h3 {
