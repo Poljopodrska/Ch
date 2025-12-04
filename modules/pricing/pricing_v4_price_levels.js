@@ -1575,16 +1575,39 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
     validateAndLoadData(izdelkiData, ceneKupciData) {
         try {
-            // Validate Izdelki data
-            const requiredIzdelkiCols = ['šifra', 'naziv', 'enota', 'industrija', 'lc', 'aktiven'];
             if (izdelkiData.length === 0) {
-                return { success: false, error: 'No data found in Izdelki sheet' };
+                return { success: false, error: 'No data found in Excel file' };
             }
 
             const firstRow = izdelkiData[0];
+            const headers = Object.keys(firstRow);
+
+            // Check for simplified 3-column format (Article Number, Article Name, LC Price)
+            const isSimpleFormat = headers.length <= 4 &&
+                                   headers.some(h => h.match(/šifra|artikel|article|number|broj/i)) &&
+                                   headers.some(h => h.match(/naziv|name|ime/i)) &&
+                                   headers.some(h => h.match(/^lc$|cena|price|cijena/i));
+
+            if (isSimpleFormat) {
+                console.log('Detected simple 3-column format');
+                // Use simple format validation - just need article code, name, and LC price
+                const codeCol = headers.find(h => h.match(/šifra|artikel|article|number|broj/i));
+                const nameCol = headers.find(h => h.match(/naziv|name|ime/i));
+                const lcCol = headers.find(h => h.match(/^lc$|cena|price|cijena/i));
+
+                if (!codeCol || !nameCol || !lcCol) {
+                    return { success: false, error: 'Simple format requires: Article Number, Article Name, LC Price' };
+                }
+
+                // Process simple format
+                return this.loadSimpleFormat(izdelkiData, codeCol, nameCol, lcCol);
+            }
+
+            // Check for complex format (original 6-column format)
+            const requiredIzdelkiCols = ['šifra', 'naziv', 'enota', 'industrija', 'lc', 'aktiven'];
             const missingCols = requiredIzdelkiCols.filter(col => !(col in firstRow));
             if (missingCols.length > 0) {
-                return { success: false, error: `Missing columns in Izdelki: ${missingCols.join(', ')}` };
+                return { success: false, error: `Excel format not recognized. Use simple format (3 columns) or full format (6 columns). Missing: ${missingCols.join(', ')}` };
             }
 
             // Validate Cene_Kupci data (optional for now)
@@ -1739,6 +1762,86 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
 
         } catch (error) {
             console.error('Validation error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Load simple 3-column format (Article Number, Article Name, LC Price)
+    loadSimpleFormat(data, codeCol, nameCol, lcCol) {
+        try {
+            console.log(`Processing simple format: ${codeCol}, ${nameCol}, ${lcCol}`);
+
+            // Reset product groups and pricing data
+            this.state.productGroups = [];
+            this.state.products = [];
+            this.state.pricingData = {};
+            this.state.customerPricing = {};
+
+            // Create a single "Imported Products" group
+            const importedProducts = [];
+            let loadedCount = 0;
+            let skippedCount = 0;
+
+            data.forEach((row, index) => {
+                const code = row[codeCol] ? row[codeCol].toString().trim() : '';
+                const name = row[nameCol] ? row[nameCol].toString().trim() : '';
+                const lcValue = this.parseEuropeanNumber(row[lcCol]);
+
+                // Skip rows without essential data
+                if (!code || !name || lcValue <= 0) {
+                    console.warn(`Skipping row ${index + 2}: missing data or invalid LC value`);
+                    skippedCount++;
+                    return;
+                }
+
+                const productId = `imported-${code}`;
+                const lc = lcValue;
+                const c0 = lc * this.state.industryFactors.ohFactor;  // LC × 1.25
+                const cmin = c0 / (1 - this.state.industryFactors.minProfitMargin);  // C0 / 0.9575
+
+                // Add product to imported group
+                importedProducts.push({
+                    id: productId,
+                    code: code,
+                    nameSl: name,
+                    nameHr: name,
+                    unit: 'kg', // Default unit
+                    lc: lc
+                });
+
+                // Set pricing data
+                this.state.pricingData[productId] = {
+                    lc: lc,
+                    c0: c0,
+                    cmin: cmin
+                };
+
+                loadedCount++;
+            });
+
+            // Create product group
+            if (importedProducts.length > 0) {
+                this.state.productGroups.push({
+                    id: 'imported-products',
+                    nameSl: 'Imported Products',
+                    nameHr: 'Uvezeni proizvodi',
+                    icon: '[Upload]',
+                    products: importedProducts
+                });
+
+                this.state.products = importedProducts;
+            }
+
+            console.log(`Loaded ${loadedCount} products, skipped ${skippedCount} rows`);
+
+            return {
+                success: true,
+                productsCount: loadedCount,
+                customerPricingCount: 0
+            };
+
+        } catch (error) {
+            console.error('Error loading simple format:', error);
             return { success: false, error: error.message };
         }
     },
