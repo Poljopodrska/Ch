@@ -565,8 +565,8 @@ const PricingV4 = {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn-cancel" onclick="PricingV4.closeUploadModal()">${this.getText('cancel')}</button>
-                            <button class="btn-process" id="process-btn" onclick="PricingV4.processExcelFile()" disabled>${this.getText('processData')}</button>
+                            <button class="btn-cancel" id="cancel-btn">${this.getText('cancel')}</button>
+                            <button class="btn-process" id="process-btn" disabled>${this.getText('processData')}</button>
                         </div>
                     </div>
                 </div>
@@ -642,9 +642,38 @@ const PricingV4 = {
             ${this.getStyles()}
         `;
             console.log('Container HTML set successfully');
+
+            // Attach event listeners for modal buttons
+            this.attachEventListeners();
         } catch (error) {
             console.error('Error in PricingV4.render:', error);
             console.error('Stack:', error.stack);
+        }
+    },
+
+    attachEventListeners() {
+        // Process button
+        const processBtn = document.getElementById('process-btn');
+        if (processBtn) {
+            processBtn.addEventListener('click', () => {
+                console.log('Process button clicked!');
+                this.processExcelFile();
+            });
+            console.log('Process button event listener attached');
+        } else {
+            console.warn('Process button not found');
+        }
+
+        // Cancel button
+        const cancelBtn = document.getElementById('cancel-btn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                console.log('Cancel button clicked!');
+                this.closeUploadModal();
+            });
+            console.log('Cancel button event listener attached');
+        } else {
+            console.warn('Cancel button not found');
         }
     },
 
@@ -1468,8 +1497,14 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
     },
 
     handleFileSelect(event) {
+        console.log('handleFileSelect called');
         const file = event.target.files[0];
-        if (!file) return;
+        if (!file) {
+            console.warn('No file selected');
+            return;
+        }
+
+        console.log('File selected:', file.name, 'Size:', file.size, 'Type:', file.type);
 
         const fileNameDiv = document.getElementById('file-name');
         const statusDiv = document.getElementById('upload-status');
@@ -1479,7 +1514,10 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         const fileName = file.name;
         const fileExt = fileName.split('.').pop().toLowerCase();
 
+        console.log('File extension:', fileExt);
+
         if (fileExt !== 'xlsx' && fileExt !== 'xls') {
+            console.warn('Invalid file extension');
             statusDiv.innerHTML = '<div class="error">[X] Please select an Excel file (.xlsx or .xls)</div>';
             processBtn.disabled = true;
             return;
@@ -1488,25 +1526,35 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         fileNameDiv.textContent = `Selected: ${fileName}`;
         statusDiv.innerHTML = '<div class="info">✓ File selected. Click "Process Data" to load.</div>';
         processBtn.disabled = false;
+        console.log('Process button enabled');
 
         // Store file for processing
         this.state.uploadedFile = file;
+        console.log('File stored in state');
     },
 
     async processExcelFile() {
+        console.log('=== processExcelFile called ===');
+        console.log('Uploaded file:', this.state.uploadedFile);
+
         if (!this.state.uploadedFile) {
+            console.error('No file in state!');
             alert('No file selected');
             return;
         }
 
         const statusDiv = document.getElementById('upload-status');
         statusDiv.innerHTML = '<div class="processing">⏳ Processing Excel file...</div>';
+        console.log('Status updated to processing');
 
         try {
             // Check if XLSX library is available
+            console.log('Checking for XLSX library...');
+            console.log('typeof XLSX:', typeof XLSX);
             if (typeof XLSX === 'undefined') {
                 throw new Error('XLSX library not loaded. Please include SheetJS library.');
             }
+            console.log('XLSX library is available');
 
             const file = this.state.uploadedFile;
             const reader = new FileReader();
