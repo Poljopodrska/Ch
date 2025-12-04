@@ -1577,9 +1577,12 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                     const izdelkiData = XLSX.utils.sheet_to_json(firstSheet);
 
                     console.log('Excel data from first sheet:', izdelkiData);
+                    console.log('First row sample:', izdelkiData[0]);
 
                     // Validate and load data (no customer pricing for now)
+                    console.log('Calling validateAndLoadData...');
                     const result = this.validateAndLoadData(izdelkiData, []);
+                    console.log('validateAndLoadData result:', result);
 
                     if (result.success) {
                         statusDiv.innerHTML = `<div class="success">[OK] Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
@@ -1622,19 +1625,26 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
     },
 
     validateAndLoadData(izdelkiData, ceneKupciData) {
+        console.log('=== validateAndLoadData called ===');
+        console.log('Data rows:', izdelkiData.length);
         try {
             if (izdelkiData.length === 0) {
+                console.error('No data in Excel file');
                 return { success: false, error: 'No data found in Excel file' };
             }
 
             const firstRow = izdelkiData[0];
             const headers = Object.keys(firstRow);
+            console.log('Headers found:', headers);
+            console.log('Number of headers:', headers.length);
 
             // Check for simplified 3-column format (Article Number, Article Name, LC Price)
             const isSimpleFormat = headers.length <= 4 &&
                                    headers.some(h => h.match(/šifra|artikel|article|number|broj/i)) &&
                                    headers.some(h => h.match(/naziv|name|ime/i)) &&
                                    headers.some(h => h.match(/^lc$|cena|price|cijena/i));
+
+            console.log('Is simple format?', isSimpleFormat);
 
             if (isSimpleFormat) {
                 console.log('Detected simple 3-column format');
