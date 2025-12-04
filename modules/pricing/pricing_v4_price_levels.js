@@ -1637,13 +1637,22 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             const headers = Object.keys(firstRow);
             console.log('Headers found:', headers);
             console.log('Number of headers:', headers.length);
+            console.log('Actual header names:', JSON.stringify(headers));
 
-            // Check for simplified 3-column format (Article Number, Article Name, LC Price)
-            const isSimpleFormat = headers.length <= 4 &&
-                                   headers.some(h => h.match(/šifra|artikel|article|number|broj/i)) &&
-                                   headers.some(h => h.match(/naziv|name|ime/i)) &&
-                                   headers.some(h => h.match(/^lc$|cena|price|cijena/i));
+            // Check if it has the required columns for complex format
+            const requiredComplexCols = ['šifra', 'naziv', 'enota', 'industrija', 'lc', 'aktiven'];
+            const hasAllComplexCols = requiredComplexCols.every(col => col in firstRow);
 
+            // Check for simplified format: has article code, name, and LC price, but NOT full complex format
+            const hasCode = headers.some(h => h.match(/šifra|artikel|article|number|broj/i));
+            const hasName = headers.some(h => h.match(/naziv|name|ime/i));
+            const hasLC = headers.some(h => h.match(/^lc$|cena|price|cijena/i));
+            const isSimpleFormat = hasCode && hasName && hasLC && !hasAllComplexCols;
+
+            console.log('Has article code?', hasCode);
+            console.log('Has name?', hasName);
+            console.log('Has LC?', hasLC);
+            console.log('Has all complex columns?', hasAllComplexCols);
             console.log('Is simple format?', isSimpleFormat);
 
             if (isSimpleFormat) {
