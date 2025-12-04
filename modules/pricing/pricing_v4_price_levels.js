@@ -321,7 +321,25 @@ const PricingV4 = {
     },
 
     loadProductStructure() {
-        // Initialize industry structure with test products
+        // Try to load from localStorage first
+        const savedProducts = localStorage.getItem('pricingProductGroups');
+        if (savedProducts) {
+            try {
+                this.state.productGroups = JSON.parse(savedProducts);
+                console.log('Loaded product structure from localStorage');
+
+                // Flatten products list
+                this.state.products = [];
+                this.state.productGroups.forEach(group => {
+                    this.state.products.push(...group.products);
+                });
+                return;
+            } catch (e) {
+                console.error('Error parsing saved products, using defaults:', e);
+            }
+        }
+
+        // Initialize industry structure with test products (defaults)
         this.state.productGroups = [
             {
                 id: 'fresh-meat',
@@ -363,6 +381,15 @@ const PricingV4 = {
         this.state.productGroups.forEach(group => {
             this.state.products.push(...group.products);
         });
+    },
+
+    saveProductStructure() {
+        try {
+            localStorage.setItem('pricingProductGroups', JSON.stringify(this.state.productGroups));
+            console.log('Saved product structure to localStorage');
+        } catch (error) {
+            console.error('Error saving product structure:', error);
+        }
     },
 
     // Get product or group name based on current language
@@ -1905,6 +1932,9 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
             }
 
             console.log(`Loaded ${loadedCount} products, skipped ${skippedCount} rows`);
+
+            // Save to localStorage for persistence
+            this.saveProductStructure();
 
             return {
                 success: true,
