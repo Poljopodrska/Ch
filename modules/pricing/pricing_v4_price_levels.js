@@ -584,7 +584,7 @@ const PricingV4 = {
                     </div>
                     <div class="header-controls">
                         <button class="btn-factors" onclick="PricingV4.showFactorsModal()">
-                            ⚙️ ${this.getText('industryFactors')}
+                            Faktorji industrije
                         </button>
                         <button class="btn-upload" onclick="PricingV4.showUploadModal()">
                             ${this.getText('uploadData')}
@@ -1534,7 +1534,7 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         }
     },
 
-    saveProductionFactors() {
+    async saveProductionFactors() {
         const statusDiv = document.getElementById('factors-status');
 
         try {
@@ -1554,15 +1554,44 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
                 return;
             }
 
+            statusDiv.innerHTML = '<div class="processing">⏳ Saving to database...</div>';
+
             // Update state
             this.state.industryProductionFactors['fresh-meat'] = freshMeat;
             this.state.industryProductionFactors['meat-products'] = meatProducts;
             this.state.industryProductionFactors['delamaris'] = delamaris;
 
-            // Save to localStorage
+            // Save to localStorage as backup
             localStorage.setItem('industryProductionFactors', JSON.stringify(this.state.industryProductionFactors));
 
-            statusDiv.innerHTML = '<div class="success">[OK] Factors updated successfully!</div>';
+            // Save to database via API
+            const apiUrl = this.getApiUrl();
+            const factors = [
+                { code: 'fresh-meat', value: freshMeat },
+                { code: 'meat-products', value: meatProducts },
+                { code: 'delamaris', value: delamaris }
+            ];
+
+            let savedCount = 0;
+            for (const factor of factors) {
+                try {
+                    const response = await fetch(`${apiUrl}/pricing/production-factors/${factor.code}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ production_factor: factor.value })
+                    });
+
+                    if (response.ok) {
+                        savedCount++;
+                    } else {
+                        console.error(`Failed to save factor for ${factor.code}`);
+                    }
+                } catch (error) {
+                    console.error(`Error saving factor for ${factor.code}:`, error);
+                }
+            }
+
+            statusDiv.innerHTML = `<div class="success">✓ Saved ${savedCount}/3 factors to database!</div>`;
 
             // Close modal and re-render after short delay
             setTimeout(() => {
