@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel
 from io import BytesIO
 import pandas as pd
+import traceback
 
 from app.core.database import get_db
 from app.models.product import Product, Industry, ProductBasePrice, CustomerProductPrice, IndustryProductionFactor
@@ -744,7 +745,10 @@ async def upload_simple_excel_pricing(
 
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Error processing Excel file: {str(e)}")
+        error_msg = f"Error processing Excel file: {str(e)}"
+        print(f"❌ {error_msg}")
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=error_msg)
 
 
 @router.get("/products-with-prices")
