@@ -49,11 +49,24 @@ stderr_logfile_maxbytes=0
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 
+[program:migrations]
+command=/bin/bash -c "cd /app/backend && alembic upgrade head && echo 'Migrations complete'"
+directory=/app/backend
+autostart=true
+autorestart=false
+startsecs=0
+priority=1
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+
 [program:backend]
 command=python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 directory=/app/backend
 autostart=true
 autorestart=true
+priority=2
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 stdout_logfile=/dev/stdout
