@@ -49,29 +49,43 @@ stderr_logfile_maxbytes=0
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 
-[program:migrations]
-command=/bin/bash -c "cd /app/backend && alembic upgrade head && echo 'Migrations complete'"
-directory=/app/backend
-autostart=true
-autorestart=false
-startsecs=0
-priority=1
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-
 [program:backend]
 command=python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 directory=/app/backend
 autostart=true
 autorestart=true
-priority=2
 stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
 EOF
+
+# Create startup script that runs migrations then starts supervisor
+COPY <<'STARTUPEOF' /app/startup.sh
+#!/bin/bash
+set -e
+
+echo "=========================================="
+echo "Ch Project Startup"
+echo "=========================================="
+
+# Run database migrations
+echo "Running database migrations..."
+cd /app/backend
+alembic upgrade head
+if [ $? -eq 0 ]; then
+    echo "✅ Migrations completed successfully"
+else
+    echo "❌ Migrations failed!"
+    exit 1
+fi
+
+# Start supervisor
+echo "Starting services..."
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+STARTUPEOF
+
+RUN chmod +x /app/startup.sh
 
 # Expose port 8080 (nginx)
 EXPOSE 8080
@@ -80,5 +94,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-# Start supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start via startup script (runs migrations first)
+CMD ["/app/startup.sh"]
