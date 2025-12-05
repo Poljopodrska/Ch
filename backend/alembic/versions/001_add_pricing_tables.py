@@ -17,110 +17,119 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Use raw SQL with IF NOT EXISTS to make migration idempotent
+    connection = op.get_bind()
+
     # Create industries table
-    op.create_table('industries',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('code', sa.String(length=50), nullable=False),
-        sa.Column('name_sl', sa.String(length=255), nullable=False),
-        sa.Column('name_hr', sa.String(length=255), nullable=False),
-        sa.Column('icon', sa.String(length=10), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_industries_code'), 'industries', ['code'], unique=True)
-    op.create_index(op.f('ix_industries_id'), 'industries', ['id'], unique=False)
+    connection.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS industries (
+            id SERIAL PRIMARY KEY,
+            code VARCHAR(50) UNIQUE NOT NULL,
+            name_sl VARCHAR(255) NOT NULL,
+            name_hr VARCHAR(255) NOT NULL,
+            icon VARCHAR(10),
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE
+        )
+    """))
+
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_industries_code ON industries(code)"))
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_industries_id ON industries(id)"))
 
     # Create products table
-    op.create_table('products',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('code', sa.String(length=50), nullable=False),
-        sa.Column('name_sl', sa.String(length=255), nullable=False),
-        sa.Column('name_hr', sa.String(length=255), nullable=False),
-        sa.Column('unit', sa.String(length=20), nullable=False),
-        sa.Column('industry_id', sa.Integer(), nullable=False),
-        sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['industry_id'], ['industries.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_products_code'), 'products', ['code'], unique=True)
-    op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
+    connection.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS products (
+            id SERIAL PRIMARY KEY,
+            code VARCHAR(50) UNIQUE NOT NULL,
+            name_sl VARCHAR(255) NOT NULL,
+            name_hr VARCHAR(255) NOT NULL,
+            unit VARCHAR(20) NOT NULL,
+            industry_id INTEGER NOT NULL REFERENCES industries(id),
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE
+        )
+    """))
+
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_products_code ON products(code)"))
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_products_id ON products(id)"))
 
     # Create industry_production_factors table
-    op.create_table('industry_production_factors',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('industry_id', sa.Integer(), nullable=False),
-        sa.Column('production_factor', sa.Float(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(['industry_id'], ['industries.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_industry_production_factors_industry_id'), 'industry_production_factors', ['industry_id'], unique=True)
+    connection.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS industry_production_factors (
+            id SERIAL PRIMARY KEY,
+            industry_id INTEGER UNIQUE NOT NULL REFERENCES industries(id),
+            production_factor DOUBLE PRECISION NOT NULL DEFAULT 1.20,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            updated_at TIMESTAMP WITH TIME ZONE
+        )
+    """))
+
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_industry_production_factors_industry_id ON industry_production_factors(industry_id)"))
 
     # Create product_base_prices table
-    op.create_table('product_base_prices',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('product_id', sa.Integer(), nullable=False),
-        sa.Column('lc', sa.Float(), nullable=False),
-        sa.Column('c0', sa.Float(), nullable=False),
-        sa.Column('cmin', sa.Float(), nullable=False),
-        sa.Column('oh_factor', sa.Float(), nullable=False),
-        sa.Column('min_profit_margin', sa.Float(), nullable=False),
-        sa.Column('valid_from', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('valid_to', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('created_by', sa.String(length=100), nullable=True),
-        sa.Column('notes', sa.String(length=500), nullable=True),
-        sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_product_base_prices_product_id'), 'product_base_prices', ['product_id'], unique=False)
+    connection.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS product_base_prices (
+            id SERIAL PRIMARY KEY,
+            product_id INTEGER NOT NULL REFERENCES products(id),
+            lc DOUBLE PRECISION NOT NULL,
+            c0 DOUBLE PRECISION NOT NULL,
+            cmin DOUBLE PRECISION NOT NULL,
+            oh_factor DOUBLE PRECISION NOT NULL DEFAULT 1.25,
+            min_profit_margin DOUBLE PRECISION NOT NULL DEFAULT 0.0425,
+            valid_from TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            valid_to TIMESTAMP WITH TIME ZONE,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            created_by VARCHAR(100),
+            notes VARCHAR(500)
+        )
+    """))
+
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_product_base_prices_product_id ON product_base_prices(product_id)"))
 
     # Create customer_product_prices table (if customers table exists)
-    # Note: This depends on the customers table existing
-    op.create_table('customer_product_prices',
-        sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('product_id', sa.Integer(), nullable=False),
-        sa.Column('customer_id', sa.Integer(), nullable=False),
-        sa.Column('strategic_cmin', sa.Float(), nullable=False),
-        sa.Column('discount_invoice', sa.Float(), nullable=False),
-        sa.Column('discount_marketing', sa.Float(), nullable=False),
-        sa.Column('discount_yearend', sa.Float(), nullable=False),
-        sa.Column('total_discounts', sa.Float(), nullable=False),
-        sa.Column('cp', sa.Float(), nullable=False),
-        sa.Column('realized_price', sa.Float(), nullable=False),
-        sa.Column('coverage_vs_c0', sa.Float(), nullable=True),
-        sa.Column('coverage_vs_cmin', sa.Float(), nullable=True),
-        sa.Column('valid_from', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-        sa.Column('valid_to', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('is_active', sa.Boolean(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-        sa.Column('created_by', sa.String(length=100), nullable=True),
-        sa.Column('notes', sa.String(length=500), nullable=True),
-        sa.ForeignKeyConstraint(['customer_id'], ['customers.id'], ),
-        sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
-        sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_customer_product_prices_customer_id'), 'customer_product_prices', ['customer_id'], unique=False)
-    op.create_index(op.f('ix_customer_product_prices_product_id'), 'customer_product_prices', ['product_id'], unique=False)
+    connection.execute(sa.text("""
+        CREATE TABLE IF NOT EXISTS customer_product_prices (
+            id SERIAL PRIMARY KEY,
+            product_id INTEGER NOT NULL REFERENCES products(id),
+            customer_id INTEGER NOT NULL REFERENCES customers(id),
+            strategic_cmin DOUBLE PRECISION NOT NULL,
+            discount_invoice DOUBLE PRECISION NOT NULL DEFAULT 0,
+            discount_marketing DOUBLE PRECISION NOT NULL DEFAULT 0,
+            discount_yearend DOUBLE PRECISION NOT NULL DEFAULT 0,
+            total_discounts DOUBLE PRECISION NOT NULL,
+            cp DOUBLE PRECISION NOT NULL,
+            realized_price DOUBLE PRECISION NOT NULL,
+            coverage_vs_c0 DOUBLE PRECISION,
+            coverage_vs_cmin DOUBLE PRECISION,
+            valid_from TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+            valid_to TIMESTAMP WITH TIME ZONE,
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+            created_by VARCHAR(100),
+            notes VARCHAR(500)
+        )
+    """))
 
-    # Insert default industries
-    op.execute("""
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_customer_product_prices_customer_id ON customer_product_prices(customer_id)"))
+    connection.execute(sa.text("CREATE INDEX IF NOT EXISTS ix_customer_product_prices_product_id ON customer_product_prices(product_id)"))
+
+    # Insert default industries (using ON CONFLICT to avoid duplicates)
+    connection.execute(sa.text("""
         INSERT INTO industries (code, name_sl, name_hr, icon, is_active) VALUES
         ('fresh-meat', 'Sveže meso', 'Svježe meso', '🥩', true),
         ('meat-products', 'Mesni izdelki', 'Mesni proizvodi', '🌭', true),
         ('delamaris', 'Delamaris', 'Delamaris', '🐟', true)
-    """)
+        ON CONFLICT (code) DO NOTHING
+    """))
 
     # Insert default production factors (1.20 for all)
-    op.execute("""
+    connection.execute(sa.text("""
         INSERT INTO industry_production_factors (industry_id, production_factor)
         SELECT id, 1.20 FROM industries
-    """)
+        ON CONFLICT (industry_id) DO NOTHING
+    """))
 
 
 def downgrade() -> None:
