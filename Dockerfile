@@ -69,14 +69,26 @@ echo "=========================================="
 echo "Ch Project Startup"
 echo "=========================================="
 
+# Debug: Print environment info (without sensitive values)
+echo "Environment: $ENVIRONMENT"
+echo "DB Host: ${DB_HOST:-not set}"
+echo "DB Name: ${DB_NAME:-not set}"
+
 # Run database migrations
 echo "Running database migrations..."
 cd /app/backend
-alembic upgrade head
-if [ $? -eq 0 ]; then
+
+# Export DB variables for alembic (in case they're not already exported)
+export DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME
+
+echo "Running: alembic upgrade head"
+alembic upgrade head 2>&1 | tee /var/log/migrations.log
+
+if [ ${PIPESTATUS[0]} -eq 0 ]; then
     echo "✅ Migrations completed successfully"
 else
-    echo "❌ Migrations failed!"
+    echo "❌ Migrations failed! See /var/log/migrations.log for details"
+    cat /var/log/migrations.log
     exit 1
 fi
 
