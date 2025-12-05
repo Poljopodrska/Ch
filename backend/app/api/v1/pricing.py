@@ -600,6 +600,220 @@ async def upload_excel_pricing(
         raise HTTPException(status_code=500, detail=f"Error processing Excel file: {str(e)}")
 
 
+@router.post("/upload-simple-excel")
+async def upload_simple_excel_pricing(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    """
+    Upload Excel file with simple 3-column format (Article Code, Article Name, LC Price).
+    Handles files with or without headers.
+    """
+    if not file.filename.endswith(('.xlsx', '.xls')):
+        raise HTTPException(status_code=400, detail="File must be Excel format (.xlsx or .xls)")
+
+    try:
+        # Read Excel file
+        contents = await file.read()
+        df = pd.read_excel(contents, sheet_name=0)  # Read first sheet
+
+        # Auto-detect columns
+        headers = df.columns.tolist()
+
+        # Find article code column (can be __EMPTY, šifra, article, etc.)
+        code_col = None
+        name_col = None
+        lc_col = None
+
+        for h in headers:
+            h_str = str(h)
+            if h_str == '__EMPTY' and code_col is None:
+                code_col = h
+            elif h_str == '__EMPTY_1' and name_col is None:
+                name_col = h
+            elif h_str.upper() == 'LC':
+                lc_col = h
+            elif not code_col and any(x in h_str.lower() for x in ['šifra', 'artikel', 'article', 'number', 'broj']):
+                code_col = h
+            elif not name_col and any(x in h_str.lower() for x in ['naziv', 'name', 'ime']):
+                name_col = h
+            elif not lc_col and any(x in h_str.lower() for x in ['cena', 'price', 'cijena']):
+                lc_col = h
+
+        if not code_col or not name_col or not lc_col:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not identify required columns. Found: {headers}"
+            )
+
+        # Get or create "imported-products" industry
+        industry = db.query(Industry).filter(Industry.code == 'imported-products').first()
+        if not industry:
+            industry = Industry(
+                code='imported-products',
+                name_sl='Uvoženi proizvodi',
+                name_hr='Uvezeni proizvodi',
+                icon='[Upload]',
+                is_active=True
+            )
+            db.add(industry)
+            db.flush()
+
+        # Process products
+        products_created = 0
+        products_updated = 0
+        base_prices_created = 0
+        now = datetime.now(timezone.utc)
+
+        for _, row in df.iterrows():
+            try:
+                code = str(row[code_col]).strip() if pd.notna(row[code_col]) else ''
+                name = str(row[name_col]).strip() if pd.notna(row[name_col]) else ''
+                lc_value = float(row[lc_col]) if pd.notna(row[lc_col]) else 0
+
+                # Skip invalid rows
+                if not code or not name or lc_value <= 0:
+                    continue
+
+                # Get or create product
+                product = db.query(Product).filter(Product.code == code).first()
+                if not product:
+                    product = Product(
+                        code=code,
+                        name_sl=name,
+                        name_hr=name,
+                        unit='kg',
+                        industry_id=industry.id,
+                        is_active=True
+                    )
+                    db.add(product)
+                    db.flush()
+                    products_created += 1
+                else:
+                    # Update existing product
+                    product.name_sl = name
+                    product.name_hr = name
+                    product.is_active = True
+                    products_updated += 1
+
+                # Calculate prices
+                oh_factor = 1.25
+                min_profit_margin = 0.0425
+                c0 = lc_value * oh_factor
+                cmin = c0 / (1 - min_profit_margin)
+
+                # Close existing open prices
+                existing = db.query(ProductBasePrice).filter(
+                    and_(
+                        ProductBasePrice.product_id == product.id,
+                        ProductBasePrice.valid_to == None
+                    )
+                ).first()
+
+                if existing:
+                    existing.valid_to = now
+
+                # Create new base price
+                base_price = ProductBasePrice(
+                    product_id=product.id,
+                    lc=lc_value,
+                    c0=c0,
+                    cmin=cmin,
+                    oh_factor=oh_factor,
+                    min_profit_margin=min_profit_margin,
+                    valid_from=now,
+                    valid_to=None
+                )
+                db.add(base_price)
+                base_prices_created += 1
+
+            except Exception as e:
+                print(f"Error processing row: {e}")
+                continue
+
+        db.commit()
+
+        return {
+            "status": "success",
+            "message": "Simple pricing data uploaded successfully",
+            "products_created": products_created,
+            "products_updated": products_updated,
+            "base_prices_created": base_prices_created
+        }
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error processing Excel file: {str(e)}")
+
+
+@router.get("/products-with-prices")
+async def get_products_with_prices(db: Session = Depends(get_db)):
+    """
+    Get all active products grouped by industry with their current base prices.
+    Returns data in format suitable for the pricing UI.
+    """
+    try:
+        # Get all active industries
+        industries = db.query(Industry).filter(Industry.is_active == True).all()
+
+        result = {
+            "industries": [],
+            "products": []
+        }
+
+        now = datetime.now(timezone.utc)
+
+        for industry in industries:
+            industry_data = {
+                "id": industry.code,
+                "code": industry.code,
+                "nameSl": industry.name_sl,
+                "nameHr": industry.name_hr,
+                "icon": industry.icon,
+                "products": []
+            }
+
+            # Get products for this industry
+            products = db.query(Product).filter(
+                and_(
+                    Product.industry_id == industry.id,
+                    Product.is_active == True
+                )
+            ).all()
+
+            for product in products:
+                # Get current base price
+                base_price = db.query(ProductBasePrice).filter(
+                    and_(
+                        ProductBasePrice.product_id == product.id,
+                        ProductBasePrice.valid_from <= now,
+                        or_(
+                            ProductBasePrice.valid_to == None,
+                            ProductBasePrice.valid_to > now
+                        )
+                    )
+                ).first()
+
+                if base_price:
+                    product_data = {
+                        "id": f"db-{product.id}",
+                        "code": product.code,
+                        "nameSl": product.name_sl,
+                        "nameHr": product.name_hr,
+                        "unit": product.unit,
+                        "lc": base_price.lc
+                    }
+                    industry_data["products"].append(product_data)
+
+            if industry_data["products"]:  # Only add industry if it has products
+                result["industries"].append(industry_data)
+
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching products: {str(e)}")
+
+
 # ============================================================================
 # Pricing History Endpoints
 # ============================================================================
