@@ -8,6 +8,7 @@ from sqlalchemy import and_, or_
 from typing import List, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel
+from io import BytesIO
 import pandas as pd
 
 from app.core.database import get_db
@@ -615,7 +616,7 @@ async def upload_simple_excel_pricing(
     try:
         # Read Excel file
         contents = await file.read()
-        df = pd.read_excel(contents, sheet_name=0)  # Read first sheet
+        df = pd.read_excel(BytesIO(contents), sheet_name=0)  # Read first sheet
 
         # Auto-detect columns
         headers = df.columns.tolist()
