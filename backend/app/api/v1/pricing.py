@@ -21,14 +21,14 @@ class IndustryCreate(BaseModel):
     code: str
     name_sl: str
     name_hr: str
-    icon: str
+    icon: Optional[str] = None
 
 class IndustryResponse(BaseModel):
     id: int
     code: str
     name_sl: str
     name_hr: str
-    icon: str
+    icon: Optional[str] = None
     is_active: bool
 
     class Config:
