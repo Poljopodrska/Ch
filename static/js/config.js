@@ -4,7 +4,7 @@ const ChConfig = {
     mode: window.location.protocol === 'file:' ? 'development' : 'production',
     api: {
         development: 'mock://', // Uses mock_api.js
-        production: window.location.protocol === 'file:' ? 'mock://' : `${window.location.protocol}//${window.location.hostname}:8000/api/v1`   // Backend on port 8000
+        production: window.location.protocol === 'file:' ? 'mock://' : `http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/api/v1`   // Backend via load balancer
     },
     features: {
         modules: true,

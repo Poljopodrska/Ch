@@ -3,6 +3,13 @@
 const PricingV4 = {
     VERSION: '4.0.2',
 
+    // Get API base URL
+    getApiUrl() {
+        return window.ChConfig && window.ChConfig.api && window.ChConfig.api.production
+            ? window.ChConfig.api.production
+            : 'http://ch-alb-2140286266.us-east-1.elb.amazonaws.com/api/v1';
+    },
+
     state: {
         language: localStorage.getItem('pricingLanguage') || 'sl', // 'sl' or 'hr'
         expanded: {
@@ -291,7 +298,7 @@ const PricingV4 = {
         }
     },
 
-    init() {
+    async init() {
         try {
             console.log(`Pricing Module V${this.VERSION} initializing...`);
 
@@ -306,7 +313,12 @@ const PricingV4 = {
                 }
             }
 
-            this.loadProductStructure();
+            // Try to load products from API first, fallback to localStorage/defaults
+            const apiLoaded = await this.loadProductsFromAPI();
+            if (!apiLoaded) {
+                console.log('API load failed, using localStorage/defaults');
+                this.loadProductStructure();
+            }
             console.log('Product structure loaded:', this.state.productGroups.length, 'groups');
             this.loadPricingData();
             console.log('Pricing data loaded:', Object.keys(this.state.pricingData).length, 'products');
@@ -389,6 +401,44 @@ const PricingV4 = {
             console.log('Saved product structure to localStorage');
         } catch (error) {
             console.error('Error saving product structure:', error);
+        }
+    },
+
+    async loadProductsFromAPI() {
+        try {
+            const apiUrl = this.getApiUrl();
+            console.log('Loading products from API:', `${apiUrl}/pricing/products-with-prices`);
+
+            const response = await fetch(`${apiUrl}/pricing/products-with-prices`);
+
+            if (!response.ok) {
+                console.error('Failed to load products from API, using localStorage fallback');
+                return false;
+            }
+
+            const data = await response.json();
+            console.log('Loaded products from API:', data);
+
+            // Convert API format to internal format
+            this.state.productGroups = data.industries || [];
+            this.state.products = [];
+
+            // Flatten products list
+            this.state.productGroups.forEach(group => {
+                if (group.products) {
+                    this.state.products.push(...group.products);
+                }
+            });
+
+            // Save to localStorage as backup
+            this.saveProductStructure();
+
+            console.log(`Loaded ${this.state.products.length} products from ${this.state.productGroups.length} industries`);
+            return true;
+
+        } catch (error) {
+            console.error('Error loading products from API:', error);
+            return false;
         }
     },
 
@@ -1574,72 +1624,47 @@ CP - Prodajna cijena, povećana za sva (potencialna) odobrenja kupcu
         }
 
         const statusDiv = document.getElementById('upload-status');
-        statusDiv.innerHTML = '<div class="processing">⏳ Processing Excel file...</div>';
+        statusDiv.innerHTML = '<div class="processing">⏳ Uploading to database...</div>';
         console.log('Status updated to processing');
 
         try {
-            // Check if XLSX library is available
-            console.log('Checking for XLSX library...');
-            console.log('typeof XLSX:', typeof XLSX);
-            if (typeof XLSX === 'undefined') {
-                throw new Error('XLSX library not loaded. Please include SheetJS library.');
-            }
-            console.log('XLSX library is available');
-
             const file = this.state.uploadedFile;
-            const reader = new FileReader();
+            const apiUrl = this.getApiUrl();
 
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+            // Create FormData and append the file
+            const formData = new FormData();
+            formData.append('file', file);
 
-                    console.log('Available sheets in Excel:', workbook.SheetNames);
+            console.log('Uploading to:', `${apiUrl}/pricing/upload-simple-excel`);
 
-                    // Use first sheet only
-                    if (workbook.SheetNames.length === 0) {
-                        throw new Error('No sheets found in Excel file');
-                    }
+            // Upload to backend API
+            const response = await fetch(`${apiUrl}/pricing/upload-simple-excel`, {
+                method: 'POST',
+                body: formData
+            });
 
-                    // Read first sheet
-                    const firstSheetName = workbook.SheetNames[0];
-                    const firstSheet = workbook.Sheets[firstSheetName];
-                    const izdelkiData = XLSX.utils.sheet_to_json(firstSheet);
+            console.log('Response status:', response.status);
 
-                    console.log('Excel data from first sheet:', izdelkiData);
-                    console.log('First row sample:', izdelkiData[0]);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Upload failed');
+            }
 
-                    // Validate and load data (no customer pricing for now)
-                    console.log('Calling validateAndLoadData...');
-                    const result = this.validateAndLoadData(izdelkiData, []);
-                    console.log('validateAndLoadData result:', result);
+            const result = await response.json();
+            console.log('Upload result:', result);
 
-                    if (result.success) {
-                        statusDiv.innerHTML = `<div class="success">[OK] Success! Loaded ${result.productsCount} products and ${result.customerPricingCount} customer-product combinations.</div>`;
-                        setTimeout(() => {
-                            this.closeUploadModal();
-                            this.render();
-                        }, 2000);
-                    } else {
-                        statusDiv.innerHTML = `<div class="error">[X] ${result.error}</div>`;
-                    }
+            statusDiv.innerHTML = `<div class="success">✓ Success! Created ${result.products_created} products, updated ${result.products_updated}, added ${result.base_prices_created} prices.</div>`;
 
-                } catch (error) {
-                    console.error('Error parsing Excel:', error);
-                    statusDiv.innerHTML = `<div class="error">[X] Error parsing Excel: ${error.message}</div>`;
-                }
-            };
-
-            reader.onerror = (error) => {
-                console.error('Error reading file:', error);
-                statusDiv.innerHTML = '<div class="error">[X] Error reading file</div>';
-            };
-
-            reader.readAsArrayBuffer(file);
+            // Reload products from database
+            setTimeout(async () => {
+                await this.loadProductsFromAPI();
+                this.closeUploadModal();
+                this.render();
+            }, 2000);
 
         } catch (error) {
-            console.error('Error processing file:', error);
-            statusDiv.innerHTML = `<div class="error">[X] ${error.message}</div>`;
+            console.error('Error uploading file:', error);
+            statusDiv.innerHTML = `<div class="error">[X] Error: ${error.message}</div>`;
         }
     },
 
