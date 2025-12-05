@@ -515,6 +515,13 @@ const PricingV4 = {
         // Calculate coverage for each customer pricing
         Object.keys(this.state.customerPricing).forEach(productId => {
             const basePrice = this.state.pricingData[productId];
+
+            // Skip if no base price exists (product not loaded)
+            if (!basePrice || !basePrice.c0) {
+                console.warn(`No base price found for product ${productId}, skipping customer pricing`);
+                return;
+            }
+
             Object.keys(this.state.customerPricing[productId]).forEach(customerId => {
                 const custPricing = this.state.customerPricing[productId][customerId];
                 custPricing.coverage = {
